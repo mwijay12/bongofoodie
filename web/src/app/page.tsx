@@ -74,21 +74,18 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Visual Graphic Representation - 3D Food Images */}
+        {/* Visual Graphic Representation - Swahili Feast Showcase */}
         <div className="w-full md:w-[40%] flex items-center justify-center">
           <div className="relative size-72 md:size-80">
             <div className="absolute inset-0 rounded-3xl bg-secondary/10 border border-secondary/20 overflow-hidden">
               <div className="absolute inset-0 bg-radial from-secondary/20 to-transparent pointer-events-none" />
             </div>
             <div className="relative z-10 grid grid-cols-2 gap-2 p-4 h-full">
+              <div className="relative rounded-xl overflow-hidden bg-white/60 shadow-sm col-span-2 row-span-2">
+                <Image src="/assets/burger-one.png" alt="Swahili Feast - Burger" fill className="object-contain p-3" />
+              </div>
               <div className="relative rounded-xl overflow-hidden bg-white/60 shadow-sm">
                 <Image src="/assets/food-3d-icon.png" alt="Swahili Dish" fill className="object-contain p-2" />
-              </div>
-              <div className="relative rounded-xl overflow-hidden bg-white/60 shadow-sm">
-                <Image src="/assets/food-3d-icon-2.png" alt="Tanzanian Cuisine" fill className="object-contain p-2" />
-              </div>
-              <div className="relative rounded-xl overflow-hidden bg-white/60 shadow-sm">
-                <Image src="/assets/food-3d-icon-3.png" alt="East African Food" fill className="object-contain p-2" />
               </div>
               <div className="relative rounded-xl overflow-hidden bg-white/60 shadow-sm">
                 <Image src="/assets/orange-juice-icon.png" alt="Fresh Juice" fill className="object-contain p-2" />
@@ -187,8 +184,8 @@ export default function Home() {
           href="/chef-ai"
           className="group bg-white border border-border p-6 rounded-2xl hover:border-primary transition-all duration-200 shadow-sm"
         >
-          <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary group-hover:text-white transition-colors duration-200 text-primary">
-            <Sparkles className="size-6" />
+          <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary group-hover:text-white transition-colors duration-200 text-primary relative overflow-hidden">
+            <Image src="/assets/ai-chef-icon.png" alt="AI Chef" fill className="object-contain p-1.5 group-hover:scale-110 transition-transform duration-200" />
           </div>
           <h3 className="font-heading text-lg font-bold text-foreground-dark mb-2">Gourmet Chat Atelier</h3>
           <p className="text-sm text-muted-foreground font-medium">
