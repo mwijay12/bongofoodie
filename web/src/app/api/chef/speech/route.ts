@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 
-const keysString = process.env.ELEVENLABS_KEYS || '';
-const elevenlabsKeys = keysString
+// Use OpenRouter for TTS with a feminine voice model
+const keysString = process.env.EXPO_PUBLIC_OPENROUTER_KEYS || process.env.OPENROUTER_KEYS || '';
+const openrouterKeys = keysString
   .split(',')
   .map(k => k.trim())
   .filter(Boolean);
@@ -9,36 +10,44 @@ const elevenlabsKeys = keysString
 let currentKeyIndex = 0;
 
 function getNextApiKey(): string | null {
-  if (elevenlabsKeys.length === 0) return null;
-  const key = elevenlabsKeys[currentKeyIndex];
-  currentKeyIndex = (currentKeyIndex + 1) % elevenlabsKeys.length;
+  if (openrouterKeys.length === 0) return null;
+  const key = openrouterKeys[currentKeyIndex];
+  currentKeyIndex = (currentKeyIndex + 1) % openrouterKeys.length;
   return key;
 }
 
-// Default standard voice: Rachel (21m00Tcm4TlvDq8ikWAM)
-const VOICE_ID = '21m00Tcm4TlvDq8ikWAM';
+// Use a feminine TTS model via OpenRouter
+// Options: "gpt-4o-mini-tts" (OpenAI), "synthesia-tts", etc.
+const TTS_MODEL = 'gpt-4o-mini-tts';
 
-async function generateSpeechFromElevenLabs(text: string, retryCount = 0): Promise<Response> {
+async function generateSpeechFromOpenRouter(text: string, retryCount = 0): Promise<Response> {
   const apiKey = getNextApiKey();
   if (!apiKey) {
-    throw new Error('No ElevenLabs API keys configured on server.');
+    throw new Error('No OpenRouter API keys configured on server.');
   }
 
   try {
     const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
+      'https://openrouter.ai/api/v1/chat/completions',
       {
         method: 'POST',
         headers: {
-          'xi-api-key': apiKey,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          text,
-          model_id: 'eleven_multilingual_v2', // Multilingual supports Swahili pronunciation perfectly!
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
+          model: TTS_MODEL,
+          messages: [
+            {
+              role: 'user',
+              content: text
+            }
+          ],
+          // Request audio output (feminine voice by default in gpt-4o-mini-tts)
+          modalities: ['text', 'audio'],
+          audio: {
+            voice: 'alloy', // feminine voice
+            format: 'mp3'
           }
         }),
       }
@@ -46,17 +55,17 @@ async function generateSpeechFromElevenLabs(text: string, retryCount = 0): Promi
 
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`ElevenLabs API failed with status ${response.status}: ${errText}`);
+      throw new Error(`OpenRouter TTS failed with status ${response.status}: ${errText}`);
     }
 
     return response;
   } catch (error: any) {
-    console.error(`[ElevenLabs Rotation Warning] Key index ${currentKeyIndex - 1} failed. Error: ${error.message}`);
+    console.error(`[OpenRouter TTS Rotation Warning] Key index ${currentKeyIndex - 1} failed. Error: ${error.message}`);
     
     // Failover to next key
-    if (retryCount < elevenlabsKeys.length) {
-      console.log(`[ElevenLabs Rotation] Retrying with next API key in pool...`);
-      return generateSpeechFromElevenLabs(text, retryCount + 1);
+    if (retryCount < openrouterKeys.length) {
+      console.log(`[OpenRouter TTS] Retrying with next API key in pool...`);
+      return generateSpeechFromOpenRouter(text, retryCount + 1);
     }
     throw error;
   }
@@ -71,10 +80,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Text to speak is required.' }, { status: 400 });
     }
 
-    const ttsResponse = await generateSpeechFromElevenLabs(text);
+    const ttsResponse = await generateSpeechFromOpenRouter(text);
     
-    // Read audio buffer
-    const audioBuffer = await ttsResponse.arrayBuffer();
+    // Read audio buffer from the response
+    const data = await ttsResponse.json();
+    const audioContent = data.choices?.[0]?.audio?.content;
+
+    if (!audioContent) {
+      throw new Error('No audio content in OpenRouter response');
+    }
+
+    // Convert base64 to buffer
+    const audioBuffer = Buffer.from(audioContent, 'base64');
 
     return new Response(audioBuffer, {
       headers: {
@@ -85,6 +102,10 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error('[API Speech Server Error]', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    // Return a JSON error so the client can fall back to browser speech
+    return NextResponse.json({ 
+      error: error.message,
+      fallback: true 
+    }, { status: 500 });
   }
 }
