@@ -1,9 +1,0 @@
-{
-  "version": 2,
-  "cleanUrls": true,
-  "framework": "nextjs",
-  "rootDirectory": "web",
-  "buildCommand": "cd web && npm run build",
-  "outputDirectory": "web/.next",
-  "regions": ["iad1"]
-}

@@ -2,11 +2,17 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 const siliconflowKey = process.env.SILICONFLOW_KEY || '';
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rkjanbxkgfyjpdcichvy.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-// Initialize server-side admin client for storage uploads (bypassing RLS)
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+// Lazy initialization: only create the client when actually needed (not at build time)
+let supabaseAdmin: ReturnType<typeof createClient> | null = null;
+function getSupabaseAdmin() {
+  if (!supabaseAdmin) {
+    supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+  }
+  return supabaseAdmin;
+}
 
 export async function POST(request: Request) {
   try {
@@ -57,7 +63,7 @@ export async function POST(request: Request) {
       const fileName = `custom-dish-${Date.now()}-${Math.random().toString(36).substr(2, 5)}.png`;
 
       // Upload to 'dishes' public bucket
-      const { data, error } = await supabaseAdmin.storage
+      const { data, error } = await getSupabaseAdmin().storage
         .from('dishes')
         .upload(fileName, imgBuffer, {
           contentType: 'image/png',
@@ -72,7 +78,7 @@ export async function POST(request: Request) {
       }
 
       // Get Public URL
-      const { data: { publicUrl } } = supabaseAdmin.storage
+      const { data: { publicUrl } } = getSupabaseAdmin().storage
         .from('dishes')
         .getPublicUrl(fileName);
 
@@ -84,10 +90,11 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error('[API Image Gen Error] SiliconFlow failed, using gourmet fallback image:', error);
-    // Retrieve dishName from request scope if parsed successfully, or default to empty
+    // Retrieve dishName from request body if parsed successfully, or default to empty
     let lookupName = '';
     try {
-      lookupName = dishName || '';
+      const body = await request.clone().json();
+      lookupName = body.dishName || '';
     } catch(e){}
     const fallbackUrl = getGourmetFallbackImage(lookupName);
     return NextResponse.json({ imageUrl: fallbackUrl });
