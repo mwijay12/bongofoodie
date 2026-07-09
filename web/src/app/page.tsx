@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Sparkles, ArrowRight, Utensils, Compass, ShoppingBag, CheckCircle, HelpCircle } from 'lucide-react';
+import Image from 'next/image';
+import { Sparkles, ArrowRight, Compass, ShoppingBag, HelpCircle } from 'lucide-react';
 
 const TRIVIA_QUESTIONS = [
   {
@@ -73,11 +74,26 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Visual Graphic Representation */}
+        {/* Visual Graphic Representation - 3D Food Images */}
         <div className="w-full md:w-[40%] flex items-center justify-center">
-          <div className="size-72 md:size-80 rounded-3xl bg-secondary/10 border border-secondary/20 flex items-center justify-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-radial from-secondary/20 to-transparent pointer-events-none" />
-            <Utensils className="size-28 text-primary opacity-80 stroke-[1.5px]" />
+          <div className="relative size-72 md:size-80">
+            <div className="absolute inset-0 rounded-3xl bg-secondary/10 border border-secondary/20 overflow-hidden">
+              <div className="absolute inset-0 bg-radial from-secondary/20 to-transparent pointer-events-none" />
+            </div>
+            <div className="relative z-10 grid grid-cols-2 gap-2 p-4 h-full">
+              <div className="relative rounded-xl overflow-hidden bg-white/60 shadow-sm">
+                <Image src="/assets/food-3d-icon.png" alt="Swahili Dish" fill className="object-contain p-2" />
+              </div>
+              <div className="relative rounded-xl overflow-hidden bg-white/60 shadow-sm">
+                <Image src="/assets/food-3d-icon-2.png" alt="Tanzanian Cuisine" fill className="object-contain p-2" />
+              </div>
+              <div className="relative rounded-xl overflow-hidden bg-white/60 shadow-sm">
+                <Image src="/assets/food-3d-icon-3.png" alt="East African Food" fill className="object-contain p-2" />
+              </div>
+              <div className="relative rounded-xl overflow-hidden bg-white/60 shadow-sm">
+                <Image src="/assets/orange-juice-icon.png" alt="Fresh Juice" fill className="object-contain p-2" />
+              </div>
+            </div>
           </div>
         </div>
       </section>

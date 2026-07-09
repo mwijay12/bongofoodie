@@ -313,8 +313,19 @@ const Profile = () => {
                     ))}
                 </View>
 
+                {/* Developer Credits */}
+                <View className="mt-6 pt-4 border-t border-gourmet-border/30 items-center">
+                    <Text className="text-[10px] text-gray-200/60 text-center leading-relaxed">
+                        Built by <Text className="text-gourmet-forest font-bold">Mwijay Davie</Text>
+                    </Text>
+                    <View className="flex-row items-center gap-3 mt-1">
+                        <Text className="text-[10px] text-gray-200/60">📞 0790942616</Text>
+                        <Text className="text-[10px] text-gray-200/60">✉️ mwijaydavie@gmail.com</Text>
+                    </View>
+                </View>
+
                 {/* Version Info */}
-                <Text className="text-center text-xs text-gray-200/60 mt-4">
+                <Text className="text-center text-xs text-gray-200/60 mt-2">
                     Bongo Foodie v1.0.0
                 </Text>
             </ScrollView>

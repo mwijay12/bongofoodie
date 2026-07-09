@@ -83,6 +83,19 @@ export default function RootLayout({
             <span>© {new Date().getFullYear()} Bongo Foodie. All Rights Reserved.</span>
             <span>Dar es Salaam, Tanzania</span>
           </div>
+
+          {/* Developer Credits */}
+          <div className="bg-primary/5 border-t border-primary/10">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex flex-col sm:flex-row items-center justify-between text-[11px] text-muted-foreground gap-1">
+              <span className="font-medium">
+                Built by <strong className="text-primary">Mwijay Davie</strong>
+              </span>
+              <span className="flex items-center gap-3">
+                <a href="tel:+255790942616" className="hover:text-primary transition-colors">📞 0790942616</a>
+                <a href="mailto:mwijaydavie@gmail.com" className="hover:text-primary transition-colors">✉️ mwijaydavie@gmail.com</a>
+              </span>
+            </div>
+          </div>
         </footer>
 
         <CartDrawer />
