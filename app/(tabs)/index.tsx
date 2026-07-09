@@ -170,49 +170,62 @@ export default function Index() {
           </View>
         </Pressable>
 
-        {/* Asymmetric Bento Campaigns Grid */}
+        {/* Promotional Campaigns Banners */}
         <View className="mb-8">
-          <Text className="h3-bold mb-4">Seasonal campaigns</Text>
+          <Text className="h3-bold mb-4">🔥 Promotional Campaigns</Text>
           
-          {/* Main Campaign Card (Full Width) */}
+          {/* Main Campaign Card - SUMMER COMBO with Burger */}
           <Pressable 
             onPress={() => router.push("/search")}
             className="w-full h-40 bg-gourmet-forest rounded-xl overflow-hidden mb-3 border border-gourmet-border flex-row items-center justify-between"
           >
             <View className="flex-1 p-6 justify-center items-start">
-              <Text className="small-bold text-gourmet-amber mb-1">LIMITED TIME</Text>
-              <Text className="h1-bold text-white text-2xl mb-3">SWAHILI FEAST</Text>
-              <Text className="paragraph-bold text-white/90">20% off Chipsi Mayai & Mishkaki</Text>
+              <View className="bg-gourmet-amber/20 px-2 py-0.5 rounded-full mb-2 self-start">
+                <Text className="text-[10px] font-quicksand-bold text-gourmet-amber">🍔 15% OFF</Text>
+              </View>
+              <Text className="h1-bold text-white text-2xl mb-1">SUMMER COMBO</Text>
+              <Text className="paragraph-bold text-white/90">Burger + Drink Special</Text>
+              <View className="mt-2 self-start">
+                <Text className="text-[9px] font-quicksand-bold text-white/70 uppercase">🟢 Active</Text>
+              </View>
             </View>
             <View className="w-1/2 h-full justify-center items-center">
-              <Image source={images.chipsiMayai} style={{ width: 128, height: 128 }} resizeMode="contain" />
+              <Image source={images.burgerOne} style={{ width: 140, height: 140 }} resizeMode="contain" />
             </View>
           </Pressable>
 
           {/* Secondary Campaign Split Cards (2 Columns) */}
           <View className="flex-row gap-3">
-            {/* Left Card */}
+            {/* BURGER BASH SPECIAL */}
             <Pressable 
               onPress={() => router.push("/search")}
               className="flex-1 h-44 bg-gourmet-amber rounded-xl p-4 justify-between border border-gourmet-border"
             >
               <View className="items-start">
-                <Text className="small-bold text-white/90 mb-1">FEATURED</Text>
-                <Text className="h3-bold text-white">NYAMA CHOMA</Text>
+                <View className="bg-white/20 px-2 py-0.5 rounded-full mb-1 self-start">
+                  <Text className="text-[9px] font-quicksand-bold text-white">🥤 10% OFF</Text>
+                </View>
+                <Text className="h3-bold text-white mt-1">BURGER BASH</Text>
+                <Text className="text-[10px] font-quicksand-bold text-white/80">SPECIAL</Text>
+                <Text className="text-[9px] font-quicksand-bold text-red-300 mt-2 uppercase">🔴 Inactive</Text>
               </View>
-              <Image source={images.nyamaChoma} style={{ width: 96, height: 96 }} className="self-center" resizeMode="contain" />
+              <Image source={images.burgerTwo} style={{ width: 80, height: 80 }} className="self-center" resizeMode="contain" />
             </Pressable>
 
-            {/* Right Card */}
+            {/* PIZZA PARTY */}
             <Pressable 
               onPress={() => router.push("/search")}
               className="flex-1 h-44 bg-gourmet-charcoal rounded-xl p-4 justify-between border border-gourmet-border"
             >
               <View className="items-start">
-                <Text className="small-bold text-gourmet-amber mb-1">WEEKEND SPEC</Text>
-                <Text className="h3-bold text-white">KACHUMBARI FRESH</Text>
+                <View className="bg-gourmet-amber/20 px-2 py-0.5 rounded-full mb-1 self-start">
+                  <Text className="text-[9px] font-quicksand-bold text-gourmet-amber">🍕 20% OFF</Text>
+                </View>
+                <Text className="h3-bold text-white mt-1">PIZZA PARTY</Text>
+                <Text className="text-[10px] font-quicksand-bold text-white/80">WEEKEND DEAL</Text>
+                <Text className="text-[9px] font-quicksand-bold text-green-300 mt-2 uppercase">🟢 Active</Text>
               </View>
-              <Image source={images.salad} style={{ width: 96, height: 96 }} className="self-center" resizeMode="contain" />
+              <Image source={images.pizzaOne} style={{ width: 80, height: 80 }} className="self-center" resizeMode="contain" />
             </Pressable>
           </View>
         </View>
