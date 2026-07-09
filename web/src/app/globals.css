@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #F6821F;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #FBAD41;
+  --color-secondary-foreground: #1D1D1D;
+  --color-background: #ffffff;
+  --color-foreground: #1D1D1D;
+  --color-card: #F8F8F8;
+  --color-card-foreground: #1D1D1D;
+  --color-muted: #F0F0F0;
+  --color-muted-foreground: #6B7280;
+  --color-destructive: #FF4040;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #E2E2E2;
+  --color-input: #E2E2E2;
+  --color-ring: #F6821F;
+  
+  --font-sans: var(--font-quicksand), sans-serif;
+  --font-heading: var(--font-outfit), sans-serif;
+
+  --animate-slide-in: slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @keyframes slide-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: #ffffff;
+  --foreground: #1D1D1D;
+  --card: #F8F8F8;
+  --card-foreground: #1D1D1D;
+  --popover: #F8F8F8;
+  --popover-foreground: #1D1D1D;
+  --primary: #F6821F;
+  --primary-foreground: #ffffff;
+  --secondary: #FBAD41;
+  --secondary-foreground: #1D1D1D;
+  --muted: #F0F0F0;
+  --muted-foreground: #6B7280;
+  --accent: #F6821F;
+  --accent-foreground: #ffffff;
+  --destructive: #FF4040;
+  --destructive-foreground: #ffffff;
+  --border: #E2E2E2;
+  --input: #E2E2E2;
+  --ring: #F6821F;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}

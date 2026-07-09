@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    .flex-center {
+        @apply flex items-center justify-center;
+    }
+
+    .flex-between {
+        @apply flex items-center justify-between;
+    }
+
+    .flex-start {
+        @apply flex items-start justify-center;
+    }
+}
+
+@layer components {
+    .cart-btn {
+        @apply relative flex items-center justify-center size-10 rounded-lg bg-gourmet-charcoal;
+    }
+
+    .cart-badge {
+        @apply absolute -top-2 -right-1 flex items-center justify-center size-5 bg-gourmet-amber rounded-full text-[10px] text-white font-quicksand-bold;
+    }
+
+    .cart-item {
+        @apply flex flex-row items-end justify-between mb-4 bg-white rounded-xl p-4 border border-gourmet-border;
+    }
+
+    .cart-item__image {
+        @apply size-20 bg-gourmet-forest/5 rounded-lg flex items-center justify-center border border-gourmet-border;
+    }
+
+    .cart-item__actions {
+        @apply flex flex-row items-center justify-center size-6 bg-gourmet-forest/5 rounded-md;
+    }
+
+    .custom-btn {
+        @apply bg-gourmet-forest rounded-lg p-3.5 w-full flex flex-row justify-center items-center;
+    }
+
+    .custom-header {
+        @apply w-full flex flex-row items-center justify-between mb-8;
+    }
+
+    .label {
+        @apply text-sm text-start w-full font-quicksand-medium text-gourmet-charcoal/60 pl-1 mb-1;
+    }
+
+    .input {
+        @apply rounded-lg p-3 w-full text-base font-quicksand-semibold text-gourmet-charcoal border border-gourmet-border bg-white/50 leading-5;
+    }
+
+    .filter {
+        @apply px-5 py-2.5 rounded-lg mr-2 border border-gourmet-border bg-white;
+    }
+
+    .menu-card {
+        @apply relative py-6 px-4 pt-20 flex items-center justify-end bg-white border border-gourmet-border rounded-xl;
+    }
+
+    .profile-field {
+        @apply flex flex-row items-center justify-start mb-4 p-3 border border-gourmet-border bg-white rounded-lg;
+    }
+
+    .profile-field__icon {
+        @apply size-10 rounded-lg bg-gourmet-forest/5 flex items-center justify-center mr-3 border border-gourmet-border;
+    }
+
+    .searchbar {
+        @apply relative flex flex-row items-center justify-center w-full bg-white border border-gourmet-border rounded-lg font-quicksand-medium text-gourmet-charcoal gap-3 px-3 py-1.5;
+    }
+
+    .tab-icon {
+        @apply flex min-w-20 items-center justify-center min-h-full gap-1 mt-6;
+    }
+
+    .offer-card {
+        @apply w-full h-44 my-3 rounded-lg overflow-hidden border border-gourmet-border flex items-center gap-5 bg-white;
+    }
+
+    .offer-card__info {
+        @apply flex-1 h-full flex flex-col justify-center items-start gap-3 p-5;
+    }
+
+    .profile-avatar {
+        @apply relative size-24 border-gourmet-border border-2 rounded-full;
+    }
+
+    .profile-edit {
+        @apply flex items-center justify-center absolute bottom-1 right-0 bg-gourmet-forest border-2 border-white size-7 p-2 rounded-full;
+    }
+
+    .h1-bold {
+        @apply text-2xl font-quicksand-bold text-gourmet-charcoal;
+    }
+
+    .h3-bold {
+        @apply text-lg font-quicksand-bold text-gourmet-charcoal;
+    }
+
+    .base-bold {
+        @apply text-base font-quicksand-bold !important;
+    }
+
+    .base-semibold {
+        @apply text-base font-quicksand-semibold;
+    }
+
+    .base-regular {
+        @apply text-base font-quicksand;
+    }
+
+    .paragraph-bold {
+        @apply text-sm font-quicksand-bold;
+    }
+
+    .paragraph-semibold {
+        @apply text-sm font-quicksand-semibold;
+    }
+
+    .paragraph-medium {
+        @apply text-sm font-quicksand-medium;
+    }
+
+    .body-medium {
+        @apply text-xs font-quicksand-medium;
+    }
+
+    .body-regular {
+        @apply text-xs font-quicksand;
+    }
+
+    .small-bold {
+        @apply text-[10px] font-quicksand-bold uppercase tracking-[0.1em];
+    }
+}
