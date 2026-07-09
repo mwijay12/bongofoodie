@@ -127,7 +127,7 @@ When a user describes a dish (e.g., *"Chipsi za mihogo na mishkaki"*):
 
 1. **Form Input**: The text input is captured in `app/(tabs)/ai-chef.tsx` under the `creatorInput` state.
 2. **API Call (Gemini)**: The system constructs a dynamic system prompt specifying a structured JSON response schema containing keys: `name`, `description`, `recipe`, `calories`, and `protein`.
-3. **Key Rotation**: The prompt is processed by `lib/gemini.ts` which selects an active key from a list of 19 rotated Gemini keys in `.env` to avoid rate limits.
+3. **Key Rotation**: The prompt is processed by `lib/aiService.ts` which selects an active key from a list of rotated Gemini keys in `.env` to avoid rate limits.
 4. **SiliconFlow Flux Call**: Once the JSON recipe is generated, the app dispatches a concurrent HTTP POST request to `https://api.siliconflow.cn/v1/images/generations` requesting a photorealistic PNG of the custom dish.
 5. **State Aggregation**: The generated image URL, title, recipe description, calories, and price (calculated dynamically at TSh 8,500 base) are loaded into the component state.
 6. **Zustand Dispatch**: The user clicks "Add Custom Dish to Cart". The handler invokes `addItem()` in `store/cart.store.ts`, appending a new `CartItem` with a unique ID, flag `isAICreated: true`, and the generated image URI.
@@ -138,15 +138,16 @@ When a user describes a dish (e.g., *"Chipsi za mihogo na mishkaki"*):
 ## 📂 SECTION 4: COMPLETE FILE STRUCTURE
 
 ```text
-food_ordering-main/
+bongofoodie/
 ├── android/                   # Native Android build configurations and project files
 ├── assets/                    # Static image and font assets
-│   ├── fonts/                 # Custom Outfit and Quicksand typography font files
+│   ├── fonts/                 # Custom Quicksand typography font files
+│   ├── icons/                 # App icon assets (arrow, bag, search, etc.)
 │   └── images/                # Local photographic food assets (Nyama Choma, Chipsi Mayai, etc.)
 ├── app/                       # Expo Router application screens directory
 │   ├── (auth)/                # Authentication routing group
 │   │   ├── _layout.tsx        # Layout wrapper for authentication screens with login graphic
-│   │   ├── sign-in.tsx        # User login screen with Appwrite/Supabase credentials check
+│   │   ├── sign-in.tsx        # User login screen with Supabase credentials check
 │   │   └── sign-up.tsx        # User registration screen
 │   ├── (tabs)/                # Main application tab routing group
 │   │   ├── _layout.tsx        # Bottom tab bar navigator (labels hidden except for Home)
@@ -156,6 +157,7 @@ food_ordering-main/
 │   │   ├── profile.tsx        # User profile, statistics, and interactive overlay modals
 │   │   └── search.tsx         # Search screen with List/Grid view toggling
 │   ├── _layout.tsx            # Global application root layout and Zustand store hydration
+│   ├── onboarding.tsx         # Onboarding screens for new users
 │   └── globals.css            # Global CSS styles compiled into NativeWind utility classes
 ├── components/                # Reusable UI components
 │   ├── CartButton.tsx         # Floating header button displaying current cart item count
@@ -164,20 +166,23 @@ food_ordering-main/
 │   ├── CustomHeader.tsx       # Screen header banner displaying title
 │   ├── CustomInput.tsx        # Text input component with label styling and validation
 │   ├── Filter.tsx             # Horizontal category filter slider bar
+│   ├── FireLoader.tsx         # Animated loading screen component
 │   ├── LocationPicker.tsx     # GPS address resolver and cascading nested-scroll dropdowns
 │   ├── MenuCard.tsx           # Grid menu card with local-first image resolution
-│   ├── SearchBar.tsx          # Input text box for search query processing
-│   └── TabBarIcon.tsx         # Custom icon rendering component for bottom tabs
+│   └── SearchBar.tsx          # Input text box for search query processing
 ├── constants/                 # Fixed application arrays and asset imports
 │   └── index.ts               # Core categories, offers, and local image path dictionary
 ├── lib/                       # Backend configurations and third-party integrations
+│   ├── aiService.ts           # Gemini/Claude LLM integration with key rotation
 │   ├── appwrite.ts            # Legacy Appwrite configuration and file uploads
-│   ├── gemini.ts              # Gemini LLM key rotation pool and JSON parser
+│   ├── data.ts                # Static data and mock data for development
+│   ├── seed.ts                # Database seed data definitions
 │   ├── supabase.ts            # Supabase client instantiation and AsyncStorage configuration
 │   ├── supabaseAuth.ts        # Supabase registration, login, and sign-out logic
 │   ├── supabaseDb.ts          # Database query functions (getMenu, getCategories, Location queries)
-│   └── useAppwrite.ts         # Generic query utility hook for handling loading states
+│   └── useAppwrite.ts         # Legacy query utility hook for handling loading states
 ├── scripts/                   # Database maintenance and import scripts
+│   ├── add-promo-settings.js  # Script to add promotional settings
 │   ├── create-admin.js        # Script to create admin role credentials
 │   ├── import-locations.js    # Batch CSV parser importing Tanzania locations into Supabase
 │   ├── run-migration.js       # SQL script runner to execute schema migrations via Pooler
@@ -189,6 +194,8 @@ food_ordering-main/
 │   └── location.store.ts      # Zustand store for global delivery address persistence
 ├── supabase/                  # Database migration configuration
 │   └── schema.sql             # SQL database script defining tables, RLS, and triggers
+├── web/                       # Web-based Next.js version of the app
+│   └── src/                   # Web app source code (Next.js App Router)
 ├── tailwind.config.js         # Configuration settings for Tailwind CSS compilation
 ├── tsconfig.json              # TypeScript compiler configurations
 ├── package.json               # Project metadata, scripts, and dependency definitions
@@ -216,8 +223,8 @@ Before starting, download and install the following software:
 Open your terminal (PowerShell on Windows or Terminal on macOS/Linux) and run:
 
 ```bash
-git clone https://github.com/adrianhajdin/food_ordering.git
-cd food_ordering
+git clone https://github.com/mwijay12/bongofoodie.git
+cd bongofoodie
 ```
 
 ---
@@ -384,7 +391,7 @@ Press **`a`** to run on an Android Emulator, **`i`** to run on an iOS Simulator,
 * **What it does**: Users ask culinary questions. Chef AI answers in Swahili or English within a strict 3-sentence constraint to fit mobile layouts.
 * **Implementation Flow**:
   ```typescript
-  import { askChef } from "@/lib/gemini";
+  import { askChef } from "@/lib/aiService";
   const reply = await askChef("Jinsi ya kupika chipsi mayai?");
   console.log(reply);
   // Output: "Kwanza kaanga viazi hadi viive. Kisha changanya mayai na kumwaga juu ya viazi kwenye kikaango. Geuza keki ya viazi na mayai upande wa pili kisha andaa na kachumbari."
@@ -514,7 +521,7 @@ The system constructs system prompts dynamically to ensure format alignment.
 
 ### Rate-Limiting Failover (Key Rotation Pool)
 
-To guarantee high availability without premium tier enterprise AI subscriptions, the system implements an active key rotation pool in `lib/gemini.ts`.
+To guarantee high availability without premium tier enterprise AI subscriptions, the system implements an active key rotation pool in `lib/aiService.ts`.
 
 ```typescript
 const keys = process.env.EXPO_PUBLIC_GEMINI_KEYS?.split(',') || [];
@@ -660,5 +667,5 @@ Estimated monthly operational expenses in USD.
 
 * **Cart Actions**: [cart.store.ts](<file:///c:/Users/MWIJAY%20TECH/Desktop/PROJECTS/food_ordering-main/store/cart.store.ts>)
 * **Database Queries**: [supabaseDb.ts](<file:///c:/Users/MWIJAY%20TECH/Desktop/PROJECTS/food_ordering-main/lib/supabaseDb.ts>)
-* **AI Handlers**: [gemini.ts](<file:///c:/Users/MWIJAY%20TECH/Desktop/PROJECTS/food_ordering-main/lib/gemini.ts>)
+* **AI Handlers**: [aiService.ts](<file:///c:/Users/MWIJAY%20TECH/Desktop/PROJECTS/food_ordering-main/lib/aiService.ts>)
 * **Geography picker**: [LocationPicker.tsx](<file:///c:/Users/MWIJAY%20TECH/Desktop/PROJECTS/food_ordering-main/components/LocationPicker.tsx>)
