@@ -32,7 +32,7 @@ export default function RootLayout({
     <html lang="en" className={`${outfit.variable} ${quicksand.variable} h-full`}>
       <body className="min-h-full bg-background-warm text-foreground-dark antialiased font-sans flex flex-col">
         <Navbar />
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-6 pb-12">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-6 pb-20 md:pb-12">
           {children}
         </main>
         

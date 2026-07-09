@@ -261,7 +261,7 @@ export default function ChefAiPage() {
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-140px)] md:h-[calc(100vh-100px)] py-4 max-w-6xl mx-auto">
+    <div className="flex flex-col lg:flex-row gap-6 min-h-[60vh] lg:min-h-[calc(100vh-100px)] py-4 max-w-6xl mx-auto">
       
       {/* Left Chat Column */}
       <div className="flex-1 flex flex-col h-full bg-white border border-border rounded-3xl p-5 shadow-sm">
@@ -418,8 +418,8 @@ export default function ChefAiPage() {
 
       </div>
 
-      {/* Right Custom Dish Atelier Sidebar */}
-      <div className="w-full lg:w-[350px] bg-white border border-border rounded-3xl p-5 flex flex-col justify-between shadow-sm h-auto lg:h-full shrink-0">
+       {/* Right Custom Dish Atelier Sidebar */}
+      <div className="w-full lg:w-[350px] bg-white border border-border rounded-3xl p-5 flex flex-col justify-between shadow-sm h-auto shrink-0">
         
         <div className="space-y-4">
           <div className="pb-3 border-b border-border">
@@ -435,7 +435,7 @@ export default function ChefAiPage() {
               <p className="text-xs text-muted-foreground font-semibold">Cooking up custom meal composition...</p>
             </div>
           ) : customDish ? (
-            <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-320px)] pr-1 no-scrollbar">
+            <div className="space-y-3 overflow-y-auto max-h-[50vh] lg:max-h-[calc(100vh-320px)] pr-1 no-scrollbar">
               
               {/* Image box representation */}
               <div className="w-full aspect-video bg-card border border-border rounded-2xl overflow-hidden relative flex items-center justify-center">
