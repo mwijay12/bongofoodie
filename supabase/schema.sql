@@ -189,3 +189,87 @@ drop policy if exists "Users can delete their own favorites" on public.favorites
 create policy "Users can delete their own favorites" on public.favorites for delete using (
   auth.uid() = profile_id
 );
+
+-- 9. Create Daily Discoveries Table (Admin-managed culinary facts)
+create table if not exists public.daily_discoveries (
+  id uuid default gen_random_uuid() primary key,
+  title text not null,
+  description text not null,
+  is_active boolean default true,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+alter table public.daily_discoveries enable row level security;
+drop policy if exists "Daily discoveries are viewable by everyone" on public.daily_discoveries;
+create policy "Daily discoveries are viewable by everyone" on public.daily_discoveries for select using (true);
+drop policy if exists "Only admin can insert daily discoveries" on public.daily_discoveries;
+create policy "Only admin can insert daily discoveries" on public.daily_discoveries for insert with check (
+  (select auth.jwt() ->> 'email') = 'defoodordering@gmail.com'
+);
+drop policy if exists "Only admin can update daily discoveries" on public.daily_discoveries;
+create policy "Only admin can update daily discoveries" on public.daily_discoveries for update using (
+  (select auth.jwt() ->> 'email') = 'defoodordering@gmail.com'
+);
+drop policy if exists "Only admin can delete daily discoveries" on public.daily_discoveries;
+create policy "Only admin can delete daily discoveries" on public.daily_discoveries for delete using (
+  (select auth.jwt() ->> 'email') = 'defoodordering@gmail.com'
+);
+
+-- Insert default daily discoveries
+insert into public.daily_discoveries (title, description) values
+('Zanzibar Spice Capital 🌴', 'Zanzibar (Unguja) is nicknamed the ''Spice Island'' because it remains one of the world''s top exporters of Cloves (Karafuu) and Nutmeg.'),
+('Bongo Foodie Sourcing 🧑‍🌾', 'We source 100% of our organic vegetables, fresh meat, and rice from local Tanzanian family farms, supporting sustainable community growth!'),
+('Eco-Friendly Delivery 📦', 'To minimize plastic waste, all Bongo Foodie deliveries use biodegradable boxes inspired by traditional East African banana leaves.'),
+('National Comfort Food 🍟', 'Chipsi Mayai (French Fries Omelette) started as a cheap roadside breakfast in Dar es Salaam and has evolved into Tanzania''s most famous street food!'),
+('Our Kijitonyama Branch 📍', 'Bongo Foodie opened its first physical branch in Kijitonyama, Dar es Salaam, aiming to bring high-end premium dining experiences to local foodies.'),
+('The Pilau Path 🍛', 'Swahili Pilau is distinct because it roasts dry spices (cumin, cardamom, cloves, cinnamon) in caramelized onions before adding meat and rice.'),
+('Coastal Coconut Magic 🥥', 'Tui la Nazi (Fresh Coconut Milk) is the soul of coastal cooking, used to simmer Samaki wa Kupaka (Coastal Fish Curry) or Maharage ya Nazi.')
+on conflict do nothing;
+
+-- 10. Create Quiz Attempts Table (tracks who attempted the daily quiz)
+create table if not exists public.quiz_attempts (
+  id uuid default gen_random_uuid() primary key,
+  profile_id uuid references public.profiles(id) on delete cascade not null,
+  quiz_date date default current_date not null,
+  is_correct boolean default false,
+  created_at timestamp with time zone default now(),
+  unique (profile_id, quiz_date)
+);
+
+alter table public.quiz_attempts enable row level security;
+drop policy if exists "Users can view their own quiz attempts" on public.quiz_attempts;
+create policy "Users can view their own quiz attempts" on public.quiz_attempts for select using (
+  auth.uid() = profile_id
+);
+drop policy if exists "Users can insert their own quiz attempts" on public.quiz_attempts;
+create policy "Users can insert their own quiz attempts" on public.quiz_attempts for insert with check (
+  auth.uid() = profile_id
+);
+
+-- 11. Create User Settings Table (notification preferences, etc.)
+create table if not exists public.user_settings (
+  id uuid default gen_random_uuid() primary key,
+  profile_id uuid references public.profiles(id) on delete cascade not null unique,
+  push_notifications boolean default true,
+  email_notifications boolean default true,
+  sms_notifications boolean default false,
+  order_updates boolean default true,
+  promotional_offers boolean default true,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+alter table public.user_settings enable row level security;
+drop policy if exists "Users can view their own settings" on public.user_settings;
+create policy "Users can view their own settings" on public.user_settings for select using (
+  auth.uid() = profile_id
+);
+drop policy if exists "Users can insert their own settings" on public.user_settings;
+create policy "Users can insert their own settings" on public.user_settings for insert with check (
+  auth.uid() = profile_id
+);
+drop policy if exists "Users can update their own settings" on public.user_settings;
+create policy "Users can update their own settings" on public.user_settings for update using (
+  auth.uid() = profile_id
+);

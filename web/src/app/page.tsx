@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Sparkles, ArrowRight, Compass, ShoppingBag, HelpCircle } from 'lucide-react';
+import { Sparkles, ArrowRight, Compass, ShoppingBag, HelpCircle, Percent, Pizza, Beef, Wine } from 'lucide-react';
 
 const TRIVIA_QUESTIONS = [
   {
@@ -92,6 +92,155 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Promotional Campaigns Section */}
+      <section className="space-y-6">
+        <div className="flex items-center gap-2">
+          <Percent className="size-5 text-primary" />
+          <h2 className="font-heading text-2xl font-extrabold text-foreground-dark">🔥 Promotional Campaigns</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Summer Combo - Main Campaign */}
+          <Link 
+            href="/search"
+            className="md:col-span-2 bg-gradient-to-br from-emerald-800 to-emerald-900 rounded-3xl p-6 md:p-8 flex items-center justify-between overflow-hidden relative group border border-emerald-700/30"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.05),transparent_60%)]" />
+            <div className="relative z-10 space-y-3">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-bold uppercase tracking-wider">
+                🍔 15% OFF
+              </span>
+              <h3 className="font-heading text-3xl md:text-4xl font-extrabold text-white">SUMMER COMBO</h3>
+              <p className="text-emerald-100/80 text-sm font-semibold">Burger + Drink Special</p>
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-300 bg-emerald-900/50 px-2.5 py-1 rounded-full">
+                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Active
+              </span>
+            </div>
+            <div className="relative z-10 w-1/3 flex items-center justify-center">
+              <div className="size-32 md:size-40 relative">
+                <Image src="/assets/burger-one.png" alt="Summer Combo Burger" fill className="object-contain drop-shadow-2xl" />
+              </div>
+            </div>
+          </Link>
+
+          {/* Burger Bash */}
+          <Link 
+            href="/search"
+            className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-3xl p-6 flex flex-col justify-between relative group border border-amber-400/30"
+          >
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
+                🥤 10% OFF
+              </span>
+              <h3 className="font-heading text-xl font-extrabold text-white">BURGER BASH</h3>
+              <p className="text-amber-100/80 text-xs font-semibold">SPECIAL</p>
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-red-300 bg-red-900/30 px-2.5 py-1 rounded-full">
+                <span className="size-1.5 rounded-full bg-red-400" />
+                Inactive
+              </span>
+            </div>
+            <div className="flex justify-center mt-4">
+              <div className="size-20 relative">
+                <Image src="/assets/burger-two.png" alt="Burger Bash" fill className="object-contain" />
+              </div>
+            </div>
+          </Link>
+
+          {/* Pizza Party */}
+          <Link 
+            href="/search"
+            className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 flex flex-col justify-between relative group border border-slate-700/30"
+          >
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-bold uppercase tracking-wider">
+                🍕 20% OFF
+              </span>
+              <h3 className="font-heading text-xl font-extrabold text-white">PIZZA PARTY</h3>
+              <p className="text-slate-300/80 text-xs font-semibold">WEEKEND DEAL</p>
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-300 bg-emerald-900/30 px-2.5 py-1 rounded-full">
+                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Active
+              </span>
+            </div>
+            <div className="flex justify-center mt-4">
+              <div className="size-20 relative">
+                <Image src="/assets/pizza-one.png" alt="Pizza Party" fill className="object-contain" />
+              </div>
+            </div>
+          </Link>
+
+          {/* Nyama Choma Special */}
+          <Link 
+            href="/search"
+            className="bg-gradient-to-br from-red-700 to-red-800 rounded-3xl p-6 flex flex-col justify-between relative group border border-red-600/30"
+          >
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
+                🥩 25% OFF
+              </span>
+              <h3 className="font-heading text-xl font-extrabold text-white">NYAMA CHOMA</h3>
+              <p className="text-red-100/80 text-xs font-semibold">GRILL NIGHT</p>
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-300 bg-emerald-900/30 px-2.5 py-1 rounded-full">
+                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Active
+              </span>
+            </div>
+            <div className="flex justify-center mt-4">
+              <div className="size-20 relative">
+                <Beef className="size-16 text-white/60" />
+              </div>
+            </div>
+          </Link>
+
+          {/* Drinks Special */}
+          <Link 
+            href="/search"
+            className="bg-gradient-to-br from-cyan-600 to-cyan-700 rounded-3xl p-6 flex flex-col justify-between relative group border border-cyan-500/30"
+          >
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
+                🥤 BUY 1 GET 1
+              </span>
+              <h3 className="font-heading text-xl font-extrabold text-white">DRINKS DEAL</h3>
+              <p className="text-cyan-100/80 text-xs font-semibold">Coca-Cola & Pepsi</p>
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-300 bg-emerald-900/30 px-2.5 py-1 rounded-full">
+                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Active
+              </span>
+            </div>
+            <div className="flex justify-center mt-4">
+              <div className="size-20 relative">
+                <Wine className="size-16 text-white/60" />
+              </div>
+            </div>
+          </Link>
+
+          {/* Swahili Feast */}
+          <Link 
+            href="/search"
+            className="bg-gradient-to-br from-orange-600 to-orange-700 rounded-3xl p-6 flex flex-col justify-between relative group border border-orange-500/30"
+          >
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
+                🍛 30% OFF
+              </span>
+              <h3 className="font-heading text-xl font-extrabold text-white">SWAHILI FEAST</h3>
+              <p className="text-orange-100/80 text-xs font-semibold">TRADITIONAL PLATTER</p>
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-300 bg-emerald-900/30 px-2.5 py-1 rounded-full">
+                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Active
+              </span>
+            </div>
+            <div className="flex justify-center mt-4">
+              <div className="size-20 relative">
+                <Image src="/assets/food-3d-icon.png" alt="Swahili Feast" fill className="object-contain" />
+              </div>
+            </div>
+          </Link>
         </div>
       </section>
 

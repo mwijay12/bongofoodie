@@ -55,6 +55,7 @@ export default function RootLayout({
                 <li><Link href="/search" className="hover:text-primary transition-colors">Explore Menu</Link></li>
                 <li><Link href="/chef-ai" className="hover:text-primary transition-colors">Consult Chef AI</Link></li>
                 <li><Link href="/cart" className="hover:text-primary transition-colors">View Cart</Link></li>
+                <li><Link href="/profile" className="hover:text-primary transition-colors">My Profile</Link></li>
                 <li><Link href="/admin" className="hover:text-primary transition-colors">Manager Portal</Link></li>
               </ul>
             </div>

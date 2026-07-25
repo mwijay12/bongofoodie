@@ -70,6 +70,7 @@ export default function TabLayout() {
             <Tabs.Screen name='ai-chef' options={{ title: 'Chef AI' }} />
             <Tabs.Screen name='cart' options={{ title: 'Cart' }} />
             <Tabs.Screen name='profile' options={{ title: 'Profile' }} />
+        <Tabs.Screen name='admin-discoveries' options={{ title: 'Admin Discoveries', href: null }} />
         </Tabs>
     );
 }

@@ -28,6 +28,54 @@ const dummyData = {
 
     menu: [
         {
+            name: "Summer Combo Burger",
+            description: "Premium beef burger with cheese, lettuce, tomato, and special sauce - part of our Summer Combo!",
+            image_url:
+                "https://static.vecteezy.com/system/resources/previews/044/844/600/large_2x/homemade-fresh-tasty-burger-with-meat-and-cheese-classic-cheese-burger-and-vegetable-ai-generated-free-png.png",
+            price: 8500,
+            rating: 4.9,
+            calories: 750,
+            protein: 35,
+            category_name: "Swahili Bites",
+            customizations: ["Cheese slice", "Avocado Slices", "Chips Kaanga", "Stoney Tangawizi"],
+        },
+        {
+            name: "Summer Combo Pizza",
+            description: "Wood-fired pepperoni pizza with mozzarella - perfect for sharing!",
+            image_url:
+                "https://static.vecteezy.com/system/resources/previews/023/742/417/large_2x/pepperoni-pizza-isolated-illustration-ai-generative-free-png.png",
+            price: 12000,
+            rating: 4.8,
+            calories: 850,
+            protein: 32,
+            category_name: "Swahili Bites",
+            customizations: ["Cheese slice", "Pili Pili Kali", "Stoney Tangawizi"],
+        },
+        {
+            name: "Coca-Cola",
+            description: "Ice-cold Coca-Cola original taste, perfect with any meal",
+            image_url:
+                "https://static.vecteezy.com/system/resources/previews/055/133/581/large_2x/deliciously-grilled-burritos-filled-with-beans-corn-and-fresh-vegetables-served-with-lime-wedge-and-cilantro-isolated-on-transparent-background-free-png.png",
+            price: 2000,
+            rating: 4.5,
+            calories: 140,
+            protein: 0,
+            category_name: "Vinywaji",
+            customizations: [],
+        },
+        {
+            name: "Pepsi",
+            description: "Chilled Pepsi cola - the classic refreshment",
+            image_url:
+                "https://static.vecteezy.com/system/resources/previews/060/236/245/large_2x/a-large-hamburger-with-cheese-onions-and-lettuce-free-png.png",
+            price: 2000,
+            rating: 4.5,
+            calories: 150,
+            protein: 0,
+            category_name: "Vinywaji",
+            customizations: [],
+        },
+        {
             name: "Chipsi Mayai",
             description: "French fry omelette, fresh kachumbari, pili pili sauce",
             image_url:

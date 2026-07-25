@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, Alert, ScrollView, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Alert, ScrollView, Modal, ActivityIndicator, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { signOutUser } from "@/lib/supabaseAuth";
 import useAuthStore from "@/store/auth.store";
 import useLocationStore from "@/store/location.store";
 import LocationPicker from '@/components/LocationPicker';
 import { Ionicons } from '@expo/vector-icons';
-import { getUserOrders, getUserFavorites, toggleFavorite } from '@/lib/supabaseDb';
+import { router } from 'expo-router';
+import { getUserOrders, getUserFavorites, toggleFavorite, getUserAnalytics, getUserSettings, upsertUserSettings } from '@/lib/supabaseDb';
 import * as Haptics from 'expo-haptics';
 import { supabase } from '@/lib/supabase';
 import * as Notifications from 'expo-notifications';
@@ -88,48 +89,314 @@ const OrderStatusStepper = ({ currentStatus }: { currentStatus: string }) => {
   );
 };
 
+// Achievements Component
+const AchievementsSection = ({ ordersCount, favoritesCount }: { ordersCount: number; favoritesCount: number }) => {
+  const achievements = [
+    {
+      id: 'member',
+      name: 'Mwana Jumuia',
+      description: 'Registered account on Bongo Foodie',
+      icon: 'shield-checkmark-outline' as const,
+      unlocked: true,
+      progressMax: 1,
+      progressCurrent: 1,
+    },
+    {
+      id: 'first_order',
+      name: 'First Bite',
+      description: 'Placed your first order',
+      icon: 'restaurant-outline' as const,
+      unlocked: ordersCount >= 1,
+      progressMax: 1,
+      progressCurrent: Math.min(ordersCount, 1),
+    },
+    {
+      id: 'five_orders',
+      name: 'Mzee wa Meza',
+      description: 'Placed 5 orders',
+      icon: 'trophy-outline' as const,
+      unlocked: ordersCount >= 5,
+      progressMax: 5,
+      progressCurrent: Math.min(ordersCount, 5),
+    },
+    {
+      id: 'ten_orders',
+      name: 'Balozi wa Bongo',
+      description: 'Placed 10 orders',
+      icon: 'trophy-outline' as const,
+      unlocked: ordersCount >= 10,
+      progressMax: 10,
+      progressCurrent: Math.min(ordersCount, 10),
+    },
+    {
+      id: 'fav_foodie',
+      name: 'Foodie Collector',
+      description: 'Added 3 favorite dishes',
+      icon: 'heart-outline' as const,
+      unlocked: favoritesCount >= 3,
+      progressMax: 3,
+      progressCurrent: Math.min(favoritesCount, 3),
+    },
+    {
+      id: 'explorer',
+      name: 'Menu Explorer',
+      description: 'Browse the full menu',
+      icon: 'compass-outline' as const,
+      unlocked: true,
+      progressMax: 1,
+      progressCurrent: 1,
+    },
+  ];
+
+  const unlockedCount = achievements.filter(a => a.unlocked).length;
+
+  return (
+    <View className="bg-white border border-gourmet-border rounded-2xl p-5 mb-6">
+      <View className="flex-row items-center justify-between mb-4">
+        <View className="flex-row items-center gap-2">
+          <Ionicons name="trophy" size={20} color="#F6821F" />
+          <Text className="h3-bold">Achievements</Text>
+        </View>
+        <View className="bg-gourmet-amber/10 px-2.5 py-1 rounded-full">
+          <Text className="text-[10px] font-quicksand-bold text-gourmet-amber">
+            {unlockedCount} / {achievements.length}
+          </Text>
+        </View>
+      </View>
+
+      <View className="gap-3">
+        {achievements.map((badge) => {
+          const IconName = badge.icon;
+          return (
+            <View
+              key={badge.id}
+              className={cn(
+                "flex-row items-center p-3.5 rounded-xl border",
+                badge.unlocked
+                  ? "bg-gourmet-forest/5 border-gourmet-forest/20"
+                  : "bg-white border-gourmet-border/40 opacity-60"
+              )}
+            >
+              <View className={cn(
+                "size-10 rounded-xl items-center justify-center mr-3",
+                badge.unlocked ? "bg-gourmet-forest/10" : "bg-gourmet-bone"
+              )}>
+                <Ionicons
+                  name={IconName}
+                  size={20}
+                  color={badge.unlocked ? "#1B5E20" : "#C4C4C4"}
+                />
+              </View>
+              <View className="flex-1">
+                <Text className={cn(
+                  "paragraph-bold",
+                  badge.unlocked ? "text-gourmet-charcoal" : "text-gray-200"
+                )}>
+                  {badge.name}
+                </Text>
+                <Text className="text-[10px] text-gray-200 mt-0.5">{badge.description}</Text>
+                {/* Progress bar */}
+                <View className="w-full bg-gourmet-border/40 rounded-full h-1.5 mt-2 overflow-hidden">
+                  <View
+                    className="bg-gourmet-forest h-1.5 rounded-full"
+                    style={{ width: `${(badge.progressCurrent / badge.progressMax) * 100}%` }}
+                  />
+                </View>
+                <Text className="text-[8px] text-gray-200 mt-0.5">
+                  {badge.progressCurrent}/{badge.progressMax}
+                </Text>
+              </View>
+              <View className="ml-2">
+                {badge.unlocked ? (
+                  <Ionicons name="checkmark-circle" size={20} color="#1B5E20" />
+                ) : (
+                  <Ionicons name="lock-closed" size={16} color="#C4C4C4" />
+                )}
+              </View>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+};
+
+// Analytics Component
+const AnalyticsSection = ({ analytics }: { analytics: any }) => {
+  const stats = [
+    { label: 'Total Orders', value: analytics.totalOrders, icon: 'receipt-outline' as const, color: '#F6821F' },
+    { label: 'Completed', value: analytics.completedOrders, icon: 'checkmark-circle-outline' as const, color: '#1B5E20' },
+    { label: 'Total Spent', value: `TSh ${(analytics.totalSpent || 0).toLocaleString()}`, icon: 'cash-outline' as const, color: '#F6821F' },
+    { label: 'Favorites', value: analytics.totalFavorites, icon: 'heart-outline' as const, color: '#EF4444' },
+    { label: 'Quiz Score', value: `${analytics.quizCorrect}/${analytics.quizTotal}`, icon: 'bulb-outline' as const, color: '#F6821F' },
+  ];
+
+  return (
+    <View className="bg-white border border-gourmet-border rounded-2xl p-5 mb-6">
+      <View className="flex-row items-center gap-2 mb-4">
+        <Ionicons name="stats-chart" size={20} color="#F6821F" />
+        <Text className="h3-bold">Analytics</Text>
+      </View>
+      <View className="flex-row flex-wrap gap-3">
+        {stats.map((stat, idx) => (
+          <View key={idx} className="w-[30%] flex-1 bg-gourmet-bone border border-gourmet-border/60 p-3 rounded-xl items-center min-w-[80px]">
+            <Ionicons name={stat.icon} size={18} color={stat.color} />
+            <Text className="text-lg font-quicksand-bold text-gourmet-charcoal mt-1">{stat.value}</Text>
+            <Text className="text-[9px] text-gray-200 mt-0.5 text-center">{stat.label}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+};
+
+// Settings Component (Notification Controls)
+const SettingsSection = ({ userId }: { userId: string }) => {
+  const [settings, setSettings] = useState({
+    push_notifications: true,
+    email_notifications: true,
+    sms_notifications: false,
+    order_updates: true,
+    promotional_offers: true,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      if (!userId) return;
+      const data = await getUserSettings(userId);
+      if (data) {
+        setSettings({
+          push_notifications: data.push_notifications ?? true,
+          email_notifications: data.email_notifications ?? true,
+          sms_notifications: data.sms_notifications ?? false,
+          order_updates: data.order_updates ?? true,
+          promotional_offers: data.promotional_offers ?? true,
+        });
+      }
+      setLoading(false);
+    };
+    load();
+  }, [userId]);
+
+  const toggleSetting = async (key: string, value: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const newSettings = { ...settings, [key]: value };
+    setSettings(newSettings);
+    try {
+      await upsertUserSettings(userId, newSettings);
+    } catch (e) {
+      console.error('[Settings] Error saving:', e);
+    }
+  };
+
+  const toggles = [
+    { key: 'push_notifications', label: 'Push Notifications', icon: 'notifications-outline' as const },
+    { key: 'email_notifications', label: 'Email Notifications', icon: 'mail-outline' as const },
+    { key: 'sms_notifications', label: 'SMS Notifications', icon: 'chatbubble-outline' as const },
+    { key: 'order_updates', label: 'Order Updates', icon: 'receipt-outline' as const },
+    { key: 'promotional_offers', label: 'Promotional Offers', icon: 'pricetag-outline' as const },
+  ];
+
+  if (loading) {
+    return (
+      <View className="bg-white border border-gourmet-border rounded-2xl p-5 mb-6">
+        <View className="flex-row items-center gap-2 mb-4">
+          <Ionicons name="settings-outline" size={20} color="#F6821F" />
+          <Text className="h3-bold">Notification Settings</Text>
+        </View>
+        <ActivityIndicator size="small" color="#F6821F" />
+      </View>
+    );
+  }
+
+  return (
+    <View className="bg-white border border-gourmet-border rounded-2xl p-5 mb-6">
+      <View className="flex-row items-center gap-2 mb-4">
+        <Ionicons name="settings-outline" size={20} color="#F6821F" />
+        <Text className="h3-bold">Notification Settings</Text>
+      </View>
+      <View className="gap-1">
+        {toggles.map((item) => (
+          <View key={item.key} className="flex-row items-center justify-between py-3 border-b border-gourmet-border/30 last:border-b-0">
+            <View className="flex-row items-center gap-3">
+              <Ionicons name={item.icon} size={18} color="#F6821F" />
+              <Text className="paragraph-medium text-gourmet-charcoal">{item.label}</Text>
+            </View>
+            <Switch
+              value={(settings as any)[item.key]}
+              onValueChange={(val) => toggleSetting(item.key, val)}
+              trackColor={{ false: '#E5E7EB', true: '#1B5E20' }}
+              thumbColor={(settings as any)[item.key] ? '#FFFFFF' : '#F4F3F4'}
+              ios_backgroundColor="#E5E7EB"
+            />
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+};
+
 const Profile = () => {
     const { user, setUser, setIsAuthenticated } = useAuthStore();
     const { deliveryLocation, setDeliveryLocation } = useLocationStore();
-    const [activeModal, setActiveModal] = useState<'orders' | 'favorites' | 'addresses' | 'help' | 'terms' | null>(null);
+    const [activeModal, setActiveModal] = useState<'orders' | 'favorites' | 'addresses' | 'help' | 'terms' | 'discoveries' | 'settings' | null>(null);
 
     const [orders, setOrders] = useState<any[]>([]);
     const [favorites, setFavorites] = useState<any[]>([]);
     const [loadingOrders, setLoadingOrders] = useState(false);
     const [loadingFavorites, setLoadingFavorites] = useState(false);
+    const [analytics, setAnalytics] = useState<any>(null);
+    const [analyticsLoading, setAnalyticsLoading] = useState(true);
+
+    const userId = user?.$id || user?.id;
 
     const loadOrders = useCallback(async () => {
-        if (!user?.$id) return;
+        if (!userId) return;
         setLoadingOrders(true);
         try {
-            const data = await getUserOrders(user.$id);
+            const data = await getUserOrders(userId);
             setOrders(data);
         } catch (e) {
             console.error(e);
         } finally {
             setLoadingOrders(false);
         }
-    }, [user?.$id]);
+    }, [userId]);
 
     const loadFavorites = useCallback(async () => {
-        if (!user?.$id) return;
+        if (!userId) return;
         setLoadingFavorites(true);
         try {
-            const data = await getUserFavorites(user.$id);
+            const data = await getUserFavorites(userId);
             setFavorites(data);
         } catch (e) {
             console.error(e);
         } finally {
             setLoadingFavorites(false);
         }
-    }, [user?.$id]);
+    }, [userId]);
+
+    const loadAnalytics = useCallback(async () => {
+        if (!userId) return;
+        setAnalyticsLoading(true);
+        try {
+            const data = await getUserAnalytics(userId);
+            setAnalytics(data);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setAnalyticsLoading(false);
+        }
+    }, [userId]);
 
     useEffect(() => {
-        if (user?.$id) {
+        if (userId) {
             loadOrders();
             loadFavorites();
+            loadAnalytics();
         }
-    }, [user?.$id, loadOrders, loadFavorites]);
+    }, [userId, loadOrders, loadFavorites, loadAnalytics]);
 
     useEffect(() => {
         // Reload when modals open to ensure fresh data
@@ -153,17 +420,17 @@ const Profile = () => {
 
     // Subscribe to realtime order status modifications
     useEffect(() => {
-        if (!user?.$id) return;
+        if (!userId) return;
 
         const channel = supabase
-            .channel(`user-orders-${user.$id}`)
+            .channel(`user-orders-${userId}`)
             .on(
                 'postgres_changes',
                 {
                     event: 'UPDATE',
                     schema: 'public',
                     table: 'orders',
-                    filter: `profile_id=eq.${user.$id}`
+                    filter: `profile_id=eq.${userId}`
                 },
                 async (payload: any) => {
                     console.log('[Supabase Realtime Order Update]', payload.new);
@@ -188,13 +455,13 @@ const Profile = () => {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [user?.$id]);
+    }, [userId]);
 
     const handleRemoveFavorite = async (menuId: string) => {
-        if (!user?.$id) return;
+        if (!userId) return;
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         try {
-            await toggleFavorite(user.$id, menuId);
+            await toggleFavorite(userId, menuId);
             setFavorites(prev => prev.filter(item => item.$id !== menuId));
         } catch (e) {
             Alert.alert("Error", "Could not remove favorite.");
@@ -225,14 +492,25 @@ const Profile = () => {
         );
     };
 
-    const profileMenuItems = [
-        { icon: "receipt-outline" as const, title: "My Orders", subtitle: "Track and view past orders", type: 'orders' as const },
-        { icon: "heart-outline" as const, title: "Favorite Dishes", subtitle: "Your top rated Swahili meals", type: 'favorites' as const },
-        { icon: "location-outline" as const, title: "Delivery Addresses", subtitle: "Manage your dropoff locations", type: 'addresses' as const },
-        { icon: "card-outline" as const, title: "Payment Methods", subtitle: "Add or remove payment options", type: null },
-        { icon: "help-circle-outline" as const, title: "Help & Support", subtitle: "FAQs, chat support, and contact info", type: 'help' as const },
-        { icon: "document-text-outline" as const, title: "Terms & Conditions", subtitle: "User agreement and privacy policy", type: 'terms' as const },
+    const isAdmin = user?.email === 'defoodordering@gmail.com';
+
+    const baseMenuItems: Array<{
+      icon: "receipt-outline" | "heart-outline" | "location-outline" | "card-outline" | "bulb-outline" | "settings-outline" | "help-circle-outline" | "document-text-outline";
+      title: string;
+      subtitle: string;
+      type: 'orders' | 'favorites' | 'addresses' | 'settings' | 'help' | 'terms' | 'discoveries' | null;
+    }> = [
+        { icon: "receipt-outline", title: "My Orders", subtitle: "Track and view past orders", type: 'orders' },
+        { icon: "heart-outline", title: "Favorite Dishes", subtitle: "Your top rated Swahili meals", type: 'favorites' },
+        { icon: "location-outline", title: "Delivery Addresses", subtitle: "Manage your dropoff locations", type: 'addresses' },
+        { icon: "card-outline", title: "Payment Methods", subtitle: "Add or remove payment options", type: null },
+        { icon: "settings-outline", title: "Settings", subtitle: "Notifications, preferences & more", type: 'settings' },
+        { icon: "help-circle-outline", title: "Help & Support", subtitle: "FAQs, chat support, and contact info", type: 'help' },
+        { icon: "document-text-outline", title: "Terms & Conditions", subtitle: "User agreement and privacy policy", type: 'terms' },
     ];
+
+    const adminItem = isAdmin ? [{ icon: "bulb-outline" as const, title: "Manage Daily Discoveries", subtitle: "Add, edit, or remove culinary facts", type: 'discoveries' as const }] : [];
+    const profileMenuItems = [...baseMenuItems.slice(0, 5), ...adminItem, ...baseMenuItems.slice(5)];
 
     const avatarUrl = user?.avatar_url || null;
     const nameLetter = user?.name ? user.name.charAt(0).toUpperCase() : "B";
@@ -287,13 +565,30 @@ const Profile = () => {
                     </View>
                 </View>
 
+                {/* Analytics Section */}
+                {analyticsLoading ? (
+                    <View className="bg-white border border-gourmet-border rounded-2xl p-5 mb-6 items-center">
+                        <ActivityIndicator size="small" color="#F6821F" />
+                    </View>
+                ) : analytics && (
+                    <AnalyticsSection analytics={analytics} />
+                )}
+
+                {/* Achievements Section */}
+                <AchievementsSection 
+                  ordersCount={orders.length} 
+                  favoritesCount={favorites.length} 
+                />
+
                 {/* Menu List */}
                 <View className="bg-white border border-gourmet-border rounded-2xl overflow-hidden mb-6">
                     {profileMenuItems.map((item, index) => (
                         <TouchableOpacity 
                             key={index} 
                             onPress={() => {
-                                if (item.type) {
+                                if (item.type === 'discoveries') {
+                                    router.push('/admin-discoveries');
+                                } else if (item.type) {
                                     setActiveModal(item.type);
                                 } else {
                                     Alert.alert("Coming Soon", `${item.title} integration is under active development.`);
@@ -346,6 +641,7 @@ const Profile = () => {
                                 {activeModal === 'orders' && "My Orders"}
                                 {activeModal === 'favorites' && "Favorite Dishes"}
                                 {activeModal === 'addresses' && "Delivery Settings"}
+                                {activeModal === 'settings' && "Settings"}
                                 {activeModal === 'help' && "Help & Support"}
                                 {activeModal === 'terms' && "Terms & Conditions"}
                             </Text>
@@ -441,6 +737,10 @@ const Profile = () => {
                                         <Text className="paragraph-bold text-gourmet-charcoal mt-1">{deliveryLocation}</Text>
                                     </View>
                                 </View>
+                            )}
+
+                            {activeModal === 'settings' && userId && (
+                                <SettingsSection userId={userId} />
                             )}
 
                             {activeModal === 'help' && (

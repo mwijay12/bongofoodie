@@ -1,51 +1,20 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FlatList, Image, Pressable, Text, TouchableOpacity, View, ScrollView, ActivityIndicator } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import cn from 'clsx';
 import { router } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import CartButton from "@/components/CartButton";
 import { images } from "@/constants";
 import useAuthStore from "@/store/auth.store";
 import useLocationStore from "@/store/location.store";
 import useAppwrite from "@/lib/useAppwrite";
-import { getMenu } from "@/lib/supabaseDb";
+import { getMenu, getDailyDiscoveries, getQuizAttempt, recordQuizAttempt } from "@/lib/supabaseDb";
 import MenuCard from "@/components/MenuCard";
 import { MenuItem } from "@/type";
-
-// Daily Culinary & Business Curations
-const CULINARY_FACTS = [
-  {
-    title: "Zanzibar Spice Capital 🌴",
-    description: "Zanzibar (Unguja) is nicknamed the 'Spice Island' because it remains one of the world's top exporters of Cloves (Karafuu) and Nutmeg."
-  },
-  {
-    title: "Bongo Foodie Sourcing 🧑‍🌾",
-    description: "We source 100% of our organic vegetables, fresh meat, and rice from local Tanzanian family farms, supporting sustainable community growth!"
-  },
-  {
-    title: "Eco-Friendly Delivery 📦",
-    description: "To minimize plastic waste, all Bongo Foodie deliveries use biodegradable boxes inspired by traditional East African banana leaves."
-  },
-  {
-    title: "National Comfort Comfort 🍟",
-    description: "Chipsi Mayai (French Fries Omelette) started as a cheap roadside breakfast in Dar es Salaam and has evolved into Tanzania's most famous street food!"
-  },
-  {
-    title: "Our Kijitonyama Branch 📍",
-    description: "Bongo Foodie opened its first physical branch in Kijitonyama, Dar es Salaam, aiming to bring high-tech premium dining experiences to local foodies."
-  },
-  {
-    title: "The Pilau Path 🍛",
-    description: "Swahili Pilau is distinct because it roasts dry spices (cumin, cardamom, cloves, cinnamon) in caramelized onions before adding meat and rice."
-  },
-  {
-    title: "Coastal Coconut Magic 🥥",
-    description: "Tui la Nazi (Fresh Coconut Milk) is the soul of coastal cooking, used to simmer Samaki wa Kupaka (Coastal Fish Curry) or Maharage ya Nazi."
-  }
-];
 
 const TRIVIA_QUESTIONS = [
   {
@@ -85,7 +54,7 @@ const TypewriterText = ({ text }: { text: string }) => {
             if (i >= text.length) {
                 clearInterval(timer);
             }
-        }, 15); // Fast, snappy typewriter effect
+        }, 15);
         return () => clearInterval(timer);
     }, [text]);
 
@@ -100,19 +69,105 @@ export default function Index() {
   const { user } = useAuthStore();
   const { deliveryLocation } = useLocationStore();
   const userName = user?.name || "Gourmand";
+  const userId = user?.$id || user?.id;
 
-  // Setup rotation index based on weekday
-  const initialFactIndex = new Date().getDay() % CULINARY_FACTS.length;
-  const quizIndex = new Date().getDay() % TRIVIA_QUESTIONS.length;
+  // Fetch daily discoveries from Supabase
+  const [discoveries, setDiscoveries] = useState<any[]>([]);
+  const [discoveriesLoading, setDiscoveriesLoading] = useState(true);
+  
+  useEffect(() => {
+    const loadDiscoveries = async () => {
+      setDiscoveriesLoading(true);
+      const data = await getDailyDiscoveries();
+      if (data.length > 0) {
+        setDiscoveries(data);
+      }
+      setDiscoveriesLoading(false);
+    };
+    loadDiscoveries();
+  }, []);
+
+  // Device-based seed for shuffle
+  const [deviceSeed, setDeviceSeed] = useState(0);
+  const seedLoaded = useRef(false);
+
+  useEffect(() => {
+    const loadSeed = async () => {
+      try {
+        let seed = await AsyncStorage.getItem('@bongo_device_seed');
+        if (!seed) {
+          seed = String(Math.floor(Math.random() * 100000));
+          await AsyncStorage.setItem('@bongo_device_seed', seed);
+        }
+        setDeviceSeed(parseInt(seed, 10));
+      } catch {
+        setDeviceSeed(Math.floor(Math.random() * 100000));
+      }
+      seedLoaded.current = true;
+    };
+    loadSeed();
+  }, []);
+
+  // Shuffle indices based on device seed
+  const getShuffledIndex = (arrLength: number, seed: number, dayOffset: number = 0) => {
+    if (arrLength === 0) return 0;
+    const dayNum = new Date().getDate();
+    const monthNum = new Date().getMonth();
+    const yearNum = new Date().getFullYear();
+    const combined = seed + dayNum + (monthNum * 31) + (yearNum * 365) + dayOffset;
+    return Math.abs(combined) % arrLength;
+  };
+
+  const factSeed = deviceSeed;
+  const quizSeed = deviceSeed + 1000;
+
+  // Use discoveries from DB, fallback to hardcoded ones
+  const displayFacts = discoveries.length > 0 
+    ? discoveries.map((d: any) => ({ title: d.title, description: d.description }))
+    : [];
+
+  const initialFactIndex = seedLoaded.current && displayFacts.length > 0
+    ? getShuffledIndex(displayFacts.length, factSeed)
+    : 0;
+  
+  const quizIndex = seedLoaded.current
+    ? getShuffledIndex(TRIVIA_QUESTIONS.length, quizSeed)
+    : new Date().getDay() % TRIVIA_QUESTIONS.length;
+  
   const currentQuiz = TRIVIA_QUESTIONS[quizIndex];
 
   // Retention States
   const [factIndex, setFactIndex] = useState(initialFactIndex);
-  const currentFact = CULINARY_FACTS[factIndex];
+  const currentFact = displayFacts.length > 0 ? displayFacts[factIndex] : null;
+  const fallbackFact = { title: "Welcome to Bongo Foodie! 🎉", description: "Discover authentic Swahili cuisine and culinary wisdom from the heart of Tanzania. Check back daily for new discoveries!" };
 
   const [selectedAns, setSelectedAns] = useState<number | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
   const [hideQuiz, setHideQuiz] = useState(false);
+  const [quizAttempted, setQuizAttempted] = useState(false);
+  const [quizLoading, setQuizLoading] = useState(true);
+
+  // Check if quiz was already attempted today
+  useEffect(() => {
+    const checkQuizAttempt = async () => {
+      if (!userId) {
+        setQuizLoading(false);
+        return;
+      }
+      try {
+        const attempt = await getQuizAttempt(userId);
+        if (attempt) {
+          setHideQuiz(true);
+          setQuizAttempted(true);
+        }
+      } catch (e) {
+        // Silently fail
+        console.log('[Quiz] Error checking attempt:', e);
+      }
+      setQuizLoading(false);
+    };
+    checkQuizAttempt();
+  }, [userId]);
 
   // Fetch featured menu items (limit to 4)
   const { data: menuItems, loading } = useAppwrite({
@@ -241,84 +296,130 @@ export default function Index() {
           <View className="bg-white border border-gourmet-border/60 p-4 rounded-lg mb-4">
             <View className="flex-row justify-between items-center mb-1">
               <Text className="small-bold text-gourmet-amber uppercase">Daily Discovery</Text>
-              <TouchableOpacity 
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setFactIndex((prev) => (prev + 1) % CULINARY_FACTS.length);
-                }}
-                className="flex-row items-center gap-x-1"
-              >
-                <Text className="text-[10px] font-bold text-gourmet-forest uppercase">Next ➡️</Text>
-              </TouchableOpacity>
+              {displayFacts.length > 0 && (
+                <TouchableOpacity 
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setFactIndex((prev) => (prev + 1) % displayFacts.length);
+                  }}
+                  className="flex-row items-center gap-x-1"
+                >
+                  <Text className="text-[10px] font-bold text-gourmet-forest uppercase">Next ➡️</Text>
+                </TouchableOpacity>
+              )}
             </View>
-            <Text className="paragraph-bold text-gourmet-charcoal mb-1">{currentFact.title}</Text>
-            {/* Snap Typewriter text effect */}
-            <TypewriterText text={currentFact.description} />
+            {discoveriesLoading ? (
+              <View className="py-6">
+                <ActivityIndicator size="small" color="#F6821F" />
+              </View>
+            ) : (
+              <>
+                <Text className="paragraph-bold text-gourmet-charcoal mb-1">
+                  {currentFact ? currentFact.title : fallbackFact.title}
+                </Text>
+                <TypewriterText text={currentFact ? currentFact.description : fallbackFact.description} />
+              </>
+            )}
           </View>
 
-          {/* Daily Quiz, fades/hides on correct answer completion */}
-          {!hideQuiz && (
+          {/* Daily Quiz - disappears after correct answer attempt */}
+          {!hideQuiz && !quizLoading && (
             <View className="bg-white border border-gourmet-border/60 p-4 rounded-lg">
-              <Text className="small-bold text-gourmet-forest uppercase mb-2">Daily Trivia Quiz</Text>
-              <Text className="paragraph-bold text-gourmet-charcoal mb-3">{currentQuiz.question}</Text>
-              
-              <View className="gap-y-2">
-                {currentQuiz.options.map((opt, idx) => {
-                  const isSelected = selectedAns === idx;
-                  const isCorrect = idx === currentQuiz.correctIndex;
-                  let btnStyle = "border-gourmet-border bg-white";
-                  let textStyle = "text-gourmet-charcoal";
-
-                  if (selectedAns !== null) {
-                    if (isCorrect) {
-                      btnStyle = "border-green-300 bg-green-50";
-                      textStyle = "text-green-800 font-bold";
-                    } else if (isSelected) {
-                      btnStyle = "border-red-300 bg-red-50";
-                      textStyle = "text-red-800 font-bold";
-                    } else {
-                      btnStyle = "border-gourmet-border bg-white opacity-60";
-                    }
-                  }
-
-                  return (
-                    <TouchableOpacity
-                      key={idx}
-                      onPress={() => {
-                        if (selectedAns !== null) return;
-                        setSelectedAns(idx);
-                        setShowExplanation(true);
-                        if (idx === currentQuiz.correctIndex) {
-                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                        } else {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                        }
-                      }}
-                      className={cn("border p-3 rounded-lg", btnStyle)}
-                    >
-                      <Text className={cn("paragraph-medium", textStyle)}>{opt}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-
-              {showExplanation && (
-                <View className="mt-3 pt-3 border-t border-gourmet-border/40">
-                  <Text className="paragraph-bold text-gourmet-charcoal mb-1">
-                    {selectedAns === currentQuiz.correctIndex ? "🎉 Correct! Use coupon KARIBU2000 in your Cart to save TSh 2,000!" : "❌ Oops! Try again."}
+              {quizAttempted ? (
+                <View className="items-center py-4">
+                  <Ionicons name="checkmark-circle" size={32} color="#1B5E20" />
+                  <Text className="paragraph-bold text-gourmet-charcoal mt-2 text-center">
+                    🎉 You've completed today's trivia! Come back tomorrow for a new challenge.
                   </Text>
-                  <Text className="paragraph-medium text-gray-200 leading-relaxed mb-2">
-                    {currentQuiz.explainer}
-                  </Text>
-                  {selectedAns === currentQuiz.correctIndex && (
-                    <TouchableOpacity 
-                      onPress={() => setHideQuiz(true)}
-                      className="mt-3 py-2 bg-gourmet-forest/10 border border-gourmet-forest/20 rounded-lg items-center"
-                    >
-                      <Text className="text-xs font-quicksand-bold text-gourmet-forest">Dismiss Trivia</Text>
-                    </TouchableOpacity>
-                  )}
                 </View>
+              ) : (
+                <>
+                  <Text className="small-bold text-gourmet-forest uppercase mb-2">Daily Trivia Quiz</Text>
+                  <Text className="paragraph-bold text-gourmet-charcoal mb-3">{currentQuiz.question}</Text>
+                  
+                  <View className="gap-y-2">
+                    {currentQuiz.options.map((opt, idx) => {
+                      const isSelected = selectedAns === idx;
+                      const isCorrect = idx === currentQuiz.correctIndex;
+                      let btnStyle = "border-gourmet-border bg-white";
+                      let textStyle = "text-gourmet-charcoal";
+
+                      if (selectedAns !== null) {
+                        if (isCorrect) {
+                          btnStyle = "border-green-300 bg-green-50";
+                          textStyle = "text-green-800 font-bold";
+                        } else if (isSelected) {
+                          btnStyle = "border-red-300 bg-red-50";
+                          textStyle = "text-red-800 font-bold";
+                        } else {
+                          btnStyle = "border-gourmet-border bg-white opacity-60";
+                        }
+                      }
+
+                      return (
+                        <TouchableOpacity
+                          key={idx}
+                          onPress={async () => {
+                            if (selectedAns !== null) return;
+                            setSelectedAns(idx);
+                            setShowExplanation(true);
+                            
+                            const correct = idx === currentQuiz.correctIndex;
+                            
+                            // Record the attempt in Supabase immediately on correct answer
+                            if (correct && userId) {
+                              try {
+                                await recordQuizAttempt(userId, true);
+                                setQuizAttempted(true);
+                              } catch (e) {
+                                console.log('[Quiz] Error recording attempt:', e);
+                              }
+                            } else if (!correct && userId) {
+                              // Record incorrect attempt too
+                              try {
+                                await recordQuizAttempt(userId, false);
+                                setQuizAttempted(true);
+                              } catch (e) {
+                                console.log('[Quiz] Error recording attempt:', e);
+                              }
+                            }
+
+                            if (correct) {
+                              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                            } else {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                            }
+                          }}
+                          className={cn("border p-3 rounded-lg", btnStyle)}
+                        >
+                          <Text className={cn("paragraph-medium", textStyle)}>{opt}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+
+                  {showExplanation && (
+                    <View className="mt-3 pt-3 border-t border-gourmet-border/40">
+                      <Text className="paragraph-bold text-gourmet-charcoal mb-1">
+                        {selectedAns === currentQuiz.correctIndex ? "🎉 Correct! Use coupon KARIBU2000 in your Cart to save TSh 2,000!" : "❌ Oops! Try again tomorrow."}
+                      </Text>
+                      <Text className="paragraph-medium text-gray-200 leading-relaxed mb-2">
+                        {currentQuiz.explainer}
+                      </Text>
+                      {selectedAns === currentQuiz.correctIndex && (
+                        <TouchableOpacity 
+                          onPress={() => {
+                            setHideQuiz(true);
+                            AsyncStorage.setItem('@bongo_quiz_hidden_' + new Date().toISOString().split('T')[0], 'true');
+                          }}
+                          className="mt-3 py-2 bg-gourmet-forest/10 border border-gourmet-forest/20 rounded-lg items-center"
+                        >
+                          <Text className="text-xs font-quicksand-bold text-gourmet-forest">Dismiss Trivia</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  )}
+                </>
               )}
             </View>
           )}

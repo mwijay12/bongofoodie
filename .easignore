@@ -1,0 +1,8 @@
+node_modules
+.expo
+.next
+web
+android/app/build
+android/build
+ios
+dist

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { User, LogOut, Loader2, Camera, Mail, Save, AlertCircle } from 'lucide-react';
+import { User, LogOut, Loader2, Camera, Mail, Save, AlertCircle, Receipt, Heart, MapPin, HelpCircle, FileText, ChevronRight, X, Clock, CheckCircle2, XCircle, Package, ChefHat, Star } from 'lucide-react';
 import Image from 'next/image';
 import Achievements from '@/components/Achievements';
 
@@ -20,6 +20,17 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  // Modal state
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+
+  // Orders state
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+  // Favorites state
+  const [favorites, setFavorites] = useState<any[]>([]);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
 
   // Mock stats for achievements geocoding orders count
   const [ordersCount, setOrdersCount] = useState(3);
@@ -78,6 +89,43 @@ export default function ProfilePage() {
       setMessage({ text: 'Error loading user profile information.', type: 'error' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadOrders = async () => {
+    if (!user?.id) return;
+    setLoadingOrders(true);
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('profile_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setOrders(data || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  const loadFavorites = async () => {
+    if (!user?.id) return;
+    setLoadingFavorites(true);
+    try {
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('*, menu_items(*)')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      setFavorites(data || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingFavorites(false);
     }
   };
 
@@ -153,6 +201,35 @@ export default function ProfilePage() {
     router.push('/sign-in');
     router.refresh();
   };
+
+  const openModal = async (type: string) => {
+    setActiveModal(type);
+    if (type === 'orders') {
+      await loadOrders();
+    } else if (type === 'favorites') {
+      await loadFavorites();
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    const map: Record<string, string> = {
+      pending: 'bg-amber-100 text-amber-700 border-amber-200',
+      preparing: 'bg-blue-100 text-blue-700 border-blue-200',
+      in_transit: 'bg-purple-100 text-purple-700 border-purple-200',
+      out_for_delivery: 'bg-purple-100 text-purple-700 border-purple-200',
+      delivered: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+      cancelled: 'bg-red-100 text-red-700 border-red-200',
+    };
+    return map[status] || 'bg-gray-100 text-gray-700 border-gray-200';
+  };
+
+  const profileMenuItems = [
+    { icon: Receipt, title: "My Orders", subtitle: "Track and view past orders", type: 'orders' },
+    { icon: Heart, title: "Favorite Dishes", subtitle: "Your top rated Swahili meals", type: 'favorites' },
+    { icon: MapPin, title: "Delivery Addresses", subtitle: "Manage your dropoff locations", type: 'addresses' },
+    { icon: HelpCircle, title: "Help & Support", subtitle: "FAQs, chat support, and contact info", type: 'help' },
+    { icon: FileText, title: "Terms & Conditions", subtitle: "User agreement and privacy policy", type: 'terms' },
+  ];
 
   if (loading) {
     return (
@@ -310,6 +387,29 @@ export default function ProfilePage() {
               )}
             </button>
           </form>
+
+          {/* Profile Quick Links */}
+          <div className="space-y-1 pt-2 border-t border-border">
+            {profileMenuItems.map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => openModal(item.type)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors text-left group cursor-pointer"
+                >
+                  <div className="size-9 rounded-lg bg-primary/5 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary/10 transition-colors">
+                    <Icon className="size-4.5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-foreground-dark">{item.title}</p>
+                    <p className="text-[10px] text-muted-foreground font-semibold truncate">{item.subtitle}</p>
+                  </div>
+                  <ChevronRight className="size-4 text-muted-foreground shrink-0" />
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Right Column: Achievements & Badges */}
@@ -323,6 +423,216 @@ export default function ProfilePage() {
         </div>
 
       </div>
+
+      {/* Modal Overlay */}
+      {activeModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl max-h-[85vh] sm:max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
+              <h3 className="font-heading font-bold text-lg text-foreground-dark">
+                {activeModal === 'orders' && 'My Orders'}
+                {activeModal === 'favorites' && 'Favorite Dishes'}
+                {activeModal === 'addresses' && 'Delivery Addresses'}
+                {activeModal === 'help' && 'Help & Support'}
+                {activeModal === 'terms' && 'Terms & Conditions'}
+              </h3>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="size-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors cursor-pointer"
+              >
+                <X className="size-4.5 text-muted-foreground" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-5">
+              {/* Orders */}
+              {activeModal === 'orders' && (
+                <div className="space-y-4">
+                  {loadingOrders ? (
+                    <div className="flex justify-center py-10">
+                      <Loader2 className="size-6 text-primary animate-spin" />
+                    </div>
+                  ) : orders.length === 0 ? (
+                    <div className="text-center py-10">
+                      <Receipt className="size-12 text-muted-foreground/30 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground font-semibold">You have no orders yet.</p>
+                      <Link href="/search" className="text-xs font-bold text-primary hover:text-secondary mt-2 inline-block">
+                        Browse Menu
+                      </Link>
+                    </div>
+                  ) : (
+                    orders.map((ord) => {
+                      const parsedItems = typeof ord.items === 'string' ? JSON.parse(ord.items) : (ord.items || []);
+                      const itemsString = parsedItems.map((item: any) => `${item.name} x${item.quantity}`).join(', ');
+                      const statusMap: Record<string, string> = {
+                        pending: "Pending",
+                        preparing: "Kitchen",
+                        in_transit: "In Transit",
+                        out_for_delivery: "Out for Delivery",
+                        delivered: "Delivered",
+                        cancelled: "Cancelled",
+                      };
+                      const displayStatus = statusMap[ord.status] || ord.status;
+                      
+                      return (
+                        <div key={ord.id} className="bg-card border border-border p-4 rounded-xl space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="font-heading font-bold text-sm text-foreground-dark">
+                              Order #{ord.id?.slice(0, 6).toUpperCase() || 'N/A'}
+                            </span>
+                            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${getStatusColor(ord.status)}`}>
+                              {displayStatus}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground font-semibold">
+                            {ord.created_at ? new Date(ord.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A'}
+                          </p>
+                          <p className="text-xs font-medium text-foreground-dark">{itemsString}</p>
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="font-heading font-bold text-sm text-primary">
+                              TSh {Number(ord.total_price).toLocaleString()}
+                            </span>
+                            {ord.status === 'delivered' && (
+                              <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                                <CheckCircle2 className="size-3.5" /> Delivered
+                              </span>
+                            )}
+                            {ord.status === 'cancelled' && (
+                              <span className="text-[10px] text-red-600 font-bold flex items-center gap-1">
+                                <XCircle className="size-3.5" /> Cancelled
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+
+              {/* Favorites */}
+              {activeModal === 'favorites' && (
+                <div className="space-y-4">
+                  {loadingFavorites ? (
+                    <div className="flex justify-center py-10">
+                      <Loader2 className="size-6 text-primary animate-spin" />
+                    </div>
+                  ) : favorites.length === 0 ? (
+                    <div className="text-center py-10">
+                      <Heart className="size-12 text-muted-foreground/30 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground font-semibold">No favorites added yet.</p>
+                      <Link href="/search" className="text-xs font-bold text-primary hover:text-secondary mt-2 inline-block">
+                        Discover Dishes
+                      </Link>
+                    </div>
+                  ) : (
+                    favorites.map((fav) => (
+                      <div key={fav.id} className="flex items-center gap-4 bg-card border border-border p-4 rounded-xl">
+                        <div className="size-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                          <Star className="size-6" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-foreground-dark">{fav.menu_items?.name || 'Dish'}</p>
+                          <p className="text-[11px] text-muted-foreground font-semibold truncate">{fav.menu_items?.description || ''}</p>
+                          <p className="text-xs font-bold text-primary mt-1">
+                            TSh {Number(fav.menu_items?.price || 0).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* Addresses */}
+              {activeModal === 'addresses' && (
+                <div className="space-y-4">
+                  <div className="bg-card border border-border p-5 rounded-xl">
+                    <div className="flex items-center gap-2 mb-3">
+                      <MapPin className="size-4.5 text-primary" />
+                      <h4 className="font-heading font-bold text-sm text-foreground-dark">Delivery Settings</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground font-semibold leading-relaxed mb-4">
+                      Choose your delivery region, district, and ward. Your selection will update across Bongo Foodie.
+                    </p>
+                    <div className="bg-primary/5 border border-primary/20 p-4 rounded-xl">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Current Address</p>
+                      <p className="text-sm font-bold text-foreground-dark">Dar es Salaam, Tanzania</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Help & Support */}
+              {activeModal === 'help' && (
+                <div className="space-y-4">
+                  <div className="bg-card border border-border p-5 rounded-xl">
+                    <div className="flex items-center gap-2 mb-3">
+                      <HelpCircle className="size-4.5 text-primary" />
+                      <h4 className="font-heading font-bold text-sm text-foreground-dark">Bongo Foodie Support</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground font-semibold leading-relaxed mb-4">
+                      Need help with an order or have culinary questions? Contact our Dar es Salaam headquarters directly.
+                    </p>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-3 bg-white border border-border rounded-xl">
+                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                          <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-foreground-dark">Phone</p>
+                          <p className="text-[11px] text-muted-foreground font-semibold">+255 712 345 678</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-white border border-border rounded-xl">
+                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                          <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-foreground-dark">Email</p>
+                          <p className="text-[11px] text-muted-foreground font-semibold">support@bongofoodie.com</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-white border border-border rounded-xl">
+                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                          <Clock className="size-4" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-foreground-dark">Hours</p>
+                          <p className="text-[11px] text-muted-foreground font-semibold">Daily: 08:00 AM - 10:00 PM</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Terms & Conditions */}
+              {activeModal === 'terms' && (
+                <div className="space-y-4">
+                  <div className="bg-card border border-border p-5 rounded-xl">
+                    <div className="flex items-center gap-2 mb-3">
+                      <FileText className="size-4.5 text-primary" />
+                      <h4 className="font-heading font-bold text-sm text-foreground-dark">User Service Terms</h4>
+                    </div>
+                    <div className="space-y-3 text-xs text-muted-foreground font-semibold leading-relaxed">
+                      <p>1. Deliveries are estimated and subject to Dar traffic conditions. We strive to deliver within 45-60 minutes.</p>
+                      <p>2. Digital payments must settle to admin Till channels. All transactions are processed securely.</p>
+                      <p>3. Chef AI suggests custom recipes; please check allergies independently before ordering.</p>
+                      <p>4. Cancellations must be made within 10 minutes of placing the order for a full refund.</p>
+                      <p>5. Bongo Foodie reserves the right to modify menu items and pricing without prior notice.</p>
+                      <p>6. Your privacy is important to us. We do not share your personal data with third parties.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

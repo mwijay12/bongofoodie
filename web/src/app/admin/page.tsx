@@ -174,10 +174,30 @@ export default function AdminPage() {
   const [promoDiscount, setPromoDiscount] = useState(2000);
   const [promoActive, setPromoActive] = useState(true);
 
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isAdminUser, setIsAdminUser] = useState<boolean>(false);
+
   useEffect(() => {
-    loadAdminData();
+    checkAdminAuth();
     loadBranchSettings();
   }, [showcaseMode]);
+
+  const checkAdminAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const email = session?.user?.email;
+    setUserEmail(email || null);
+
+    const authorizedAdmins = ['defoodordering@gmail.com', 'mwijaydavie@gmail.com', 'davidbyanmwijage@gmail.com'];
+    const isAdmin = !!email && authorizedAdmins.includes(email);
+    setIsAdminUser(isAdmin);
+
+    if (!isAdmin) {
+      setLoading(false);
+      return;
+    }
+
+    loadAdminData();
+  };
 
   const loadBranchSettings = async () => {
     if (typeof window !== 'undefined') {
@@ -555,6 +575,31 @@ export default function AdminPage() {
       <div className="flex flex-col items-center justify-center py-40 gap-3">
         <Loader2 className="size-10 text-primary animate-spin" />
         <p className="text-xs font-bold uppercase tracking-widest text-primary animate-pulse">Loading Bongo Foodie Console...</p>
+      </div>
+    );
+  }
+
+  if (!isAdminUser) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 px-4 text-center max-w-md mx-auto">
+        <div className="size-16 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 mb-4 border border-red-500/20">
+          <AlertTriangle className="size-8" />
+        </div>
+        <h2 className="font-heading font-extrabold text-2xl text-foreground-dark">Access Denied (Restricted Area)</h2>
+        <p className="text-sm text-muted-foreground mt-2 font-medium">
+          Ukurasa huu wa Management Portal ni maalum kwa ajili ya Administrator pekee. 
+          {userEmail ? (
+            <span> Akaunti uliyostahimili nayo (<strong>{userEmail}</strong>) haina kibali cha kuingia hapa.</span>
+          ) : (
+            <span> Hujaingia (Logged in). Tafadhali ingia kwa akaunti ya Admin.</span>
+          )}
+        </p>
+        <Link
+          href="/sign-in"
+          className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-heading font-bold text-xs hover:bg-secondary transition-colors cursor-pointer shadow-md shadow-primary/20"
+        >
+          Sign In as Administrator
+        </Link>
       </div>
     );
   }

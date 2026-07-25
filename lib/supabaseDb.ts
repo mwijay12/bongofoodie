@@ -295,6 +295,193 @@ export async function getUserFavorites(userId: string) {
   }
 }
 
+export async function getDailyDiscoveries() {
+  try {
+    const { data, error } = await supabase
+      .from('daily_discoveries')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: true });
+    
+    if (error) throw error;
+    return data || [];
+  } catch (error: any) {
+    console.error('[Supabase getDailyDiscoveries Error]', error);
+    return [];
+  }
+}
+
+export async function createDailyDiscovery(title: string, description: string) {
+  try {
+    const { error } = await supabase
+      .from('daily_discoveries')
+      .insert({ title, description });
+    
+    if (error) throw error;
+    return true;
+  } catch (error: any) {
+    console.error('[Supabase createDailyDiscovery Error]', error);
+    throw error;
+  }
+}
+
+export async function updateDailyDiscovery(id: string, title: string, description: string) {
+  try {
+    const { error } = await supabase
+      .from('daily_discoveries')
+      .update({ title, description, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    
+    if (error) throw error;
+    return true;
+  } catch (error: any) {
+    console.error('[Supabase updateDailyDiscovery Error]', error);
+    throw error;
+  }
+}
+
+export async function deleteDailyDiscovery(id: string) {
+  try {
+    const { error } = await supabase
+      .from('daily_discoveries')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+    return true;
+  } catch (error: any) {
+    console.error('[Supabase deleteDailyDiscovery Error]', error);
+    throw error;
+  }
+}
+
+export async function getQuizAttempt(userId: string) {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await supabase
+      .from('quiz_attempts')
+      .select('*')
+      .eq('profile_id', userId)
+      .eq('quiz_date', today)
+      .maybeSingle();
+    
+    if (error) throw error;
+    return data;
+  } catch (error: any) {
+    console.error('[Supabase getQuizAttempt Error]', error);
+    return null;
+  }
+}
+
+export async function recordQuizAttempt(userId: string, isCorrect: boolean) {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const { error } = await supabase
+      .from('quiz_attempts')
+      .insert({ profile_id: userId, quiz_date: today, is_correct: isCorrect });
+    
+    if (error) throw error;
+    return true;
+  } catch (error: any) {
+    console.error('[Supabase recordQuizAttempt Error]', error);
+    throw error;
+  }
+}
+
+export async function getUserSettings(userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('user_settings')
+      .select('*')
+      .eq('profile_id', userId)
+      .maybeSingle();
+    
+    if (error) throw error;
+    return data;
+  } catch (error: any) {
+    console.error('[Supabase getUserSettings Error]', error);
+    return null;
+  }
+}
+
+export async function upsertUserSettings(userId: string, settings: {
+  push_notifications?: boolean;
+  email_notifications?: boolean;
+  sms_notifications?: boolean;
+  order_updates?: boolean;
+  promotional_offers?: boolean;
+}) {
+  try {
+    const { error } = await supabase
+      .from('user_settings')
+      .upsert({ 
+        profile_id: userId, 
+        ...settings, 
+        updated_at: new Date().toISOString() 
+      });
+    
+    if (error) throw error;
+    return true;
+  } catch (error: any) {
+    console.error('[Supabase upsertUserSettings Error]', error);
+    throw error;
+  }
+}
+
+export async function getUserAnalytics(userId: string) {
+  try {
+    // Get total orders
+    const { data: orders, error: ordersError } = await supabase
+      .from('orders')
+      .select('id, total_price, status, created_at')
+      .eq('profile_id', userId);
+    
+    if (ordersError) throw ordersError;
+
+    // Get total favorites
+    const { data: favorites, error: favError } = await supabase
+      .from('favorites')
+      .select('id')
+      .eq('profile_id', userId);
+    
+    if (favError) throw favError;
+
+    // Get quiz attempts
+    const { data: quizzes, error: quizError } = await supabase
+      .from('quiz_attempts')
+      .select('*')
+      .eq('profile_id', userId);
+    
+    if (quizError) throw quizError;
+
+    const totalOrders = orders?.length || 0;
+    const totalSpent = (orders || []).reduce((sum, o) => sum + Number(o.total_price || 0), 0);
+    const completedOrders = (orders || []).filter(o => o.status === 'delivered').length;
+    const totalFavorites = favorites?.length || 0;
+    const quizCorrect = (quizzes || []).filter(q => q.is_correct).length;
+    const quizTotal = quizzes?.length || 0;
+
+    return {
+      totalOrders,
+      totalSpent,
+      completedOrders,
+      totalFavorites,
+      quizCorrect,
+      quizTotal,
+    };
+  } catch (error: any) {
+    console.error('[Supabase getUserAnalytics Error]', error);
+    return {
+      totalOrders: 0,
+      totalSpent: 0,
+      completedOrders: 0,
+      totalFavorites: 0,
+      quizCorrect: 0,
+      quizTotal: 0,
+    };
+  }
+}
+
 export async function updateMenuRating(menuId: string, rating: number) {
   try {
     const { data, error: fetchError } = await supabase
