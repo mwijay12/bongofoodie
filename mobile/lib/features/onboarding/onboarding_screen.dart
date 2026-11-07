@@ -195,7 +195,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     onPageChanged: (idx) => setState(() => _pageIndex = idx),
                     itemBuilder: (context, index) {
                       final slide = slides[index];
-                      return Column(
+                      return LayoutBuilder(
+                        builder: (context, constraints) => SingleChildScrollView(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                            child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
@@ -262,6 +266,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             ),
                           ),
                         ],
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),
