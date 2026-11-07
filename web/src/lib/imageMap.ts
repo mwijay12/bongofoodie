@@ -66,14 +66,14 @@ export function hasValidImage(url: string | null | undefined): boolean {
     return true;
   }
 
-  if (url.startsWith('https://rkjanbxkgfyjpdcichvy.supabase.co')) {
+  if (url.startsWith('https://') || url.startsWith('http://')) {
     return true;
   }
 
   return false;
 }
 
-export function resolveFoodImage(url: string): string {
+export function resolveFoodImage(url?: string | null): string {
   if (!url) {
     return '/assets/salad.png';
   }

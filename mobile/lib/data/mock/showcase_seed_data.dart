@@ -1,0 +1,551 @@
+import '../models/models.dart';
+
+class ShowcaseSeedData {
+  ShowcaseSeedData._();
+
+  static const Map<UserRole, AppUser> demoProfiles = {
+    UserRole.customer: AppUser(
+      id: 'demo-customer-001',
+      name: 'Amina Juma',
+      email: 'demo@bongofoodie.co.tz',
+      phone: '+255 712 345 678',
+      role: UserRole.customer,
+      isDemo: true,
+    ),
+    UserRole.waiter: AppUser(
+      id: 'demo-waiter-001',
+      name: 'Salma Rashid (Waiter)',
+      email: 'waiter@bongofoodie.co.tz',
+      phone: '+255 788 123 456',
+      role: UserRole.waiter,
+      isDemo: true,
+    ),
+    UserRole.admin: AppUser(
+      id: 'demo-admin-001',
+      name: 'Mwijay Davie (Admin)',
+      email: 'mwijaydavie@gmail.com',
+      phone: '+255 790 942 616',
+      role: UserRole.admin,
+      isDemo: true,
+    ),
+  };
+
+  static const List<CategoryModel> categories = [
+    CategoryModel(
+      id: 'cat-bites',
+      name: 'Swahili Bites',
+      description: 'Traditional East African street starters & coastal snacks',
+    ),
+    CategoryModel(
+      id: 'cat-choma',
+      name: 'Nyama Choma',
+      description: 'Charcoal flame-grilled signature Tanzanian meats',
+    ),
+    CategoryModel(
+      id: 'cat-pilau',
+      name: 'Rice & Pilau',
+      description: 'Zanzibar spice-infused pilau, biryani & coconut rice',
+    ),
+    CategoryModel(
+      id: 'cat-stews',
+      name: 'Traditional Stews',
+      description: 'Slow-simmered tui la nazi curries & chapati pairings',
+    ),
+    CategoryModel(
+      id: 'cat-specials',
+      name: 'Gourmet Specials',
+      description: 'Chef fusion burgers & wood-fired Swahili pizzas',
+    ),
+    CategoryModel(
+      id: 'cat-drinks',
+      name: 'Vinywaji',
+      description: 'Fresh tropical juices, spiced chai & chilled sodas',
+    ),
+  ];
+
+  static const List<CustomizationOption> defaultSwahiliSides = [
+    CustomizationOption(
+      id: 'cust-kachumbari',
+      name: 'Kachumbari Extra',
+      price: 1000,
+      type: 'topping',
+    ),
+    CustomizationOption(
+      id: 'cust-pilipili',
+      name: 'Pili Pili Kali',
+      price: 500,
+      type: 'topping',
+    ),
+    CustomizationOption(
+      id: 'cust-ndimu',
+      name: 'Ndimu (Fresh Lime)',
+      price: 300,
+      type: 'topping',
+    ),
+    CustomizationOption(
+      id: 'cust-ugali',
+      name: 'Ugali Kipande',
+      price: 1500,
+      type: 'side',
+    ),
+    CustomizationOption(
+      id: 'cust-chapati',
+      name: 'Chapati Moja',
+      price: 1000,
+      type: 'side',
+    ),
+    CustomizationOption(
+      id: 'cust-avocado',
+      name: 'Avocado Slices',
+      price: 1000,
+      type: 'topping',
+    ),
+    CustomizationOption(
+      id: 'cust-stoney',
+      name: 'Stoney Tangawizi',
+      price: 1500,
+      type: 'drink',
+    ),
+  ];
+
+  static const List<MenuItemModel> menuItems = [
+    MenuItemModel(
+      id: 'menu-chipsi-mayai',
+      name: 'Chipsi Mayai',
+      description:
+          'Iconic Dar es Salaam golden French fry omelette served hot with fresh tomato-onion kachumbari and house tamarind pili pili.',
+      imageUrl: 'chipsiMayai',
+      price: 5500,
+      rating: 4.9,
+      ratingCount: 84,
+      calories: 580,
+      protein: 18,
+      prepTimeMins: 12,
+      categoryId: 'cat-bites',
+      categoryName: 'Swahili Bites',
+      availableCustomizations: defaultSwahiliSides,
+    ),
+    MenuItemModel(
+      id: 'menu-nyama-choma',
+      name: 'Nyama Choma & Ugali',
+      description:
+          'Charcoal-grilled tender beef ribs basted in ginger-lime marinade, paired with warm sembe ugali, mchicha wa nazi, and kachumbari.',
+      imageUrl: 'nyamaChoma',
+      price: 13500,
+      rating: 4.9,
+      ratingCount: 126,
+      calories: 780,
+      protein: 46,
+      prepTimeMins: 25,
+      categoryId: 'cat-choma',
+      categoryName: 'Nyama Choma',
+      availableCustomizations: defaultSwahiliSides,
+    ),
+    MenuItemModel(
+      id: 'menu-pilau-kuku',
+      name: 'Pilau ya Kuku',
+      description:
+          'Fragrant Zanzibar spiced basmati rice slow-cooked with caramelized onions, whole cardamom, cloves, tender kuku kienyeji, and kachumbari.',
+      imageUrl: 'pilauYaKuku',
+      price: 10000,
+      rating: 4.8,
+      ratingCount: 97,
+      calories: 640,
+      protein: 32,
+      prepTimeMins: 20,
+      categoryId: 'cat-pilau',
+      categoryName: 'Rice & Pilau',
+      availableCustomizations: defaultSwahiliSides,
+    ),
+    MenuItemModel(
+      id: 'menu-samaki-kupaka',
+      name: 'Samaki wa Kupaka',
+      description:
+          'Charcoal-seared Indian Ocean snapper simmered in rich Tui la Nazi (fresh coconut cream), turmeric, garlic, and tamarind glaze.',
+      imageUrl: 'samakiWaKupaka',
+      price: 15000,
+      rating: 4.9,
+      ratingCount: 73,
+      calories: 690,
+      protein: 40,
+      prepTimeMins: 25,
+      categoryId: 'cat-stews',
+      categoryName: 'Traditional Stews',
+      availableCustomizations: defaultSwahiliSides,
+    ),
+    MenuItemModel(
+      id: 'menu-mishkaki',
+      name: "Mishkaki ya Ng'ombe",
+      description:
+          'Four smoky beef tenderloin skewers marinated overnight in papaya, crushed ginger, garlic, and Zanzibar black pepper over glowing mkaa.',
+      imageUrl: 'mishkakiYaNgombe',
+      price: 7500,
+      rating: 4.7,
+      ratingCount: 64,
+      calories: 460,
+      protein: 35,
+      prepTimeMins: 15,
+      categoryId: 'cat-choma',
+      categoryName: 'Nyama Choma',
+      availableCustomizations: defaultSwahiliSides,
+    ),
+    MenuItemModel(
+      id: 'menu-wali-nazi',
+      name: 'Wali wa Nazi na Maharage',
+      description:
+          'Creamy coconut-steamed rice paired with velvety red kidney beans braised in fresh coconut milk and sweet coastal cardamom.',
+      imageUrl: 'pilauYaKuku',
+      price: 6000,
+      rating: 4.6,
+      ratingCount: 42,
+      calories: 540,
+      protein: 16,
+      prepTimeMins: 15,
+      categoryId: 'cat-pilau',
+      categoryName: 'Rice & Pilau',
+      availableCustomizations: defaultSwahiliSides,
+    ),
+    MenuItemModel(
+      id: 'menu-kuku-chapati',
+      name: 'Mchuzi wa Kuku na Chapati',
+      description:
+          'Rich coastal chicken coconut curry served with two flaky pan-layered golden chapatis brushed with ghee.',
+      imageUrl: 'samakiWaKupaka',
+      price: 9500,
+      rating: 4.8,
+      ratingCount: 58,
+      calories: 660,
+      protein: 30,
+      prepTimeMins: 18,
+      categoryId: 'cat-stews',
+      categoryName: 'Traditional Stews',
+      availableCustomizations: defaultSwahiliSides,
+    ),
+    MenuItemModel(
+      id: 'menu-ndizi-mzuzu',
+      name: 'Ndizi Mzuzu Kaanga',
+      description:
+          'Caramelized ripe sweet plantain medallions lightly spiced with black pepper and sea salt, served with pili pili ya ukwaju.',
+      imageUrl: 'fries',
+      price: 4000,
+      rating: 4.6,
+      ratingCount: 39,
+      calories: 320,
+      protein: 4,
+      prepTimeMins: 10,
+      categoryId: 'cat-bites',
+      categoryName: 'Swahili Bites',
+      availableCustomizations: defaultSwahiliSides,
+    ),
+    MenuItemModel(
+      id: 'menu-bongo-burger',
+      name: 'Bongo Pili-Pili Smash Burger',
+      description:
+          'Double flame-seared Tanzanian beef patty, melted cheddar, smoky pili-pili aioli, avocado, and crispy onions on toasted brioche.',
+      imageUrl: 'burgerOne',
+      price: 11000,
+      rating: 4.8,
+      ratingCount: 51,
+      calories: 740,
+      protein: 38,
+      prepTimeMins: 15,
+      categoryId: 'cat-specials',
+      categoryName: 'Gourmet Specials',
+      availableCustomizations: defaultSwahiliSides,
+    ),
+    MenuItemModel(
+      id: 'menu-zanzibar-pizza',
+      name: 'Zanzibar Spice Wood-Fired Pizza',
+      description:
+          'Artisan sourdough crust topped with spiced suki beef, mozzarella, roasted sweet peppers, red onions, and fresh coriander.',
+      imageUrl: 'pizzaOne',
+      price: 16000,
+      rating: 4.8,
+      ratingCount: 45,
+      calories: 860,
+      protein: 36,
+      prepTimeMins: 22,
+      categoryId: 'cat-specials',
+      categoryName: 'Gourmet Specials',
+      availableCustomizations: defaultSwahiliSides,
+    ),
+    MenuItemModel(
+      id: 'menu-passion-juice',
+      name: 'Juisi ya Passion & Embe Baridi',
+      description:
+          'Freshly pressed Morogoro passion fruit and ripe coastal mango juice served chilled with fresh mint.',
+      imageUrl: 'orangeJuiceIcon',
+      price: 3500,
+      rating: 4.9,
+      ratingCount: 68,
+      calories: 160,
+      protein: 2,
+      prepTimeMins: 5,
+      categoryId: 'cat-drinks',
+      categoryName: 'Vinywaji',
+      availableCustomizations: const [],
+    ),
+    MenuItemModel(
+      id: 'menu-stoney',
+      name: 'Stoney Tangawizi Baridi',
+      description:
+          'Ice-cold East African fiery ginger soda — the undisputed companion to hot Nyama Choma and Mishkaki.',
+      imageUrl: 'orangeJuiceIcon',
+      price: 2000,
+      rating: 4.8,
+      ratingCount: 91,
+      calories: 140,
+      protein: 0,
+      prepTimeMins: 2,
+      categoryId: 'cat-drinks',
+      categoryName: 'Vinywaji',
+      availableCustomizations: const [],
+    ),
+  ];
+
+  static const List<PromotionModel> promotions = [
+    PromotionModel(
+      id: 'promo-1',
+      title: 'KARIBU BONGO FEAST',
+      subtitle: 'Save TSh 2,000 on any Swahili main dish with code KARIBU2000',
+      discountBadge: '🔥 TSh 2,000 OFF',
+      promoCode: 'KARIBU2000',
+      bgHex: '#F6821F',
+      imageKey: 'nyamaChoma',
+    ),
+    PromotionModel(
+      id: 'promo-2',
+      title: 'IJUMAA PILAU & JUICE',
+      subtitle: 'Zanzibar Pilau ya Kuku + Fresh Passion Mango Juice combo',
+      discountBadge: '🍛 15% OFF',
+      promoCode: 'KARIBU2000',
+      bgHex: '#0F5132',
+      imageKey: 'pilauYaKuku',
+    ),
+    PromotionModel(
+      id: 'promo-3',
+      title: 'WEEKEND PIZZA & BURGER',
+      subtitle: 'Wood-fired Zanzibar Pizza & Smash Burger family deal',
+      discountBadge: '🍕 20% OFF',
+      promoCode: 'KARIBU2000',
+      bgHex: '#181C2E',
+      imageKey: 'pizzaOne',
+    ),
+  ];
+
+  static const List<DiscoveryModel> discoveries = [
+    DiscoveryModel(
+      id: 'disc-1',
+      title: 'Zanzibar Spice Capital 🌴',
+      description:
+          "Zanzibar (Unguja) is nicknamed the 'Spice Island' because it remains one of the world's top producers of Cloves (Karafuu), Cinnamon (Mdalasini), and Nutmeg.",
+    ),
+    DiscoveryModel(
+      id: 'disc-2',
+      title: 'National Street Icon 🍟',
+      description:
+          'Chipsi Mayai started at Dar es Salaam roadside banda stalls and evolved into Tanzania’s most iconic comfort meal — best enjoyed with fresh kachumbari!',
+    ),
+    DiscoveryModel(
+      id: 'disc-3',
+      title: 'The Pilau Spice Path 🍛',
+      description:
+          'Authentic Swahili Pilau roasts whole cumin, cardamom, cloves, and cinnamon in caramelized onions before simmering meat and Morogoro rice together.',
+    ),
+    DiscoveryModel(
+      id: 'disc-4',
+      title: 'Coastal Coconut Magic 🥥',
+      description:
+          'Tui la Nazi (freshly pressed coconut milk) is the soul of coastal cooking, lending velvety richness to Samaki wa Kupaka and Wali wa Nazi.',
+    ),
+    DiscoveryModel(
+      id: 'disc-5',
+      title: 'Kijitonyama Flagship Kitchen 📍',
+      description:
+          'Our flagship Bongo Foodie kitchen in Kijitonyama, Dar es Salaam unites traditional mkaa charcoal grilling with Chef AI recipe personalization.',
+    ),
+  ];
+
+  static const List<TriviaQuestion> triviaQuestions = [
+    TriviaQuestion(
+      id: 1,
+      question: "Which aromatic spice is called 'Mdalasini' in Kiswahili?",
+      options: [
+        'Clove (Karafuu)',
+        'Cinnamon',
+        'Cardamom (Iliki)',
+        'Ginger (Tangawizi)',
+      ],
+      correctIndex: 1,
+      explainer:
+          'Mdalasini is Cinnamon! Harvested from tree bark in Zanzibar and Tanga, it perfumes Swahili Chai and Pilau.',
+    ),
+    TriviaQuestion(
+      id: 2,
+      question: "What does 'Tui la Nazi' mean in coastal Swahili cuisine?",
+      options: ['Coconut Milk', 'Clarified Ghee', 'Tamarind Glaze', 'Mango Nectar'],
+      correctIndex: 0,
+      explainer:
+          'Tui la Nazi is freshly squeezed Coconut Milk — the creamy foundation of Samaki wa Kupaka and Maharage ya Nazi.',
+    ),
+    TriviaQuestion(
+      id: 3,
+      question: 'Which Tanzanian dish consists of marinated charcoal-grilled skewers?',
+      options: ['Vitumbua', 'Mishkaki', 'Kachumbari', 'Mandazi'],
+      correctIndex: 1,
+      explainer:
+          'Mishkaki are tender beef or goat skewers marinated in papaya, ginger, garlic, and lime, grilled over hot charcoal.',
+    ),
+  ];
+
+  static const List<TzRegion> regions = [
+    TzRegion(code: 7, name: 'Dar es Salaam'),
+    TzRegion(code: 2, name: 'Arusha'),
+    TzRegion(code: 19, name: 'Mwanza'),
+    TzRegion(code: 1, name: 'Dodoma'),
+    TzRegion(code: 29, name: 'Mjini Magharibi (Zanzibar)'),
+    TzRegion(code: 3, name: 'Kilimanjaro'),
+    TzRegion(code: 4, name: 'Tanga'),
+    TzRegion(code: 5, name: 'Morogoro'),
+    TzRegion(code: 12, name: 'Mbeya'),
+    TzRegion(code: 6, name: 'Pwani'),
+    TzRegion(code: 11, name: 'Iringa'),
+  ];
+
+  static const List<TzDistrict> districts = [
+    // Dar es Salaam
+    TzDistrict(code: 701, name: 'Kinondoni', regionCode: 7),
+    TzDistrict(code: 702, name: 'Ilala (Dar CBD)', regionCode: 7),
+    TzDistrict(code: 703, name: 'Temeke', regionCode: 7),
+    TzDistrict(code: 704, name: 'Ubungo', regionCode: 7),
+    TzDistrict(code: 705, name: 'Kigamboni', regionCode: 7),
+    // Regional hubs
+    TzDistrict(code: 201, name: 'Arusha Mjini', regionCode: 2),
+    TzDistrict(code: 202, name: 'Arumeru', regionCode: 2),
+    TzDistrict(code: 1901, name: 'Nyamagana', regionCode: 19),
+    TzDistrict(code: 1902, name: 'Ilemela', regionCode: 19),
+    TzDistrict(code: 101, name: 'Dodoma Mjini', regionCode: 1),
+    TzDistrict(code: 2901, name: 'Mjini (Stone Town)', regionCode: 29),
+    TzDistrict(code: 2902, name: 'Magharibi A', regionCode: 29),
+    TzDistrict(code: 301, name: 'Moshi Mjini', regionCode: 3),
+    TzDistrict(code: 401, name: 'Tanga Mjini', regionCode: 4),
+    TzDistrict(code: 501, name: 'Morogoro Mjini', regionCode: 5),
+    TzDistrict(code: 1201, name: 'Mbeya Mjini', regionCode: 12),
+    TzDistrict(code: 601, name: 'Kibaha Mjini', regionCode: 6),
+    TzDistrict(code: 602, name: 'Bagamoyo', regionCode: 6),
+    TzDistrict(code: 1101, name: 'Iringa Mjini', regionCode: 11),
+  ];
+
+  static const List<TzWard> wards = [
+    // Kinondoni
+    TzWard(code: 70101, name: 'Kijitonyama', districtCode: 701),
+    TzWard(code: 70102, name: 'Mikocheni', districtCode: 701),
+    TzWard(code: 70103, name: 'Msasani (Masaki / Oysterbay)', districtCode: 701),
+    TzWard(code: 70104, name: 'Makumbusho', districtCode: 701),
+    TzWard(code: 70105, name: 'Mwananyamala', districtCode: 701),
+    TzWard(code: 70107, name: 'Kawe', districtCode: 701),
+    TzWard(code: 70108, name: 'Mbezi Juu', districtCode: 701),
+    // Ilala
+    TzWard(code: 70201, name: 'Kariakoo', districtCode: 702),
+    TzWard(code: 70202, name: 'Upanga Mashariki', districtCode: 702),
+    TzWard(code: 70204, name: 'Kisutu', districtCode: 702),
+    TzWard(code: 70205, name: 'Kivukoni (Posta)', districtCode: 702),
+    TzWard(code: 70208, name: 'Tabata', districtCode: 702),
+    TzWard(code: 70209, name: 'Segerea', districtCode: 702),
+    // Temeke
+    TzWard(code: 70301, name: "Chang'ombe", districtCode: 703),
+    TzWard(code: 70303, name: 'Kurasini', districtCode: 703),
+    TzWard(code: 70304, name: 'Temeke', districtCode: 703),
+    TzWard(code: 70306, name: 'Mbagala', districtCode: 703),
+    // Ubungo
+    TzWard(code: 70401, name: 'Sinza', districtCode: 704),
+    TzWard(code: 70402, name: 'Ubungo', districtCode: 704),
+    TzWard(code: 70405, name: 'Kimara', districtCode: 704),
+    TzWard(code: 70406, name: 'Mbezi', districtCode: 704),
+    TzWard(code: 70407, name: 'Goba', districtCode: 704),
+    // Kigamboni
+    TzWard(code: 70501, name: 'Kigamboni (Ferry)', districtCode: 705),
+    TzWard(code: 70504, name: 'Mjimwema', districtCode: 705),
+    TzWard(code: 70505, name: 'Gezaulole', districtCode: 705),
+    // Other regions
+    TzWard(code: 20101, name: 'Sekei', districtCode: 201),
+    TzWard(code: 20102, name: 'Kaloleni', districtCode: 201),
+    TzWard(code: 20201, name: 'Usa River', districtCode: 202),
+    TzWard(code: 190101, name: 'Capri Point', districtCode: 1901),
+    TzWard(code: 190201, name: 'Kirumba', districtCode: 1902),
+    TzWard(code: 10101, name: 'Majengo (Dodoma CBD)', districtCode: 101),
+    TzWard(code: 290101, name: 'Shangani (Stone Town)', districtCode: 2901),
+    TzWard(code: 290201, name: 'Bububu', districtCode: 2902),
+    TzWard(code: 30101, name: 'Mawenzi', districtCode: 301),
+    TzWard(code: 40101, name: 'Chumbageni', districtCode: 401),
+    TzWard(code: 50101, name: 'Boma', districtCode: 501),
+    TzWard(code: 120101, name: 'Iyunga', districtCode: 1201),
+    TzWard(code: 60101, name: 'Tumbi', districtCode: 601),
+    TzWard(code: 60201, name: 'Dunda', districtCode: 602),
+    TzWard(code: 110101, name: 'Gangilonga', districtCode: 1101),
+  ];
+
+  static List<OrderModel> initialOrders() {
+    final now = DateTime.now();
+    return [
+      OrderModel(
+        id: 'bf-983104',
+        profileId: 'demo-customer-001',
+        tableNumber: 'Delivery',
+        items: const [
+          CartItemModel(
+            id: 'menu-nyama-choma',
+            name: 'Nyama Choma & Ugali',
+            price: 13500,
+            imageUrl: 'nyamaChoma',
+            quantity: 1,
+            customizations: [
+              CustomizationOption(
+                id: 'cust-kachumbari',
+                name: 'Kachumbari Extra',
+                price: 1000,
+              ),
+            ],
+          ),
+          CartItemModel(
+            id: 'menu-chipsi-mayai',
+            name: 'Chipsi Mayai',
+            price: 5500,
+            imageUrl: 'chipsiMayai',
+            quantity: 1,
+          ),
+        ],
+        status: OrderStatus.preparing,
+        totalPrice: 21000,
+        deliveryLocation: 'Kijitonyama, Kinondoni, Dar es Salaam',
+        customerName: 'Amina Juma',
+        customerEmail: 'demo@bongofoodie.co.tz',
+        customerPhone: '+255 712 345 678',
+        paymentMethod: 'lipanamba',
+        createdAt: now.subtract(const Duration(minutes: 18)),
+      ),
+      OrderModel(
+        id: 'bf-512098',
+        profileId: 'demo-customer-001',
+        tableNumber: 'Delivery',
+        items: const [
+          CartItemModel(
+            id: 'menu-pilau-kuku',
+            name: 'Pilau ya Kuku',
+            price: 10000,
+            imageUrl: 'pilauYaKuku',
+            quantity: 2,
+          ),
+        ],
+        status: OrderStatus.delivered,
+        totalPrice: 21000,
+        deliveryLocation: 'Mikocheni, Kinondoni, Dar es Salaam',
+        customerName: 'Amina Juma',
+        customerEmail: 'demo@bongofoodie.co.tz',
+        customerPhone: '+255 712 345 678',
+        paymentMethod: 'cash',
+        createdAt: now.subtract(const Duration(days: 2)),
+      ),
+    ];
+  }
+}

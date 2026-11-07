@@ -82,10 +82,10 @@ export default function Home() {
             </div>
             <div className="relative z-10 grid grid-cols-2 gap-2 p-4 h-full">
               <div className="relative rounded-xl overflow-hidden bg-white/60 shadow-sm col-span-2 row-span-2">
-                <Image src="/assets/burger-one.png" alt="Swahili Feast - Burger" fill className="object-contain p-3" />
+                <Image src="/assets/bongo-food-icon.png" alt="A bowl of Swahili pilau, rendered in 3D" fill className="object-contain p-3" />
               </div>
               <div className="relative rounded-xl overflow-hidden bg-white/60 shadow-sm">
-                <Image src="/assets/food-3d-icon.png" alt="Swahili Dish" fill className="object-contain p-2" />
+                <Image src="/assets/bongo-chef-mascot.png" alt="BongoFoodie chef mascot" fill className="object-contain p-2" />
               </div>
               <div className="relative rounded-xl overflow-hidden bg-white/60 shadow-sm">
                 <Image src="/assets/orange-juice-icon.png" alt="Fresh Juice" fill className="object-contain p-2" />

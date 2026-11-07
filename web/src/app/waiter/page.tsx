@@ -1,16 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { getLocalOrders, saveLocalOrders } from '@/lib/supabaseDb';
 import { Order } from '@/types';
-import { 
-  Bell, 
-  MapPin, 
-  Check, 
-  Loader2, 
-  UtensilsCrossed, 
-  TrendingUp, 
-  CheckCircle2, 
+import {
+  Bell,
+  MapPin,
+  Check,
+  Loader2,
+  UtensilsCrossed,
+  TrendingUp,
+  CheckCircle2,
   Clock,
   Volume2
 } from 'lucide-react';
@@ -49,7 +50,7 @@ export default function WaiterDashboard() {
   useEffect(() => {
     loadWaiterOrders();
 
-    if (!showcaseMode) {
+    if (isSupabaseConfigured && !showcaseMode) {
       // Subscribe to real-time changes in the 'orders' table!
       const channel = supabase
         .channel('waiter-order-changes')
@@ -121,8 +122,9 @@ export default function WaiterDashboard() {
   const loadWaiterOrders = async () => {
     setLoading(true);
     try {
-      if (showcaseMode) {
-        setOrders(MOCK_ACTIVE_ORDERS);
+      if (!isSupabaseConfigured || showcaseMode) {
+        const activeLocal = getLocalOrders().filter(o => o.status === 'pending' || o.status === 'preparing' || o.status === 'in_transit');
+        setOrders(activeLocal.length > 0 ? activeLocal : MOCK_ACTIVE_ORDERS);
         return;
       }
 
@@ -158,6 +160,11 @@ export default function WaiterDashboard() {
   };
 
   const handleMarkDelivered = async (orderId: string) => {
+    const allLocal = getLocalOrders().map(o => o.id === orderId ? { ...o, status: 'delivered' as const } : o);
+    saveLocalOrders(allLocal);
+    setOrders(prev => prev.filter(o => o.id !== orderId));
+
+    if (!isSupabaseConfigured) return;
     try {
       const { error } = await supabase
         .from('orders')
@@ -165,14 +172,17 @@ export default function WaiterDashboard() {
         .eq('id', orderId);
 
       if (error) throw error;
-      setOrders(prev => prev.filter(o => o.id !== orderId));
     } catch (e) {
-      console.warn('Database error. Updating local list.');
-      setOrders(prev => prev.filter(o => o.id !== orderId));
+      console.warn('Database error. Updated local list.', e);
     }
   };
 
   const handleMarkInTransit = async (orderId: string) => {
+    const allLocal = getLocalOrders().map(o => o.id === orderId ? { ...o, status: 'in_transit' as const } : o);
+    saveLocalOrders(allLocal);
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'in_transit' } : o));
+
+    if (!isSupabaseConfigured) return;
     try {
       const { error } = await supabase
         .from('orders')
@@ -182,20 +192,20 @@ export default function WaiterDashboard() {
       if (error) throw error;
       loadWaiterOrders();
     } catch (e) {
-      console.warn('Database error. Updating local list status.');
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'in_transit' } : o));
+      console.warn('Database error. Updated local list status.', e);
     }
   };
 
-  const announceSwahiliReady = (tableNumber: string, orderId: string) => {
+  const announceSwahiliReady = (tableNumber: string | undefined, orderId: string) => {
+    const safeTable = tableNumber || 'Delivery';
     if ('speechSynthesis' in window) {
       const displayId = orderId.slice(3, 7).split('').join(' ');
-      const cleanTable = tableNumber.toLowerCase().includes('table') 
-        ? tableNumber.replace(/table/gi, 'Meza ya') 
-        : tableNumber;
-      
+      const cleanTable = safeTable.toLowerCase().includes('table')
+        ? safeTable.replace(/table/gi, 'Meza ya')
+        : safeTable;
+
       const msg = `Habari! Agizo namba ${displayId} la ${cleanTable} liko tayari sasa. Karibu uje kuchukua chakula chako cha Bongo Foodie. Asante!`;
-      
+
       const utterance = new SpeechSynthesisUtterance(msg);
       utterance.lang = 'sw-TZ';
       utterance.rate = 0.85;
@@ -207,7 +217,7 @@ export default function WaiterDashboard() {
   };
 
   // Group orders by table number for waiter convenience
-  const pendingOrders = orders.filter(o => o.status === 'pending');
+  const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === 'preparing');
   const readyOrders = orders.filter(o => o.status === 'in_transit');
 
   if (loading) {
@@ -221,7 +231,7 @@ export default function WaiterDashboard() {
 
   return (
     <div className="flex flex-col gap-6 py-6 pb-20">
-      
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-border gap-3">
         <div className="flex items-center gap-3">
@@ -237,7 +247,7 @@ export default function WaiterDashboard() {
           <button
             onClick={() => setShowcaseMode(!showcaseMode)}
             className={`text-[9px] font-extrabold uppercase px-2 py-1.5 rounded-lg border transition-all cursor-pointer ${
-              showcaseMode 
+              showcaseMode
                 ? 'bg-amber-500 text-white border-amber-600'
                 : 'bg-white text-muted-foreground border-border hover:bg-muted'
             }`}
@@ -252,7 +262,7 @@ export default function WaiterDashboard() {
 
       {/* Two Column Dispatch layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
+
         {/* Column 1: Ready for Dispatch (Waiter needs to carry it!) */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 p-3 bg-emerald-600/5 border border-emerald-600/10 rounded-2xl">

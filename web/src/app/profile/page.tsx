@@ -3,7 +3,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import {
+  clearDemoSession,
+  getActiveUserProfile,
+  getOrdersForProfileWeb,
+  getUserFavoritesWeb,
+} from '@/lib/supabaseDb';
 import { User, LogOut, Loader2, Camera, Mail, Save, AlertCircle, Receipt, Heart, MapPin, HelpCircle, FileText, ChevronRight, X, Clock, CheckCircle2, XCircle, Package, ChefHat, Star } from 'lucide-react';
 import Image from 'next/image';
 import Achievements from '@/components/Achievements';
@@ -47,43 +53,20 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
+      const activeProfile = await getActiveUserProfile();
+      if (!activeProfile) {
         router.push('/sign-in');
         return;
       }
 
-      setUser(session.user);
-      
-      // Fetch relational profile row
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('name, avatar_url')
-        .eq('id', session.user.id)
-        .single();
+      setUser(activeProfile);
+      setName(activeProfile.name || '');
+      setAvatarUrl(activeProfile.avatar_url || null);
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      const userOrders = await getOrdersForProfileWeb(activeProfile.id);
+      if (userOrders.length > 0) {
+        setOrdersCount(userOrders.length);
       }
-
-      if (profile) {
-        setName(profile.name || '');
-        setAvatarUrl(profile.avatar_url || null);
-      } else {
-        setName(session.user.user_metadata?.full_name || '');
-      }
-
-      // Also count actual database orders to dynamic statistics if they exist
-      const { count } = await supabase
-        .from('orders')
-        .select('*', { count: 'exact', head: true })
-        .eq('profile_id', session.user.id);
-      
-      if (count && count > 0) {
-        setOrdersCount(count);
-      }
-
     } catch (e: any) {
       console.error(e);
       setMessage({ text: 'Error loading user profile information.', type: 'error' });
@@ -96,13 +79,7 @@ export default function ProfilePage() {
     if (!user?.id) return;
     setLoadingOrders(true);
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('profile_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
+      const data = await getOrdersForProfileWeb(user.id);
       setOrders(data || []);
     } catch (e) {
       console.error(e);
@@ -115,12 +92,7 @@ export default function ProfilePage() {
     if (!user?.id) return;
     setLoadingFavorites(true);
     try {
-      const { data, error } = await supabase
-        .from('favorites')
-        .select('*, menu_items(*)')
-        .eq('user_id', user.id);
-      
-      if (error) throw error;
+      const data = await getUserFavoritesWeb(user.id);
       setFavorites(data || []);
     } catch (e) {
       console.error(e);
@@ -137,6 +109,11 @@ export default function ProfilePage() {
     setMessage(null);
 
     try {
+      if (!isSupabaseConfigured || user.isDemo) {
+        setMessage({ text: 'Profile updated in Showcase session!', type: 'success' });
+        return;
+      }
+
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -197,7 +174,10 @@ export default function ProfilePage() {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    clearDemoSession();
+    if (isSupabaseConfigured) {
+      await supabase.auth.signOut().catch(() => {});
+    }
     router.push('/sign-in');
     router.refresh();
   };
@@ -530,15 +510,15 @@ export default function ProfilePage() {
                     </div>
                   ) : (
                     favorites.map((fav) => (
-                      <div key={fav.id} className="flex items-center gap-4 bg-card border border-border p-4 rounded-xl">
+                      <div key={fav.$id || fav.id} className="flex items-center gap-4 bg-card border border-border p-4 rounded-xl">
                         <div className="size-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Star className="size-6" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-foreground-dark">{fav.menu_items?.name || 'Dish'}</p>
-                          <p className="text-[11px] text-muted-foreground font-semibold truncate">{fav.menu_items?.description || ''}</p>
+                          <p className="text-sm font-bold text-foreground-dark">{fav.name || fav.menu_items?.name || 'Dish'}</p>
+                          <p className="text-[11px] text-muted-foreground font-semibold truncate">{fav.description || fav.menu_items?.description || ''}</p>
                           <p className="text-xs font-bold text-primary mt-1">
-                            TSh {Number(fav.menu_items?.price || 0).toLocaleString()}
+                            TSh {Number(fav.price ?? fav.menu_items?.price ?? 0).toLocaleString()}
                           </p>
                         </div>
                       </div>

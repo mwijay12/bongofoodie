@@ -1,0 +1,11 @@
+{
+  "name": "BongoFoodie TZ",
+  "short_name": "BongoFoodie",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#120D09",
+  "theme_color": "#F6821F",
+  "description": "Authentic Swahili Gastronomy, Chef AI & Tanzania Food Delivery.",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
+}

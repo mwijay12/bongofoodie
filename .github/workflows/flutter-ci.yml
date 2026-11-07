@@ -1,0 +1,92 @@
+name: Flutter Mobile CI & APK Showcase Build
+
+on:
+  push:
+    branches: [main, 'arena/**']
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/flutter-ci.yml'
+  pull_request:
+    paths:
+      - 'mobile/**'
+  workflow_dispatch:
+
+jobs:
+  build-flutter:
+    name: Analyze, Test & Build Bongo Foodie APK + Web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter Stable
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.3'
+          cache: true
+
+      - name: Hydrate Native Platform Runners (Android, iOS, Web)
+        run: |
+          flutter create --platforms=android,ios,web --org tz.co.bongofoodie --project-name bongo_foodie .
+          rm -f test/widget_test.dart
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Static Analysis
+        run: |
+          flutter analyze --no-fatal-infos --no-fatal-warnings > /tmp/flutter-analysis.log 2>&1 || {
+            cat /tmp/flutter-analysis.log
+            while IFS= read -r line; do
+              echo "::error::$line"
+            done < <(grep 'error •' /tmp/flutter-analysis.log || tail -20 /tmp/flutter-analysis.log)
+            exit 1
+          }
+          cat /tmp/flutter-analysis.log
+
+      - name: Build Release Android APK
+        run: |
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL=https://ovdozsryglkljcugdnkz.supabase.co \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=sb_publishable_Mgy_bwv99mDM-2-O1S07Nw_-53184VK \
+            --dart-define=WEB_API_BASE_URL=${{ secrets.WEB_API_BASE_URL }}
+
+      - name: Upload Release APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bongo-foodie-release-apk
+          path: mobile/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+      - name: Run Unit Tests
+        run: |
+          flutter test --reporter expanded > /tmp/flutter-tests.log 2>&1 || {
+            cat /tmp/flutter-tests.log
+            while IFS= read -r line; do echo "::error::$line"; done < <(grep -E "\[E\]|Expected:|Actual:|overflowed|Exception|Error|Some tests failed" /tmp/flutter-tests.log | head -9)
+            exit 1
+          }
+          cat /tmp/flutter-tests.log
+
+      - name: Build Flutter Web Showcase
+        run: |
+          flutter build web --release \
+            --dart-define=SUPABASE_URL=https://ovdozsryglkljcugdnkz.supabase.co \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=sb_publishable_Mgy_bwv99mDM-2-O1S07Nw_-53184VK \
+            --dart-define=WEB_API_BASE_URL=${{ secrets.WEB_API_BASE_URL }}
+
+      - name: Upload Flutter Web Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bongo-foodie-flutter-web
+          path: mobile/build/web
+          retention-days: 14

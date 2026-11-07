@@ -1,20 +1,33 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rkjanbxkgfyjpdcichvy.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const rawUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
+const rawAnonKey = (
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  ''
+).trim();
 
-// Lazy singleton: only create client when first accessed (never at module load time)
+export const isSupabaseConfigured =
+  rawUrl.startsWith('https://') &&
+  rawUrl.includes('.supabase.co') &&
+  !rawUrl.includes('placeholder') &&
+  !rawUrl.includes('YOUR_PROJECT_REF') &&
+  rawAnonKey.length > 20 &&
+  !rawAnonKey.includes('placeholder') &&
+  !rawAnonKey.includes('YOUR_SUPABASE');
+
+const supabaseUrl = isSupabaseConfigured ? rawUrl : 'https://placeholder.supabase.co';
+const supabaseAnonKey = isSupabaseConfigured ? rawAnonKey : 'placeholder-anon-key-showcase-mode';
+
 let _supabase: SupabaseClient | null = null;
 
 function getClient(): SupabaseClient {
   if (!_supabase) {
-    const key = supabaseAnonKey || 'placeholder-key-for-build-only';
-    _supabase = createClient(supabaseUrl, key);
+    _supabase = createClient(supabaseUrl, supabaseAnonKey);
   }
   return _supabase;
 }
 
-// Export a Proxy that lazily initializes the client on first property access
 export const supabase = new Proxy<SupabaseClient>({} as SupabaseClient, {
   get(_target, prop) {
     return getClient()[prop as keyof SupabaseClient];

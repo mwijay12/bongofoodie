@@ -1,0 +1,29 @@
+name: Supabase Keep-Alive Heartbeat
+
+on:
+  # Runs every 3 days at 07:00 UTC (10:00 EAT - Dar es Salaam)
+  # Supabase Free Tier pauses after 7 days of inactivity, so every 3 days gives >2x safety margin!
+  schedule:
+    - cron: '0 7 */3 * *'
+  # Also allow manual 1-click trigger from GitHub -> Actions tab
+  workflow_dispatch:
+
+jobs:
+  ping-supabase:
+    name: Ping Bongo Foodie Supabase DB
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Execute Keep-Alive Heartbeat
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          KEEPALIVE_SOURCE: github-actions-schedule
+        run: node scripts/keepalive-ping.js
