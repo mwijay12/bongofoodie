@@ -1,6 +1,21 @@
 {
   "version": 2,
-  "cleanUrls": true,
   "framework": "nextjs",
-  "regions": ["iad1"]
+  "regions": ["iad1"],
+  "rewrites": [
+    {
+      "source": "/mobile-app",
+      "destination": "/mobile-app/index.html"
+    },
+    {
+      "source": "/mobile-app/",
+      "destination": "/mobile-app/index.html"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/keepalive",
+      "schedule": "0 6 * * *"
+    }
+  ]
 }

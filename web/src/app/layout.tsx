@@ -1,17 +1,26 @@
 import type { Metadata } from "next";
-import { Outfit, Quicksand } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const outfit = Outfit({
+const outfit = localFont({
   variable: "--font-outfit",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  src: [
+    { path: "../fonts/Quicksand-Medium.ttf", weight: "500", style: "normal" },
+    { path: "../fonts/Quicksand-SemiBold.ttf", weight: "600", style: "normal" },
+    { path: "../fonts/Quicksand-Bold.ttf", weight: "700", style: "normal" },
+    { path: "../fonts/Quicksand-Bold.ttf", weight: "800", style: "normal" },
+  ],
 });
 
-const quicksand = Quicksand({
+const quicksand = localFont({
   variable: "--font-quicksand",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  src: [
+    { path: "../fonts/Quicksand-Light.ttf", weight: "300", style: "normal" },
+    { path: "../fonts/Quicksand-Regular.ttf", weight: "400", style: "normal" },
+    { path: "../fonts/Quicksand-Medium.ttf", weight: "500", style: "normal" },
+    { path: "../fonts/Quicksand-SemiBold.ttf", weight: "600", style: "normal" },
+    { path: "../fonts/Quicksand-Bold.ttf", weight: "700", style: "normal" },
+  ],
 });
 
 export const metadata: Metadata = {

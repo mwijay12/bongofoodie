@@ -2,8 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
-import { getMenu } from '@/lib/supabaseDb';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import {
+  AUTHORIZED_ADMIN_EMAILS,
+  getActiveUserProfile,
+  getLocalOrders,
+  getMenu,
+  saveLocalOrders,
+  startDemoSession,
+} from '@/lib/supabaseDb';
 import { MenuItem, Order } from '@/types';
 import { 
   TrendingUp, 
@@ -183,12 +190,13 @@ export default function AdminPage() {
   }, [showcaseMode]);
 
   const checkAdminAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const email = session?.user?.email;
-    setUserEmail(email || null);
+    const activeProfile = await getActiveUserProfile();
+    const email = activeProfile?.email || null;
+    setUserEmail(email);
 
-    const authorizedAdmins = ['defoodordering@gmail.com', 'mwijaydavie@gmail.com', 'davidbyanmwijage@gmail.com'];
-    const isAdmin = !!email && authorizedAdmins.includes(email);
+    const isAdmin =
+      activeProfile?.role === 'admin' ||
+      (!!email && AUTHORIZED_ADMIN_EMAILS.includes(email));
     setIsAdminUser(isAdmin);
 
     if (!isAdmin) {
@@ -318,11 +326,13 @@ export default function AdminPage() {
       const menuData = await getMenu();
       setMenuItems(menuData);
 
-      if (showcaseMode) {
-        setOrders(MOCK_SHOWCASE_ORDERS);
-        setRevenue(92500);
-        setPendingCount(1);
-        setTotalOrders(3);
+      if (!isSupabaseConfigured || showcaseMode) {
+        const localOrders = showcaseMode ? MOCK_SHOWCASE_ORDERS : getLocalOrders();
+        setOrders(localOrders);
+        const totalRev = localOrders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + o.total_price, 0);
+        setRevenue(totalRev || 92500);
+        setPendingCount(localOrders.filter(o => o.status === 'pending').length);
+        setTotalOrders(localOrders.length);
         setLoading(false);
         return;
       }
@@ -382,6 +392,12 @@ export default function AdminPage() {
   };
 
   const handleUpdateStatus = async (orderId: string, newStatus: string) => {
+    const nextOrders = orders.map(o => o.id === orderId ? { ...o, status: newStatus as any } : o);
+    setOrders(nextOrders);
+    saveLocalOrders(nextOrders);
+
+    if (!isSupabaseConfigured) return;
+
     try {
       const { error } = await supabase
         .from('orders')
@@ -389,11 +405,8 @@ export default function AdminPage() {
         .eq('id', orderId);
 
       if (error) throw error;
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus as any } : o));
-      alert('Order status coordinates updated!');
     } catch (error: any) {
-      console.warn('Database error. Updating local mock state.');
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus as any } : o));
+      console.warn('Database error. Updated local showcase state.', error);
     }
   };
 
@@ -594,12 +607,24 @@ export default function AdminPage() {
             <span> Hujaingia (Logged in). Tafadhali ingia kwa akaunti ya Admin.</span>
           )}
         </p>
-        <Link
-          href="/sign-in"
-          className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-heading font-bold text-xs hover:bg-secondary transition-colors cursor-pointer shadow-md shadow-primary/20"
-        >
-          Sign In as Administrator
-        </Link>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/sign-in"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-heading font-bold text-xs hover:bg-secondary transition-colors cursor-pointer shadow-md shadow-primary/20"
+          >
+            Sign In as Administrator
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              startDemoSession('admin');
+              checkAdminAuth();
+            }}
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500/15 text-amber-800 border border-amber-500/30 font-heading font-bold text-xs hover:bg-amber-500/25 transition-colors cursor-pointer"
+          >
+            ✨ Preview Showcase Admin
+          </button>
+        </div>
       </div>
     );
   }

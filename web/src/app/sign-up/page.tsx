@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { AUTHORIZED_ADMIN_EMAILS, saveCustomDemoSession } from '@/lib/supabaseDb';
 import { Mail, Lock, User, Phone, Loader2, ArrowRight, Eye, EyeOff, X } from 'lucide-react';
 
 export default function SignUpPage() {
@@ -29,6 +30,21 @@ export default function SignUpPage() {
     setErrorMsg(null);
 
     try {
+      if (!isSupabaseConfigured) {
+        const isAdminEmail = AUTHORIZED_ADMIN_EMAILS.includes(email.trim().toLowerCase());
+        saveCustomDemoSession({
+          id: `demo-${Date.now()}`,
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          role: isAdminEmail ? 'admin' : 'customer',
+          isDemo: true,
+        });
+        router.push('/profile');
+        router.refresh();
+        return;
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -42,12 +58,13 @@ export default function SignUpPage() {
 
       if (error) throw error;
 
-      // If user successfully registered, create their profile row
+      // Ensure profile row exists if trigger hasn't populated phone yet
       if (data.user) {
-        await supabase.from('profiles').insert({
+        await supabase.from('profiles').upsert({
           id: data.user.id,
           name,
           email,
+          phone,
         });
       }
 

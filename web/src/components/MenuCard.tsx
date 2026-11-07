@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { MenuItem } from '@/types';
 import { resolveFoodImage, hasValidImage } from '@/lib/imageMap';
+import { getActiveUserProfile, toggleFavoriteWeb } from '@/lib/supabaseDb';
 import { useCartStore } from '@/store/cart.store';
 import { Plus, Star, Utensils, CupSoda, X, Heart, Share2, Minus, ShoppingCart, ChevronRight, Flame, Check } from 'lucide-react';
 
@@ -19,6 +20,15 @@ export default function MenuCard({ item }: MenuCardProps) {
   const [showModal, setShowModal] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const profile = await getActiveUserProfile();
+    const uid = profile?.id || 'demo-customer';
+    const nextState = await toggleFavoriteWeb(uid, $id);
+    setIsFavorite(nextState);
+  };
 
   const isDrink = categories?.toLowerCase() === 'vinywaji' ||
     name.toLowerCase().includes('drink') || name.toLowerCase().includes('soda') ||
@@ -89,8 +99,12 @@ export default function MenuCard({ item }: MenuCardProps) {
                   className="size-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/70 transition-colors">
                   <Share2 className="size-4 text-foreground-dark" />
                 </button>
-                <button className="size-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/70 transition-colors">
-                  <Heart className="size-4 text-foreground-dark" />
+                <button
+                  onClick={handleToggleFavorite}
+                  title="Save Favorite"
+                  className={`size-10 rounded-full flex items-center justify-center transition-colors ${isFavorite ? 'bg-red-50 text-red-500' : 'bg-muted text-foreground-dark hover:bg-muted/70'}`}
+                >
+                  <Heart className={`size-4 ${isFavorite ? 'fill-red-500 stroke-red-500' : ''}`} />
                 </button>
               </div>
             </div>

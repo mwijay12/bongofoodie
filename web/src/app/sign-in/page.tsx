@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { startDemoSession } from '@/lib/supabaseDb';
+import { UserRole } from '@/types';
+import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff, Sparkles, ShieldCheck, Bell, User } from 'lucide-react';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -15,8 +17,25 @@ export default function SignInPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  const handleDemoAccess = (role: UserRole) => {
+    startDemoSession(role);
+    if (role === 'admin') {
+      router.push('/admin');
+    } else if (role === 'waiter') {
+      router.push('/waiter');
+    } else {
+      router.push('/profile');
+    }
+    router.refresh();
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isSupabaseConfigured) {
+      setErrorMsg('Live Supabase keys are not set yet — tap any 1-Click Showcase Role below to explore immediately!');
+      return;
+    }
+
     setLoading(true);
     setErrorMsg(null);
     setSuccessMsg(null);
@@ -34,8 +53,9 @@ export default function SignInPage() {
     } catch (err) {
       const error = err as Error;
       let msg = error.message || 'Failed to sign in. Please verify your credentials.';
-      if (msg.toLowerCase().includes("confirm") || msg.toLowerCase().includes("invalid login credentials")) {
-        msg = "Invalid login credentials. If you signed up recently, please confirm your email via the link sent or verify your password. (You can disable 'Confirm email' in Supabase Auth Providers setting to sign in instantly during local development).";
+      if (msg.toLowerCase().includes('confirm') || msg.toLowerCase().includes('invalid login credentials')) {
+        msg =
+          "Invalid login credentials. If you signed up recently, please confirm your email or disable 'Confirm email' in Supabase Auth -> Providers -> Email for instant sign-in.";
       }
       setErrorMsg(msg);
     } finally {
@@ -44,6 +64,10 @@ export default function SignInPage() {
   };
 
   const handleForgotPassword = async () => {
+    if (!isSupabaseConfigured) {
+      setErrorMsg('Configure NEXT_PUBLIC_SUPABASE_URL & NEXT_PUBLIC_SUPABASE_ANON_KEY first to send recovery emails.');
+      return;
+    }
     if (!email.trim()) {
       setErrorMsg('Please type your email address first so we can send the recovery link.');
       return;
@@ -56,7 +80,7 @@ export default function SignInPage() {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
-      setSuccessMsg('A password reset link has been successfully sent to your email address!');
+      setSuccessMsg('A password reset link has been sent to your email address!');
     } catch (err) {
       const error = err as Error;
       setErrorMsg(error.message || 'Failed to send recovery email.');
@@ -66,14 +90,18 @@ export default function SignInPage() {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!isSupabaseConfigured) {
+      handleDemoAccess('customer');
+      return;
+    }
     setLoading(true);
     setErrorMsg(null);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/profile`
-        }
+          redirectTo: `${window.location.origin}/profile`,
+        },
       });
       if (error) throw error;
     } catch (err) {
@@ -84,11 +112,53 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto py-12 px-6">
+    <div className="max-w-md mx-auto py-10 px-6 space-y-6">
+      {/* 1-Click Portfolio Showcase Switcher */}
+      <div className="bg-gradient-to-br from-amber-50 via-white to-orange-50 border border-primary/25 rounded-3xl p-5 shadow-sm space-y-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="size-4 text-primary fill-primary" />
+          <h3 className="font-heading text-sm font-extrabold text-foreground-dark">
+            Instant Portfolio Showcase Access (1-Click)
+          </h3>
+        </div>
+        <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">
+          Explore the complete Bongo Foodie ecosystem immediately as a Customer, Waiter Dispatch operator, or Restaurant Admin:
+        </p>
+        <div className="grid grid-cols-3 gap-2 pt-1">
+          <button
+            type="button"
+            onClick={() => handleDemoAccess('customer')}
+            className="flex flex-col items-center gap-1 p-2.5 rounded-2xl bg-white border border-border hover:border-primary hover:bg-primary/5 transition-all cursor-pointer"
+          >
+            <User className="size-4 text-primary" />
+            <span className="text-[11px] font-bold text-foreground-dark">Customer</span>
+            <span className="text-[9px] text-muted-foreground">Order & Track</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDemoAccess('waiter')}
+            className="flex flex-col items-center gap-1 p-2.5 rounded-2xl bg-white border border-border hover:border-emerald-600 hover:bg-emerald-50 transition-all cursor-pointer"
+          >
+            <Bell className="size-4 text-emerald-600" />
+            <span className="text-[11px] font-bold text-foreground-dark">Waiter POS</span>
+            <span className="text-[9px] text-muted-foreground">Live Dispatch</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDemoAccess('admin')}
+            className="flex flex-col items-center gap-1 p-2.5 rounded-2xl bg-white border border-border hover:border-amber-600 hover:bg-amber-50 transition-all cursor-pointer"
+          >
+            <ShieldCheck className="size-4 text-amber-600" />
+            <span className="text-[11px] font-bold text-foreground-dark">Admin</span>
+            <span className="text-[9px] text-muted-foreground">Full Console</span>
+          </button>
+        </div>
+      </div>
+
       <div className="bg-white border border-border rounded-3xl p-8 shadow-sm space-y-6">
         <div className="text-center space-y-1.5">
           <h2 className="font-heading text-2xl font-bold text-foreground-dark">Welcome Back</h2>
-          <p className="text-xs text-muted-foreground font-medium">Log in to manage your orders and profile</p>
+          <p className="text-xs text-muted-foreground font-medium">Log in with Supabase Auth to sync your orders</p>
         </div>
 
         {errorMsg && (
@@ -167,7 +237,9 @@ export default function SignInPage() {
 
         <div className="relative flex py-2 items-center">
           <div className="flex-grow border-t border-border"></div>
-          <span className="flex-shrink mx-4 text-muted-foreground text-[10px] font-bold uppercase tracking-wider">Or continue with</span>
+          <span className="flex-shrink mx-4 text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
+            Or continue with
+          </span>
           <div className="flex-grow border-t border-border"></div>
         </div>
 
@@ -177,20 +249,12 @@ export default function SignInPage() {
           disabled={loading}
           className="w-full py-3 border border-border bg-white text-foreground-dark font-semibold text-xs rounded-xl hover:bg-muted transition-colors inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
         >
-          <svg className="size-4 shrink-0" viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-            <g transform="matrix(1, 0, 0, 1, 0, 0)">
-              <path d="M21.35,11.1H12v2.7h5.38c-0.24,1.28 -0.96,2.37 -2.04,3.1v2.58h3.3c1.93,-1.78 3.04,-4.4 3.04,-7.4C21.68,11.96 21.56,11.5 21.35,11.1z" fill="#4285F4" />
-              <path d="M12,20.6c2.59,0 4.77,-0.86 6.36,-2.32l-3.3,-2.58c-0.91,0.61 -2.08,0.97 -3.06,0.97 -2.35,0 -4.35,-1.59 -5.06,-3.72H3.5v2.66C5.12,18.77 8.35,20.6 12,20.6z" fill="#34A853" />
-              <path d="M6.94,12.93c-0.18,-0.54 -0.28,-1.11 -0.28,-1.7c0,-0.59 0.1,-1.16 0.28,-1.7V6.87H3.5C2.88,8.12 2.52,9.52 2.52,11c0,1.48 0.36,2.88 0.98,4.13L6.94,12.93z" fill="#FBBC05" />
-              <path d="M12,5.2c1.41,0 2.68,0.49 3.68,1.44l2.76,-2.76C16.77,2.32 14.59,1.4 12,1.4 8.35,1.4 5.12,3.23 3.5,6.87l3.44,2.66C7.65,6.79 9.65,5.2 12,5.2z" fill="#EA4335" />
-            </g>
-          </svg>
           <span>Continue with Google</span>
         </button>
 
         <div className="text-center pt-2">
           <p className="text-xs text-muted-foreground font-semibold">
-            Don't have an account yet?{' '}
+            Don&apos;t have an account yet?{' '}
             <Link href="/sign-up" className="text-primary hover:underline">
               Create Account
             </Link>

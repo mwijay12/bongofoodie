@@ -1,105 +1,91 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-const keysString = process.env.GEMINI_KEYS || '';
-const geminiKeys = keysString
-  .split(',')
-  .map(k => k.trim())
-  .filter(Boolean);
-
-let currentKeyIndex = 0;
-
-function getNextApiKey(): string | null {
-  if (geminiKeys.length === 0) return null;
-  const key = geminiKeys[currentKeyIndex];
-  currentKeyIndex = (currentKeyIndex + 1) % geminiKeys.length;
-  return key;
-}
-
-const CUSTOM_DISH_PROMPT = `
-Analyze the chat history between the customer and Chef AI. Based on the food options discussed, customize a special meal composition that the restaurant kitchen can build.
-Return ONLY a valid JSON object matching the following structure, with no markdown wrappers or additional text:
-{
-  "name": "A creative Swahili name for the custom dish (e.g. Pilau ya Kuku ya Mzee Special)",
-  "description": "A mouth-watering description in mixed Swahili and English detailing why this was created for them.",
-  "price": A realistic price in Tanzanian Shillings (number, e.g. 9500),
-  "ingredients": ["list", "of", "custom", "ingredients", "and", "toppings"],
-  "calories": Estimated calories (number),
-  "protein": "Estimated protein weight (string, e.g. 28g)",
-  "recipe": "A short sentence in Swahili explaining how the chef will customize it."
-}
-`;
-
-async function getCustomDishFromGemini(messages: any[], retryCount = 0): Promise<string> {
-  const apiKey = getNextApiKey();
-  if (!apiKey) throw new Error('No API keys configured.');
-
-  const contents = [
-    {
-      role: 'user',
-      parts: [{ text: `Here is the conversation history:\n${JSON.stringify(messages)}\n\n${CUSTOM_DISH_PROMPT}` }]
-    }
-  ];
-
+export async function POST(req: NextRequest) {
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents,
-          generationConfig: {
-            responseMimeType: 'application/json',
-            temperature: 0.8,
+    const body = await req.json();
+    const messages: Array<{ role: string; content: string }> = body?.messages ?? [];
+    const lastUserText =
+      [...messages].reverse().find((m) => m.role === 'user')?.content ||
+      'Swahili grilled specialty';
+
+    const geminiKey = process.env.GEMINI_API_KEY;
+    if (geminiKey) {
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [
+                    {
+                      text: `Compose a custom Tanzanian Swahili dish inspired by "${lastUserText}". Return ONLY JSON with keys: name (string), description (string), price (number in TZS between 6500 and 18500), ingredients (string array), calories (number), protein (string like "36g"), recipe (short string).`,
+                    },
+                  ],
+                },
+              ],
+              generationConfig: { responseMimeType: 'application/json' },
+            }),
           }
-        }),
+        );
+        if (res.ok) {
+          const json = await res.json();
+          const rawText = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (rawText) {
+            return NextResponse.json(JSON.parse(rawText));
+          }
+        }
+      } catch {
+        // Fall through to Showcase Swahili Chef composer
       }
+    }
+
+    const lower = lastUserText.toLowerCase();
+    if (lower.includes('samaki') || lower.includes('fish') || lower.includes('nazi')) {
+      return NextResponse.json({
+        name: 'Samaki wa Nazi & Ndizi Mzuzu Royale',
+        description:
+          'Charcoal-seared Indian Ocean snapper simmered in velvety Tui la Nazi coconut-tamarind glaze with sweet fried plantains.',
+        price: 15000,
+        ingredients: ['Red Snapper', 'Tui la Nazi', 'Tamarind', 'Ndizi Mzuzu', 'Fresh Lime'],
+        calories: 640,
+        protein: '39g',
+        recipe:
+          'Grill marinated snapper over mkaa embers, finish in spiced coconut-tamarind reduction, and plate alongside caramelized plantains.',
+      });
+    }
+
+    if (lower.includes('pilau') || lower.includes('rice') || lower.includes('biryani')) {
+      return NextResponse.json({
+        name: 'Zanzibar Spice Pilau & Mishkaki Platter',
+        description:
+          'Aromatic basmati rice infused with Pemba cloves, whole cardamom, and caramelized shallots topped with beef mishkaki.',
+        price: 12500,
+        ingredients: ['Basmati Rice', 'Pemba Cloves', 'Cardamom', 'Beef Mishkaki', 'Kachumbari'],
+        calories: 690,
+        protein: '35g',
+        recipe:
+          'Caramelize red onions deep golden, bloom whole Zanzibar pilau masala spices, steam with stock, and crown with charcoal mishkaki.',
+      });
+    }
+
+    return NextResponse.json({
+      name: 'Kijitonyama Mkaa Choma Chef Special',
+      description: `Flame-grilled Tanzanian prime cuts basted in ginger-garlic lime butter inspired by "${lastUserText.slice(0, 60)}".`,
+      price: 13500,
+      ingredients: ['Prime Beef / Mbuzi', 'Crushed Ginger & Garlic', 'Fresh Lime', 'Pili-Pili ya Ukwaju', 'Kachumbari'],
+      calories: 710,
+      protein: '44g',
+      recipe:
+        'Marinate tender cuts in ginger, garlic, and lime juice, slow-roast over hardwood charcoal, and serve sizzling with fresh kachumbari.',
+    });
+  } catch {
+    return NextResponse.json(
+      { error: 'Unable to compose custom dish right now.' },
+      { status: 500 }
     );
-
-    if (!response.ok) {
-      throw new Error(`Gemini status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) throw new Error('Empty candidate parts');
-    return text.trim();
-  } catch (error: any) {
-    console.error(`[Custom Dish Failover] key failed. Retrying...`, error.message);
-    if (retryCount < geminiKeys.length) {
-      return getCustomDishFromGemini(messages, retryCount + 1);
-    }
-    throw error;
-  }
-}
-
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { messages } = body;
-    
-    if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json({ error: 'Messages history is required.' }, { status: 400 });
-    }
-
-    const jsonText = await getCustomDishFromGemini(messages);
-    const parsedDish = JSON.parse(jsonText);
-    
-    return NextResponse.json(parsedDish);
-  } catch (error: any) {
-    console.error('[API Custom Dish Error]', error);
-    // Fallback dish if parsing or API fails completely
-    const fallback = {
-      name: 'Sahani Maalum ya Chef',
-      description: 'Customized mix of Swahili chicken stew, kachumbari, and hot chipsi created especially for you.',
-      price: 8500,
-      ingredients: ['Chipsi', 'Kuku wa Kupaka', 'Kachumbari', 'Pilipili za kukaanga'],
-      calories: 580,
-      protein: '32g',
-      recipe: 'Jikoni watachanganya chipsi na kuku wa kupaka pamoja na kachumbari pembeni.'
-    };
-    return NextResponse.json(fallback);
   }
 }

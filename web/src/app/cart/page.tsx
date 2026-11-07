@@ -9,7 +9,8 @@ import { Plus, Minus, Trash2, ShoppingBag, ArrowRight, Download } from 'lucide-r
 import LocationPicker from '@/components/LocationPicker';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { getActiveUserProfile, recordOrderWeb } from '@/lib/supabaseDb';
 
 export default function CartPage() {
   const { 
@@ -35,7 +36,7 @@ export default function CartPage() {
   const [lastOrderedTotal, setLastOrderedTotal] = useState(0);
   const [lastOrderId, setLastOrderId] = useState('');
   const [promoCode, setPromoCode] = useState('');
-  const [promoDiscount, setPromoDiscount] = useState(1000);
+  const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState('');
 
@@ -67,6 +68,7 @@ export default function CartPage() {
     }
 
     const fetchSettings = async () => {
+      if (!isSupabaseConfigured) return;
       try {
         const { data, error } = await supabase
           .from('settings')
@@ -97,29 +99,33 @@ export default function CartPage() {
     fetchSettings();
   }, []);
 
-  const handleCheckout = (e: React.FormEvent) => {
+  const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) return;
     
     const generatedId = `bf-${Math.floor(100000 + Math.random() * 900000)}`;
+    const computedTotal = Math.max(0, totalPrice + 3000 - promoDiscount);
     setLastOrderId(generatedId);
     setLastOrderedItems([...items]);
-    setLastOrderedTotal(totalPrice + 3000 - promoDiscount);
+    setLastOrderedTotal(computedTotal);
     
-    const checkoutNotes = notes + (paymentMethod === 'lipanamba' ? ' (Paid via Lipa Namba)' : ' (Cash on Delivery)');
+    const checkoutNotes = (notes ? `${notes} ` : '') + (paymentMethod === 'lipanamba' ? '(Paid via Lipa Namba)' : '(Cash on Delivery)');
+    const activeProfile = await getActiveUserProfile();
 
-    // Write order row to database for admin live monitor sync
-    supabase.from('orders').insert({
+    await recordOrderWeb({
       id: generatedId,
+      profile_id: activeProfile?.id,
       table_number: tableNumber || 'Takeaway / Delivery',
-      items: JSON.stringify(items),
+      items: [...items],
       status: 'pending',
-      total_price: totalPrice + 3000 - promoDiscount,
-      delivery_location: selectedAddress || 'Dar es Salaam',
-      customer_name: 'Guest Customer',
-      customer_email: phoneNumber || 'no-phone@email.com'
-    }).then(({ error }) => {
-      if (error) console.error('[Database order insertion error]', error);
+      total_price: computedTotal,
+      delivery_location: selectedAddress || 'Dar es Salaam, Tanzania',
+      created_at: new Date().toISOString(),
+      customer_name: activeProfile?.name || 'Guest Customer',
+      customer_email: phoneNumber || activeProfile?.phone || activeProfile?.email || 'no-phone@email.com',
+      customer_phone: phoneNumber || activeProfile?.phone || '',
+      payment_method: paymentMethod,
+      notes: checkoutNotes,
     });
 
     setCheckedOut(true);
@@ -392,11 +398,11 @@ export default function CartPage() {
                       setPromoApplied(true);
                       setPromoError('');
                     } else if (!dbActive) {
-                      setPromoDiscount(1000);
+                      setPromoDiscount(0);
                       setPromoApplied(false);
                       setPromoError('This coupon has expired');
                     } else {
-                      setPromoDiscount(1000);
+                      setPromoDiscount(0);
                       setPromoApplied(false);
                       setPromoError('Invalid coupon code');
                     }
