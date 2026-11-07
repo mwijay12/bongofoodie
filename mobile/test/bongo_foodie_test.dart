@@ -43,8 +43,8 @@ void main() {
         customizations: const [extraSide],
       );
 
-      // (10,000 + 1,000) * 2 = 22,000
-      expect(cart.state.subtotal, 22000);
+      // (13,500 + 1,000) * 2 = 29,000
+      expect(cart.state.subtotal, 29000);
 
       final invalid = cart.applyPromoCode(
         code: 'FAKECODE',
@@ -59,8 +59,8 @@ void main() {
       );
       expect(valid, isTrue);
       expect(cart.state.effectiveDiscount, 2000);
-      // 22,000 subtotal + 2,000 delivery - 2,000 discount = 22,000
-      expect(cart.state.grandTotal, 22000);
+      // 29,000 subtotal + 2,000 delivery - 2,000 discount = 29,000
+      expect(cart.state.grandTotal, 29000);
     });
   });
 
