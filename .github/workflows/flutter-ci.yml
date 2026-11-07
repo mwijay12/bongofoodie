@@ -43,7 +43,15 @@ jobs:
         run: flutter pub get
 
       - name: Static Analysis
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        run: |
+          flutter analyze --no-fatal-infos --no-fatal-warnings > /tmp/flutter-analysis.log 2>&1 || {
+            cat /tmp/flutter-analysis.log
+            while IFS= read -r line; do
+              echo "::error::$line"
+            done < <(grep 'error •' /tmp/flutter-analysis.log || tail -20 /tmp/flutter-analysis.log)
+            exit 1
+          }
+          cat /tmp/flutter-analysis.log
 
       - name: Run Unit Tests
         run: flutter test
