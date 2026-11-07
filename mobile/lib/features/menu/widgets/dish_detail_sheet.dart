@@ -404,7 +404,7 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
               ),
             ],
           ),
-        ),
+        );
       },
     );
   }

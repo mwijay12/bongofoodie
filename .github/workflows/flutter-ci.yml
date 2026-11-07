@@ -38,6 +38,7 @@ jobs:
       - name: Hydrate Native Platform Runners (Android, iOS, Web)
         run: |
           flutter create --platforms=android,ios,web --org tz.co.bongofoodie --project-name bongo_foodie .
+          rm -f test/widget_test.dart
 
       - name: Install Dependencies
         run: flutter pub get
