@@ -54,9 +54,6 @@ jobs:
           }
           cat /tmp/flutter-analysis.log
 
-      - name: Run Unit Tests
-        run: flutter test
-
       - name: Build Release Android APK
         run: |
           flutter build apk --release \
@@ -70,6 +67,15 @@ jobs:
           name: bongo-foodie-release-apk
           path: mobile/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
+
+      - name: Run Unit Tests
+        run: |
+          flutter test --reporter expanded > /tmp/flutter-tests.log 2>&1 || {
+            cat /tmp/flutter-tests.log
+            while IFS= read -r line; do echo "::error::$line"; done < <(tail -50 /tmp/flutter-tests.log)
+            exit 1
+          }
+          cat /tmp/flutter-tests.log
 
       - name: Build Flutter Web Showcase
         run: |
