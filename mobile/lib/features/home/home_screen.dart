@@ -254,14 +254,12 @@ class HomeScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: promotionsAsync.when(
                   skipLoadingOnRefresh: true,
-                  data: (promos) => SizedBox(
-                    height: AppSpace.v148,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: promos.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: AppSpace.v14),
-                      itemBuilder: (context, index) {
+                  data: (promos) => ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: promos.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: AppSpace.v14),
+                    itemBuilder: (context, index) {
                         final p = promos[index];
                         final bg = _parseHex(p.bgColorHex);
                         return InkWell(
@@ -345,7 +343,6 @@ class HomeScreen extends ConsumerWidget {
                         );
                       },
                     ),
-                  ),
                   loading: () => SizedBox(
                     height: AppSpace.v148,
                     child: ListView.separated(
