@@ -32,7 +32,7 @@ void main() {
           data: MediaQueryData(
             size: Size(width, 844),
             textScaleFactor: textScaleFactor,
-            brightness: brightness,
+            platformBrightness: brightness,
           ),
           child: MaterialApp(
             theme: brightness == Brightness.dark
@@ -74,9 +74,9 @@ void main() {
     for (final width in widths) {
       for (final scale in scales) {
         for (final brightness in brightnesses) {
-          test(
+          testWidgets(
             'no layout overflow at ${width.toInt()}dp, textScale $scale, ${brightness.name}',
-            () async {
+            (tester) async {
               await pumpStaffScreen(
                 tester,
                 width: width,
@@ -118,7 +118,7 @@ void main() {
       '/profile',
       '/staff',
     ]) {
-      test('no layout exceptions on $route', () async {
+      testWidgets('no layout exceptions on $route', (tester) async {
         final router = GoRouter(
           initialLocation: route,
           routes: <RouteBase>[
@@ -139,7 +139,7 @@ void main() {
               data: const MediaQueryData(
                 size: Size(360, 640),
                 textScaleFactor: 1.3,
-                brightness: Brightness.light,
+                platformBrightness: Brightness.light,
               ),
               child: MaterialApp.router(
                 theme: buildAppTheme(),

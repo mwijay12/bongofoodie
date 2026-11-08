@@ -8,6 +8,7 @@ import '../../data/models/models.dart';
 import '../../state/auth_provider.dart';
 import '../../state/menu_provider.dart';
 import '../../state/orders_provider.dart';
+import '../../state/settings_provider.dart';
 
 class StaffDispatchScreen extends ConsumerStatefulWidget {
   const StaffDispatchScreen({super.key});

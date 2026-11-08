@@ -78,12 +78,15 @@ class HomeScreen extends ConsumerWidget {
           child: RefreshIndicator.adaptive(
           color: AppColors.primary,
           onRefresh: () async {
-            await ref.refresh(promotionsProvider).catchError((_) {});
-            await ref.refresh(allMenuItemsProvider).catchError((_) {});
-            await ref
-                .read(dailyDiscoveriesProvider.notifier)
-                .refresh()
-                .catchError((_) {});
+            try {
+              await ref.refresh(promotionsProvider);
+            } catch (_) {}
+            try {
+              await ref.refresh(allMenuItemsProvider);
+            } catch (_) {}
+            try {
+              await ref.read(dailyDiscoveriesProvider.notifier).refresh();
+            } catch (_) {}
           },
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),

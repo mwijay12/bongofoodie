@@ -59,7 +59,7 @@ class StateMessage extends ConsumerWidget {
             Text(_error ? strings.errorBody : body!,
                 textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
             if (action != null && label != null) ...[
-              const SizedBox(height: gap),
+              SizedBox(height: gap),
               FilledButton.tonal(onPressed: action, child: Text(label)),
             ],
           ],
