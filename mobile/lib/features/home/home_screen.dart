@@ -22,7 +22,8 @@ import '../../state/auth_provider.dart';
 import '../../state/cart_provider.dart';
 import '../../state/menu_provider.dart';
 import '../../state/settings_provider.dart';
-import '../menu/widgets/dish_detail_sheet.dart';
+import '../../core/widgets/dish_hero_image.dart';
+import '../../router/dish_route_args.dart';
 
 /// Shared metrics for dish cards — kept in app_tokens.dart (DishCardMetrics)
 /// so the real card and its skeleton stay in sync.
@@ -337,8 +338,8 @@ class HomeScreen extends ConsumerWidget {
                                 const SizedBox(width: AppSpace.v10),
                                 DishImage(
                                   imageRef: p.imageKey,
-                                  width: 76,
-                                  height: 76,
+                                  width: AppSpace.v76,
+                                  height: AppSpace.v76,
                                   borderRadius: AppRadius.v16,
                                 ),
                               ],
@@ -499,7 +500,7 @@ class HomeScreen extends ConsumerWidget {
                           return _SignatureDishCard(
                             dish: dish,
                             isFavorite: isFav,
-                            onTap: () => showDishDetailSheet(context, dish),
+                            onTap: () => context.push('/dish/${dish.id}', extra: DishRouteArgs(item: dish, heroScope: DishHeroScopes.homeSignature)),
                             onToggleFavorite: () => ref
                                 .read(favoritesProvider.notifier)
                                 .toggle(dish.id),
@@ -603,14 +604,14 @@ class _ChefAtelierCard extends StatelessWidget {
             child: Stack(
               children: [
                 Positioned(
-                  right: -55,
-                  top: -65,
+                  right: -AppSpace.v55,
+                  top: -AppSpace.v65,
                   child: Container(
-                    width: 190,
-                    height: 190,
+                    width: AppSpace.v190,
+                    height: AppSpace.v190,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.surface.withOpacity(.08), width: 30),
+                      border: Border.all(color: AppColors.surface.withOpacity(.08), width: AppSpace.v30),
                     ),
                   ),
                 ),
@@ -643,7 +644,7 @@ class _ChefAtelierCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: AppSpace.v12),
-                      const DishImage(imageRef: 'bongoChefMascot', width: 92, height: 118, borderRadius: AppRadius.v22),
+                      const DishImage(imageRef: 'bongoChefMascot', width: AppSpace.v92, height: AppSpace.v118, borderRadius: AppRadius.v22),
                     ],
                   ),
                 ),
@@ -695,8 +696,9 @@ class _SignatureDishCard extends StatelessWidget {
               Stack(
                 children: [
                   Center(
-                    child: DishImage(
-                      imageRef: dish.imageUrl,
+                    child: DishHeroImage(
+                      item: dish,
+                      heroScope: DishHeroScopes.homeSignature,
                       width: DishCardMetrics.imageSize,
                       height: DishCardMetrics.imageSize,
                       borderRadius: AppRadius.v18,

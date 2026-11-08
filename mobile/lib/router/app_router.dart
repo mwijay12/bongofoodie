@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../core/theme/app_tokens.dart';
 import '../core/widgets/bongo_glass_nav_bar.dart';
 import '../core/widgets/app_shell.dart';
 import '../features/auth/sign_in_screen.dart';
@@ -8,6 +9,7 @@ import '../features/auth/sign_up_screen.dart';
 import '../features/cart/cart_screen.dart';
 import '../features/chef_ai/chef_ai_screen.dart';
 import '../features/home/home_screen.dart';
+import '../features/menu/dish_detail_screen.dart';
 import '../features/menu/search_menu_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/profile/profile_screen.dart';
@@ -15,6 +17,9 @@ import '../features/staff/staff_dispatch_screen.dart';
 import '../state/auth_provider.dart';
 import '../state/cart_provider.dart';
 import '../state/settings_provider.dart';
+import 'dish_route_args.dart';
+
+final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final settings = ref.watch(appSettingsProvider);
@@ -22,6 +27,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ref.watch(authProvider.select((s) => s.isAuthenticated));
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: !settings.hasSeenOnboarding && !isAuthenticated
         ? '/onboarding'
         : '/home',
@@ -41,6 +47,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/staff',
         builder: (context, state) => const StaffDispatchScreen(),
+      ),
+      GoRoute(
+        path: '/dish/:id',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          final extra = state.extra;
+          final args = extra is DishRouteArgs ? extra : null;
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            transitionDuration: AppMotion.slow,
+            reverseTransitionDuration: AppMotion.base,
+            transitionsBuilder: (_, animation, __, child) {
+              final curved = CurvedAnimation(
+                parent: animation,
+                curve: AppMotion.enter,
+              );
+              return FadeTransition(
+                opacity: curved,
+                child: ScaleTransition(
+                  scale: Tween<double>(
+                    begin: AppMotion.transitionScaleBegin,
+                    end: 1,
+                  ).animate(curved),
+                  child: child,
+                ),
+              );
+            },
+            child: DishDetailScreen(id: id, args: args),
+          );
+        },
       ),
 
       // Main 5-Tab Customer Shell (Zero ghost 6th tab!)

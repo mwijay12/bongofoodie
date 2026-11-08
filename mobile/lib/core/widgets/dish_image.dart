@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 import '../theme/app_tokens.dart';
 import '../theme/skeleton_colors.dart';
 
@@ -8,6 +9,8 @@ class DishImage extends StatelessWidget {
   final double? height;
   final BoxFit fit;
   final double borderRadius;
+  final bool clip;
+  final bool transparentFallback;
 
   const DishImage({
     super.key,
@@ -17,6 +20,8 @@ class DishImage extends StatelessWidget {
     this.height,
     this.fit = BoxFit.cover,
     this.borderRadius = AppRadius.v16,
+    this.clip = true,
+    this.transparentFallback = false,
   }) : imageRef = imageRef ?? imageKeyOrUrl ?? 'salad';
 
   static const Map<String, String> _localAssetMap = {
@@ -104,10 +109,13 @@ class DishImage extends StatelessWidget {
         frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
           if (wasSynchronouslyLoaded || child is _DishImageFallback) return child;
           final reducedMotion = MediaQuery.disableAnimationsOf(context);
+          final backdrop = transparentFallback
+              ? AppColors.clear
+              : SkeletonColors.of(context).base;
           return Stack(
             children: [
               Positioned.fill(
-                child: ColoredBox(color: SkeletonColors.of(context).base),
+                child: ColoredBox(color: backdrop),
               ),
               AnimatedOpacity(
                 opacity: frame == null ? 0 : 1,
@@ -124,26 +132,35 @@ class DishImage extends StatelessWidget {
       child = _fallbackBox(context);
     }
 
+    if (!clip) return child;
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
       child: child,
     );
   }
 
-  Widget _fallbackBox(BuildContext context) =>
-      _DishImageFallback(width: width, height: height);
+  Widget _fallbackBox(BuildContext context) => _DishImageFallback(
+        width: width,
+        height: height,
+        transparent: transparentFallback,
+      );
 }
 
 class _DishImageFallback extends StatelessWidget {
-  const _DishImageFallback({this.width, this.height});
+  const _DishImageFallback({
+    this.width,
+    this.height,
+    this.transparent = false,
+  });
   final double? width;
   final double? height;
+  final bool transparent;
 
   @override
   Widget build(BuildContext context) => Container(
         width: width,
         height: height,
-        color: SkeletonColors.of(context).base,
+        color: transparent ? AppColors.clear : SkeletonColors.of(context).base,
         alignment: Alignment.center,
         child: Icon(
           Icons.restaurant_rounded,

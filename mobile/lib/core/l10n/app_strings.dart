@@ -60,7 +60,20 @@ class AppStrings {
       ? 'Tafuta Nyama Choma, Pilau, Samaki wa Kupaka...'
       : 'Search Nyama Choma, Pilau, Samaki wa Kupaka...';
   String get allCategories => isSw ? 'Zote' : 'All';
-  String get addToCart => isSw ? 'Weka Kikapuni' : 'Add to Cart';
+  String get addToCart => isSw ? 'Weka Kikapuni' : 'Add to cart';
+  String get added => isSw ? 'Imewekwa' : 'Added';
+  String get readMore => isSw ? 'Soma zaidi' : 'Read more';
+  String get readLess => isSw ? 'Soma kidogo' : 'Read less';
+  String get quantity => isSw ? 'Idadi' : 'Quantity';
+  String get backToMenu => isSw ? 'Rudi kwenye menyu' : 'Back to menu';
+  String get increaseQuantity => isSw ? 'Ongeza idadi' : 'Increase quantity';
+  String get decreaseQuantity => isSw ? 'Punguza idadi' : 'Decrease quantity';
+  String get favorite => isSw ? 'Kipendwa' : 'Favorite';
+  String get dishSecondaryName => isSw ? 'Jina la Kiswahili' : 'Swahili name';
+  String get dishNotFoundTitle => isSw ? 'Sahani haipatikani' : 'Dish not found';
+  String get dishNotFoundBody => isSw
+      ? 'Sahani hii haipatikani tena kwenye menyu.'
+      : 'This dish is no longer available on the menu.';
   String get clearSearch => isSw ? 'Safisha Tafuta' : 'Clear Search';
 
   // Cart & Checkout
