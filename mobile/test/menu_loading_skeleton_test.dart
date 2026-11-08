@@ -93,7 +93,7 @@ void main() {
         (tester) async {
       SharedPreferences.setMockInitialValues({});
       final pendingMenu = Completer<List<MenuItemModel>>();
-      final pendingPromos = Completer<List<dynamic>>();
+      final pendingPromos = Completer<List<PromotionModel>>();
       await tester.pumpWidget(ProviderScope(
         overrides: [
           showcaseLatencyProvider.overrideWithValue(Duration.zero),
