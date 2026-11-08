@@ -8,6 +8,9 @@ import '../../core/config/env_config.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
+import '../../core/widgets/skeleton/shimmer.dart';
+import '../../core/widgets/skeleton/skeleton_box.dart';
+import '../../core/widgets/state_message.dart';
 import '../../core/widgets/tanzania_location_sheet.dart';
 import '../../data/mock/showcase_seed_data.dart';
 import '../../data/models/models.dart';
@@ -18,6 +21,14 @@ import '../../state/cart_provider.dart';
 import '../../state/menu_provider.dart';
 import '../../state/settings_provider.dart';
 import '../menu/widgets/dish_detail_sheet.dart';
+
+abstract final class _SignatureMetrics {
+  static const double cardHeight = 270;
+  static const double cardMaxWidth = 230;
+  static const double imageSize = 112;
+  static const double gap = AppSpace.v14;
+  static const double padding = AppSpace.md;
+}
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -449,15 +460,22 @@ class HomeScreen extends ConsumerWidget {
               menuAsync.when(
                 data: (items) {
                   final featured = items.take(8).toList();
+                  if (featured.isEmpty) {
+                    return SliverToBoxAdapter(
+                      child: StateMessage.empty(
+                        title: t.emptyMenuTitle, body: t.emptyMenuBody,
+                      ),
+                    );
+                  }
                   return SliverPadding(
                     padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0, AppSpace.screenH, context.navClearance),
                     sliver: SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 230,
-                        mainAxisSpacing: 14,
-                        crossAxisSpacing: 14,
-                        mainAxisExtent: 270,
+                        maxCrossAxisExtent: _SignatureMetrics.cardMaxWidth,
+                        mainAxisSpacing: _SignatureMetrics.gap,
+                        crossAxisSpacing: _SignatureMetrics.gap,
+                        mainAxisExtent: _SignatureMetrics.cardHeight,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -490,14 +508,33 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   );
                 },
-                loading: () => const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(AppSpace.v40),
-                    child: Center(child: CircularProgressIndicator()),
+                loading: () => SliverToBoxAdapter(
+                  child: Semantics(
+                    label: t.loading,
+                    child: ExcludeSemantics(
+                      child: Shimmer(
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0,
+                              AppSpace.screenH, context.navClearance),
+                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: _SignatureMetrics.cardMaxWidth,
+                            mainAxisSpacing: _SignatureMetrics.gap,
+                            crossAxisSpacing: _SignatureMetrics.gap,
+                            mainAxisExtent: _SignatureMetrics.cardHeight,
+                          ),
+                          itemCount: 2,
+                          itemBuilder: (_, __) => const _SignatureDishSkeleton(),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                error: (e, _) => SliverToBoxAdapter(
-                  child: Center(child: Text('Error loading menu: $e')),
+                error: (_, __) => SliverToBoxAdapter(
+                  child: StateMessage.error(
+                    onRetry: () => ref.invalidate(allMenuItemsProvider),
+                  ),
                 ),
               ),
             ],
@@ -603,6 +640,31 @@ class _ChefAtelierCard extends StatelessWidget {
   }
 }
 
+class _SignatureDishSkeleton extends StatelessWidget {
+  const _SignatureDishSkeleton();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(_SignatureMetrics.padding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Center(child: SkeletonBox(
+              width: _SignatureMetrics.imageSize,
+              height: _SignatureMetrics.imageSize,
+              radius: AppRadius.v18,
+            )),
+            const SizedBox(height: AppSpace.v10),
+            const SkeletonBox(width: AppSpace.v40, height: AppSpace.md),
+            const SizedBox(height: AppSpace.v4),
+            const SkeletonLines(),
+            const Spacer(),
+            const SkeletonBox(width: AppSpace.v40, height: AppSpace.lg),
+          ],
+        ),
+      );
+}
+
 class _SignatureDishCard extends StatelessWidget {
   final MenuItemModel dish;
   final bool isFavorite;
@@ -629,7 +691,7 @@ class _SignatureDishCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.v22),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.all(AppSpace.md),
+          padding: const EdgeInsets.all(_SignatureMetrics.padding),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadius.v22),
             border: Border.all(
@@ -644,8 +706,8 @@ class _SignatureDishCard extends StatelessWidget {
                   Center(
                     child: DishImage(
                       imageRef: dish.imageUrl,
-                      width: 112,
-                      height: 112,
+                      width: _SignatureMetrics.imageSize,
+                      height: _SignatureMetrics.imageSize,
                       borderRadius: AppRadius.v18,
                     ),
                   ),
