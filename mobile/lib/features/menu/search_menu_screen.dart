@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
@@ -139,7 +140,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
 
             // Search Bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
               child: TextField(
                 controller: _searchCtrl,
                 onChanged: (_) => setState(() {}),
@@ -167,7 +168,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                 data: (cats) {
                   final names = ['All', ...cats.map((c) => c.name)];
                   return ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
                     scrollDirection: Axis.horizontal,
                     itemCount: names.length,
                     separatorBuilder: (_, __) => const SizedBox(width: 8),
@@ -181,7 +182,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                         label: Text(
                           catName == 'All' ? t.allCategories : catName,
                           style: TextStyle(
-                            color: selected ? Colors.white : null,
+                            color: selected ? AppColors.surface : null,
                             fontWeight: FontWeight.w800,
                             fontSize: 12.5,
                           ),
@@ -206,7 +207,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                   if (items.isEmpty) {
                     return Center(
                       child: Padding(
-                        padding: const EdgeInsets.all(32),
+                        padding: const EdgeInsets.all(AppSpace.xxl),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -320,15 +321,15 @@ class _MenuGridTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: isDark ? AppColors.darkCard : Colors.white,
-      borderRadius: BorderRadius.circular(20),
+      color: isDark ? AppColors.darkCard : AppColors.surface,
+      borderRadius: BorderRadius.circular(AppRadius.md),
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         onTap: onOpen,
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpace.md),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             border: Border.all(
               color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
             ),
@@ -389,7 +390,7 @@ class _MenuGridTile extends StatelessWidget {
                       child: const Icon(
                         Icons.add_rounded,
                         size: 18,
-                        color: Colors.white,
+                        color: AppColors.surface,
                       ),
                     ),
                   ),
@@ -419,15 +420,15 @@ class _MenuListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: isDark ? AppColors.darkCard : Colors.white,
-      borderRadius: BorderRadius.circular(20),
+      color: isDark ? AppColors.darkCard : AppColors.surface,
+      borderRadius: BorderRadius.circular(AppRadius.md),
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         onTap: onOpen,
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpace.md),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             border: Border.all(
               color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
             ),
@@ -492,7 +493,7 @@ class _MenuListTile extends StatelessWidget {
                   backgroundColor: AppColors.primary,
                 ),
                 onPressed: onAdd,
-                icon: const Icon(Icons.add_rounded, color: Colors.white),
+                icon: const Icon(Icons.add_rounded, color: AppColors.surface),
               ),
             ],
           ),

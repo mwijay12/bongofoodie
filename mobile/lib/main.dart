@@ -34,7 +34,7 @@ class BongoFoodieApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'BongoFoodie TZ',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
+      theme: buildAppTheme(),
       darkTheme: AppTheme.dark(),
       themeMode: settings.themeMode,
       routerConfig: router,

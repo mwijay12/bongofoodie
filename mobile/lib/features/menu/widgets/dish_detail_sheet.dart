@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../core/l10n/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/dish_image.dart';
@@ -14,7 +15,7 @@ Future<void> showDishDetailSheet(BuildContext context, MenuItemModel dish) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+    backgroundColor: AppColors.clear,
     builder: (_) => DishDetailSheet(dish: dish),
   );
 }
@@ -93,8 +94,8 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                 width: 44,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.35),
-                  borderRadius: BorderRadius.circular(999),
+                  color: AppColors.inkMuted.withOpacity(0.35),
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
               ),
               Expanded(
@@ -107,10 +108,10 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
+                              horizontal: AppSpace.md, vertical: 6),
                           decoration: BoxDecoration(
                             color: AppColors.primary.withOpacity(0.14),
-                            borderRadius: BorderRadius.circular(999),
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
                           ),
                           child: Text(
                             widget.dish.categoryName,
@@ -201,14 +202,14 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                       children: [
                         _MetricPill(
                           icon: Icons.star_rounded,
-                          iconColor: Colors.amber,
+                          iconColor: AppColors.gold,
                           label:
                               '${_displayRating.toStringAsFixed(1)} (${widget.dish.ratingCount})',
                         ),
                         const SizedBox(width: 8),
                         _MetricPill(
                           icon: Icons.local_fire_department_rounded,
-                          iconColor: Colors.deepOrange,
+                          iconColor: AppColors.primaryDeep,
                           label: '${widget.dish.calories} kcal',
                         ),
                         const SizedBox(width: 8),
@@ -277,7 +278,7 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkCard : Colors.white,
+                        color: isDark ? AppColors.darkCard : AppColors.surface,
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
                           color: isDark
@@ -310,7 +311,7 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                                   active
                                       ? Icons.star_rounded
                                       : Icons.star_outline_rounded,
-                                  color: Colors.amber,
+                                  color: AppColors.gold,
                                   size: 26,
                                 ),
                               ),
@@ -332,10 +333,10 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                   MediaQuery.of(context).padding.bottom + 14,
                 ),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkCard : Colors.white,
+                  color: isDark ? AppColors.darkCard : AppColors.surface,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: AppColors.scrim.withOpacity(0.08),
                       blurRadius: 16,
                       offset: const Offset(0, -4),
                     ),
@@ -426,10 +427,10 @@ class _MetricPill extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+        padding: const EdgeInsets.symmetric(vertical: AppSpace.sm, horizontal: 6),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkCard : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: isDark ? AppColors.darkCard : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
           border: Border.all(
             color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
@@ -147,7 +148,7 @@ class ProfileScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF28170A), Color(0xFF47250B)],
+                  colors: [AppColors.ember, AppColors.ink],
                 ),
                 borderRadius: BorderRadius.circular(24),
               ),
@@ -161,7 +162,7 @@ class ProfileScreen extends ConsumerWidget {
                         child: Text(
                           user?.initials ?? 'BF',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppColors.surface,
                             fontWeight: FontWeight.w800,
                             fontSize: 18,
                           ),
@@ -180,7 +181,7 @@ class ProfileScreen extends ConsumerWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: AppColors.surface,
                                       fontWeight: FontWeight.w800,
                                       fontSize: 18,
                                     ),
@@ -189,15 +190,15 @@ class ProfileScreen extends ConsumerWidget {
                                 const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
+                                      horizontal: AppSpace.sm, vertical: 2),
                                   decoration: BoxDecoration(
                                     color: AppColors.primary.withOpacity(0.28),
-                                    borderRadius: BorderRadius.circular(999),
+                                    borderRadius: BorderRadius.circular(AppRadius.pill),
                                   ),
                                   child: Text(
                                     (user?.role.value ?? 'guest').toUpperCase(),
                                     style: const TextStyle(
-                                      color: Color(0xFFFFD8A8),
+                                      color: AppColors.heroLight,
                                       fontSize: 10,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -209,7 +210,7 @@ class ProfileScreen extends ConsumerWidget {
                             Text(
                               user?.email ?? 'Sign in to sync across devices',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.76),
+                                color: AppColors.surface.withOpacity(0.76),
                                 fontSize: 12.5,
                               ),
                             ),
@@ -236,9 +237,9 @@ class ProfileScreen extends ConsumerWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
+                              foregroundColor: AppColors.surface,
                               side: BorderSide(
-                                  color: Colors.white.withOpacity(0.3)),
+                                  color: AppColors.surface.withOpacity(0.3)),
                             ),
                             onPressed: () async {
                               await ref
@@ -289,8 +290,8 @@ class ProfileScreen extends ConsumerWidget {
             // 3. Preferences Card (Dark Mode + Language)
             Container(
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkCard : Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                color: isDark ? AppColors.darkCard : AppColors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 border: Border.all(
                   color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
                 ),
@@ -364,9 +365,9 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             if (orders.isEmpty)
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(AppSpace.screenH),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkCard : Colors.white,
+                  color: isDark ? AppColors.darkCard : AppColors.surface,
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: const Text(
@@ -403,7 +404,7 @@ class ProfileScreen extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkCard : Colors.white,
+                      color: isDark ? AppColors.darkCard : AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: badge.unlocked
@@ -480,7 +481,7 @@ class _StatCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.darkCard : Colors.white,
+            color: isDark ? AppColors.darkCard : AppColors.surface,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
@@ -525,10 +526,10 @@ class _LiveOrderCard extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpace.lg),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        color: isDark ? AppColors.darkCard : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
         ),
@@ -587,8 +588,8 @@ class _LiveOrderCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: done
                               ? AppColors.success
-                              : Colors.grey.withOpacity(0.25),
-                          borderRadius: BorderRadius.circular(999),
+                              : AppColors.inkMuted.withOpacity(0.25),
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
                         ),
                       ),
                       const SizedBox(height: 5),
@@ -598,7 +599,7 @@ class _LiveOrderCard extends StatelessWidget {
                           fontSize: 10,
                           fontWeight:
                               done ? FontWeight.w800 : FontWeight.w500,
-                          color: done ? AppColors.success : Colors.grey,
+                          color: done ? AppColors.success : AppColors.inkMuted,
                         ),
                       ),
                     ],

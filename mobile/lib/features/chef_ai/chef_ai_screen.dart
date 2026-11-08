@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
@@ -194,7 +195,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                     ),
                     child: const Icon(
                       Icons.auto_awesome_rounded,
-                      color: Colors.white,
+                      color: AppColors.surface,
                       size: 20,
                     ),
                   ),
@@ -244,10 +245,10 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
 
             // Mode Tabs
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
               child: Container(
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkCard : Colors.white,
+                  color: isDark ? AppColors.darkCard : AppColors.surface,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
@@ -256,12 +257,12 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                 child: TabBar(
                   controller: _tabController,
                   indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
+                  dividerColor: AppColors.clear,
                   indicator: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  labelColor: Colors.white,
+                  labelColor: AppColors.surface,
                   labelStyle: const TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 13,
@@ -307,7 +308,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
         SizedBox(
           height: 38,
           child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
             scrollDirection: Axis.horizontal,
             itemCount: prompts.length,
             separatorBuilder: (_, __) => const SizedBox(width: 8),
@@ -334,7 +335,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                 return const Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
-                    padding: EdgeInsets.all(12),
+                    padding: EdgeInsets.all(AppSpace.md),
                     child: SizedBox(
                       width: 22,
                       height: 22,
@@ -353,11 +354,11 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                     maxWidth: MediaQuery.of(context).size.width * 0.78,
                   ),
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: AppSpace.md),
                   decoration: BoxDecoration(
                     color: msg.isUser
                         ? AppColors.primary
-                        : (isDark ? AppColors.darkCard : Colors.white),
+                        : (isDark ? AppColors.darkCard : AppColors.surface),
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(18),
                       topRight: const Radius.circular(18),
@@ -375,7 +376,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                   child: Text(
                     msg.content,
                     style: TextStyle(
-                      color: msg.isUser ? Colors.white : null,
+                      color: msg.isUser ? AppColors.surface : null,
                       fontSize: 13.8,
                       height: 1.45,
                       fontWeight: FontWeight.w600,
@@ -408,7 +409,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                   padding: const EdgeInsets.all(14),
                 ),
                 onPressed: _sendingChat ? null : () => _sendMessage(),
-                icon: const Icon(Icons.send_rounded, color: Colors.white),
+                icon: const Icon(Icons.send_rounded, color: AppColors.surface),
               ),
             ],
           ),
@@ -473,7 +474,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                     height: 18,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.2,
-                      color: Colors.white,
+                      color: AppColors.surface,
                     ),
                   )
                 : const Icon(Icons.auto_fix_high_rounded),
@@ -490,7 +491,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkCard : Colors.white,
+              color: isDark ? AppColors.darkCard : AppColors.surface,
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: AppColors.primary.withOpacity(0.45),
@@ -515,10 +516,10 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
+                                horizontal: AppSpace.sm, vertical: 3),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withOpacity(0.14),
-                              borderRadius: BorderRadius.circular(999),
+                              borderRadius: BorderRadius.circular(AppRadius.pill),
                             ),
                             child: Text(
                               '✨ CHEF BESPOKE • ${_generatedDish!.category}',

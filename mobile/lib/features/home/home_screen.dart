@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../core/config/env_config.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
@@ -85,7 +86,7 @@ class HomeScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(14),
                           onTap: () => showTanzaniaLocationPicker(context),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            padding: const EdgeInsets.symmetric(vertical: AppSpace.xs),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -94,7 +95,7 @@ class HomeScreen extends ConsumerWidget {
                                     Text(
                                       t.deliverTo.toUpperCase(),
                                       style: const TextStyle(
-                                        color: AppColors.primary,
+                                        color: AppColors.primaryDeep,
                                         fontSize: 10.5,
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: 1.0,
@@ -110,7 +111,7 @@ class HomeScreen extends ConsumerWidget {
                                                 : AppColors.primary)
                                             .withOpacity(0.14),
                                         borderRadius:
-                                            BorderRadius.circular(999),
+                                            BorderRadius.circular(AppRadius.pill),
                                       ),
                                       child: Text(
                                         EnvConfig.hasSupabaseCredentials
@@ -165,13 +166,13 @@ class HomeScreen extends ConsumerWidget {
                             avatar: const Icon(
                               Icons.soup_kitchen_rounded,
                               size: 16,
-                              color: Colors.white,
+                              color: AppColors.surface,
                             ),
                             backgroundColor: AppColors.espresso,
                             label: const Text(
                               'Staff Live',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.surface,
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -244,7 +245,7 @@ class HomeScreen extends ConsumerWidget {
                   data: (promos) => SizedBox(
                     height: 148,
                     child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
                       scrollDirection: Axis.horizontal,
                       itemCount: promos.length,
                       separatorBuilder: (_, __) => const SizedBox(width: 14),
@@ -258,9 +259,11 @@ class HomeScreen extends ConsumerWidget {
                           ),
                           child: Container(
                             width: 285,
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(AppSpace.lg),
                             decoration: BoxDecoration(
-                              color: bg,
+                              gradient: bg.green > bg.red
+                                  ? AppColors.promoGreen
+                                  : AppColors.promoOrange,
                               borderRadius: BorderRadius.circular(22),
                             ),
                             child: Row(
@@ -274,18 +277,18 @@ class HomeScreen extends ConsumerWidget {
                                       if (p.badgeText.isNotEmpty)
                                         Container(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 3),
+                                              horizontal: AppSpace.sm, vertical: 3),
                                           decoration: BoxDecoration(
                                             color:
-                                                Colors.black.withOpacity(0.22),
+                                                AppColors.scrim.withOpacity(0.22),
                                             borderRadius:
-                                                BorderRadius.circular(999),
+                                                BorderRadius.circular(AppRadius.pill),
                                           ),
                                           child: Text(
                                             p.badgeText,
                                             style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 10,
+                                              color: AppColors.surface,
+                                              fontSize: 16,
                                               fontWeight: FontWeight.w800,
                                             ),
                                           ),
@@ -296,7 +299,7 @@ class HomeScreen extends ConsumerWidget {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
-                                          color: Colors.white,
+                                          color: AppColors.surface,
                                           fontWeight: FontWeight.w800,
                                           fontSize: 17,
                                         ),
@@ -307,8 +310,9 @@ class HomeScreen extends ConsumerWidget {
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.9),
-                                          fontSize: 12,
+                                          color: AppColors.surface,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
                                           height: 1.3,
                                         ),
                                       ),
@@ -344,10 +348,10 @@ class HomeScreen extends ConsumerWidget {
                           ? list.first
                           : ShowcaseSeedData.discoveries.first;
                       return Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(AppSpace.lg),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkCard : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
+                          color: isDark ? AppColors.darkCard : AppColors.surface,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
                           border: Border.all(
                             color: AppColors.primary.withOpacity(0.28),
                           ),
@@ -363,10 +367,10 @@ class HomeScreen extends ConsumerWidget {
                                 Expanded(
                                   child: Text(
                                     t.dailyDiscovery,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.w800,
                                       fontSize: 13.5,
-                                      color: AppColors.primary,
+                                      color: isDark ? AppColors.heroLight : AppColors.primaryDeep,
                                     ),
                                   ),
                                 ),
@@ -530,8 +534,8 @@ class _ChefAtelierCard extends StatelessWidget {
         child: Transform.translate(offset: Offset(0, 12 * (1 - value)), child: child),
       ),
       child: Material(
-        color: const Color(0xFF25231F),
-        borderRadius: BorderRadius.circular(28),
+        color: AppColors.ember,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
@@ -540,7 +544,7 @@ class _ChefAtelierCard extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF35322B), Color(0xFF171C19)],
+                colors: [AppColors.ember, AppColors.ink],
               ),
             ),
             child: Stack(
@@ -553,7 +557,7 @@ class _ChefAtelierCard extends StatelessWidget {
                     height: 190,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white.withOpacity(.08), width: 30),
+                      border: Border.all(color: AppColors.surface.withOpacity(.08), width: 30),
                     ),
                   ),
                 ),
@@ -566,21 +570,21 @@ class _ChefAtelierCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text('BONGO FOODIE  /  CHEF AI',
-                              style: TextStyle(color: Color(0xFFF3B676), fontSize: 9,
+                              style: TextStyle(color: AppColors.heroMuted, fontSize: 9,
                                 letterSpacing: 1.4, fontWeight: FontWeight.w700)),
                             const SizedBox(height: 14),
-                            Text(title, style: const TextStyle(color: Colors.white,
+                            Text(title, style: const TextStyle(color: AppColors.surface,
                               fontSize: 22, height: 1.15, fontWeight: FontWeight.w700,
                               letterSpacing: -.5)),
                             const SizedBox(height: 8),
-                            Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(.72),
+                            Text(subtitle, style: TextStyle(color: AppColors.surface.withOpacity(.72),
                               fontSize: 12, height: 1.45)),
                             const SizedBox(height: 18),
                             Row(mainAxisSize: MainAxisSize.min, children: [
-                              Text(action, style: const TextStyle(color: Color(0xFFFFC98D),
+                              Text(action, style: const TextStyle(color: AppColors.heroLight,
                                 fontSize: 12, fontWeight: FontWeight.w700)),
                               const SizedBox(width: 7),
-                              const Icon(Icons.arrow_forward_rounded, color: Color(0xFFFFC98D), size: 16),
+                              const Icon(Icons.arrow_forward_rounded, color: AppColors.heroLight, size: 16),
                             ]),
                           ],
                         ),
@@ -619,13 +623,13 @@ class _SignatureDishCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
-      color: isDark ? AppColors.darkCard : Colors.white,
+      color: isDark ? AppColors.darkCard : AppColors.surface,
       borderRadius: BorderRadius.circular(22),
       child: InkWell(
         borderRadius: BorderRadius.circular(22),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpace.md),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
@@ -650,11 +654,11 @@ class _SignatureDishCard extends StatelessWidget {
                     top: 0,
                     child: InkWell(
                       onTap: onToggleFavorite,
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: (isDark ? Colors.black : Colors.white)
+                          color: (isDark ? AppColors.scrim : AppColors.surface)
                               .withOpacity(0.85),
                           shape: BoxShape.circle,
                         ),
@@ -663,7 +667,7 @@ class _SignatureDishCard extends StatelessWidget {
                               ? Icons.favorite_rounded
                               : Icons.favorite_border_rounded,
                           size: 16,
-                          color: isFavorite ? AppColors.error : Colors.grey,
+                          color: isFavorite ? AppColors.error : AppColors.inkMuted,
                         ),
                       ),
                     ),
@@ -674,7 +678,7 @@ class _SignatureDishCard extends StatelessWidget {
               Row(
                 children: [
                   const Icon(Icons.star_rounded,
-                      size: 14, color: Colors.amber),
+                      size: 14, color: AppColors.gold),
                   const SizedBox(width: 3),
                   Text(
                     dish.rating.toStringAsFixed(1),
@@ -723,7 +727,7 @@ class _SignatureDishCard extends StatelessWidget {
                     child: Text(
                       AppStrings.formatTzs(dish.price),
                       style: const TextStyle(
-                        color: AppColors.primary,
+                        color: AppColors.primaryDeep,
                         fontWeight: FontWeight.w800,
                         fontSize: 13.5,
                       ),
@@ -733,16 +737,16 @@ class _SignatureDishCard extends StatelessWidget {
                     message: 'Add ${dish.name} to cart',
                     child: InkWell(
                     onTap: onQuickAdd,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                     child: Container(
                       padding: const EdgeInsets.all(7),
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppColors.cta,
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
                       ),
                       child: const Icon(
                         Icons.add_rounded,
-                        color: Colors.white,
+                        color: AppColors.surface,
                         size: 18,
                       ),
                     ),

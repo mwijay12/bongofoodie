@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../core/config/env_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/models.dart';
@@ -158,8 +159,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: isDark
-                        ? [const Color(0xFF2B1C10), const Color(0xFF1F1610)]
-                        : [const Color(0xFFFFF5E6), const Color(0xFFFFEBD0)],
+                        ? [AppColors.ember, AppColors.ink]
+                        : [AppColors.cream, AppColors.surfaceWarm],
                   ),
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(
@@ -236,7 +237,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               if (auth.errorMessage != null) ...[
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(AppSpace.md),
                   decoration: BoxDecoration(
                     color: AppColors.error.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(14),
@@ -267,7 +268,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 children: [
                   const Expanded(child: Divider()),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpace.md),
                     child: Text(
                       t.isSw ? 'AU INGIA KWA BARUA PEPE' : 'OR SIGN IN WITH EMAIL',
                       style: const TextStyle(
@@ -328,7 +329,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.4,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           ),
                         )
                       : Text(t.isSw ? 'Ingia Sasa' : 'Sign In'),
@@ -387,17 +388,17 @@ class _DemoRoleTile extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
-      color: isDark ? AppColors.darkCard : Colors.white,
+      color: isDark ? AppColors.darkCard : AppColors.surface,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpace.md, vertical: 10),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(AppSpace.sm),
                 decoration: BoxDecoration(
                   color: badgeColor.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(10),
