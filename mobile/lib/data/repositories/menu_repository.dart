@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,6 +6,26 @@ import '../../core/services/supabase_service.dart';
 import '../../core/config/env_config.dart';
 import '../mock/showcase_seed_data.dart';
 import '../models/models.dart';
+
+List<String> _asStringList(dynamic value) {
+  if (value is List) {
+    return value.map((entry) => entry.toString()).toList();
+  }
+  if (value is String && value.trim().isNotEmpty) {
+    final trimmed = value.trim();
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+      final inner = trimmed.substring(1, trimmed.length - 1);
+      if (inner.isEmpty) return const <String>[];
+      return inner
+          .split(',')
+          .map((entry) => entry.trim())
+          .where((entry) => entry.isNotEmpty)
+          .toList();
+    }
+    return <String>[trimmed];
+  }
+  return const <String>[];
+}
 
 final showcaseLatencyProvider = Provider<Duration>((ref) {
   if (SupabaseService.isLive) return Duration.zero;
@@ -21,6 +42,7 @@ class MenuRepository {
       : _showcaseLatency = showcaseLatency ?? EnvConfig.showcaseLatency;
   final Duration _showcaseLatency;
 
+  static const _dishReadTimeout = Duration(seconds: 10);
   static const _favPrefKey = 'bongo_favorites_v2';
   static const _discoveriesPrefKey = 'bongo_discoveries_v2';
   static const _quizDatePrefKey = 'bongo_quiz_date_v2';
@@ -71,6 +93,11 @@ class MenuRepository {
           calories,
           protein,
           prep_time_mins,
+          spice_level,
+          ingredients,
+          allergens,
+          fun_fact_en,
+          fun_fact_sw,
           category_id,
           categories ( id, name ),
           menu_customizations (
@@ -118,6 +145,11 @@ class MenuRepository {
               availableCustomizations: custList.isNotEmpty
                   ? custList
                   : ShowcaseSeedData.defaultSwahiliSides,
+              spiceLevel: (r['spice_level'] as num?)?.toInt(),
+              ingredients: _asStringList(r['ingredients']),
+              allergens: _asStringList(r['allergens']),
+              funFactEn: r['fun_fact_en']?.toString(),
+              funFactSw: r['fun_fact_sw']?.toString(),
             );
           }).toList();
         }
@@ -146,6 +178,70 @@ class MenuRepository {
     }
 
     return items;
+  }
+
+  Future<List<CustomizationOption>> getDishCustomizations(String dishId) async {
+    final sb = SupabaseService.client;
+    if (sb == null && _showcaseLatency > Duration.zero) {
+      await Future<void>.delayed(_showcaseLatency);
+    }
+    if (sb != null && !dishId.startsWith('menu-')) {
+      try {
+        final rows = await sb
+            .from('menu_customizations')
+            .select('customizations ( id, name, price, type )')
+            .eq('menu_id', dishId)
+            .order('created_at', ascending: true)
+            .timeout(_dishReadTimeout);
+        final options = <CustomizationOption>[];
+        for (final row in rows) {
+          final customization = row['customizations'];
+          if (customization is Map) {
+            options.add(CustomizationOption.fromJson(
+              Map<String, dynamic>.from(customization),
+            ));
+          }
+        }
+        if (options.isNotEmpty) return options;
+      } catch (_) {}
+    }
+
+    final matches = ShowcaseSeedData.menuItems
+        .where((item) => item.id == dishId)
+        .toList();
+    if (matches.isNotEmpty &&
+        matches.first.availableCustomizations.isNotEmpty) {
+      return matches.first.availableCustomizations;
+    }
+    return ShowcaseSeedData.defaultSwahiliSides;
+  }
+
+  Future<List<MenuReviewModel>> getDishReviews(String dishId) async {
+    final sb = SupabaseService.client;
+    if (sb == null && _showcaseLatency > Duration.zero) {
+      await Future<void>.delayed(_showcaseLatency);
+    }
+    if (sb != null && !dishId.startsWith('menu-')) {
+      try {
+        final rows = await sb
+            .from('menu_reviews')
+            .select(
+                'id, menu_id, profile_id, rating, comment, created_at, updated_at')
+            .eq('menu_id', dishId)
+            .order('created_at', ascending: false)
+            .timeout(_dishReadTimeout);
+        if (rows.isNotEmpty) {
+          return rows
+              .map<MenuReviewModel>((r) => MenuReviewModel.fromJson(
+                    Map<String, dynamic>.from(r),
+                  ))
+              .toList();
+        }
+      } catch (_) {}
+    }
+    return ShowcaseSeedData.menuReviews
+        .where((review) => review.menuId == dishId)
+        .toList();
   }
 
   Future<List<PromotionModel>> getPromotions() async {

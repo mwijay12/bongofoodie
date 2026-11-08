@@ -153,6 +153,11 @@ export async function getMenu({ category, query, limit }: GetMenuParams = {}): P
         calories,
         protein,
         prep_time_mins,
+        spice_level,
+        ingredients,
+        allergens,
+        fun_fact_en,
+        fun_fact_sw,
         categories (
           id,
           name
@@ -180,6 +185,11 @@ export async function getMenu({ category, query, limit }: GetMenuParams = {}): P
           prep_time_mins: item.prep_time_mins,
           categories: item.categories ? item.categories.name : '',
           _categoryId: item.categories ? item.categories.id : '',
+          spice_level: item.spice_level ?? null,
+          ingredients: item.ingredients ?? [],
+          allergens: item.allergens ?? [],
+          fun_fact_en: item.fun_fact_en ?? null,
+          fun_fact_sw: item.fun_fact_sw ?? null,
         })) as MenuItem[];
       }
     } catch (error) {
@@ -275,7 +285,12 @@ export async function getUserFavoritesWeb(userId: string): Promise<MenuItem[]> {
             price,
             rating,
             calories,
-            protein
+            protein,
+            spice_level,
+            ingredients,
+            allergens,
+            fun_fact_en,
+            fun_fact_sw
           )
         `)
         .eq('profile_id', userId);
@@ -292,6 +307,11 @@ export async function getUserFavoritesWeb(userId: string): Promise<MenuItem[]> {
             rating: Number(row.menu.rating || 4.8),
             calories: row.menu.calories,
             protein: row.menu.protein,
+            spice_level: row.menu.spice_level ?? null,
+            ingredients: row.menu.ingredients ?? [],
+            allergens: row.menu.allergens ?? [],
+            fun_fact_en: row.menu.fun_fact_en ?? null,
+            fun_fact_sw: row.menu.fun_fact_sw ?? null,
           }));
       }
     } catch (err) {

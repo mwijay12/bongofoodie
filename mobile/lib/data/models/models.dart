@@ -173,6 +173,11 @@ class MenuItemModel {
   final String categoryId;
   final String categoryName;
   final List<CustomizationOption> availableCustomizations;
+  final int? spiceLevel;
+  final List<String> ingredients;
+  final List<String> allergens;
+  final String? funFactEn;
+  final String? funFactSw;
 
   const MenuItemModel({
     required this.id,
@@ -188,12 +193,119 @@ class MenuItemModel {
     this.categoryId = '',
     this.categoryName = 'Swahili Bites',
     this.availableCustomizations = const [],
+    this.spiceLevel,
+    this.ingredients = const [],
+    this.allergens = const [],
+    this.funFactEn,
+    this.funFactSw,
   });
+
+  static List<String> _stringList(dynamic value) {
+    if (value is List) {
+      return value.map((entry) => entry.toString()).toList();
+    }
+    if (value is String && value.trim().isNotEmpty) {
+      final trimmed = value.trim();
+      if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+        final inner = trimmed.substring(1, trimmed.length - 1);
+        if (inner.isEmpty) return const <String>[];
+        return inner
+            .split(',')
+            .map((entry) => entry.trim())
+            .where((entry) => entry.isNotEmpty)
+            .toList();
+      }
+      return <String>[trimmed];
+    }
+    return const <String>[];
+  }
+
+  factory MenuItemModel.fromJson(Map<String, dynamic> json) {
+    final category = json['categories'];
+    final categoryMap =
+        category is Map ? Map<String, dynamic>.from(category) : null;
+    final rawCustomizations = json['available_customizations'] ??
+        json['availableCustomizations'] ??
+        json['menu_customizations'];
+    final customizations = <CustomizationOption>[];
+    if (rawCustomizations is List) {
+      for (final raw in rawCustomizations) {
+        if (raw is Map) {
+          final nested = raw['customizations'];
+          if (nested is Map) {
+            customizations.add(CustomizationOption.fromJson(
+              Map<String, dynamic>.from(nested),
+            ));
+          } else {
+            customizations.add(CustomizationOption.fromJson(
+              Map<String, dynamic>.from(raw),
+            ));
+          }
+        }
+      }
+    }
+
+    return MenuItemModel(
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      description: (json['description'] ?? '').toString(),
+      imageUrl: (json['image_url'] ?? json['imageUrl'] ?? 'salad').toString(),
+      price: (json['price'] as num?)?.toDouble() ?? 0,
+      rating: (json['rating'] as num?)?.toDouble() ?? 4.8,
+      ratingCount: (json['rating_count'] as num?)?.toInt() ?? 10,
+      calories: (json['calories'] as num?)?.toInt() ?? 520,
+      protein: (json['protein'] as num?)?.toInt() ?? 24,
+      prepTimeMins: (json['prep_time_mins'] as num?)?.toInt() ?? 20,
+      categoryId: (categoryMap?['id'] ??
+              json['category_id'] ??
+              json['categoryId'] ??
+              '')
+          .toString(),
+      categoryName: (categoryMap?['name'] ??
+              json['category_name'] ??
+              json['categoryName'] ??
+              'Swahili Bites')
+          .toString(),
+      availableCustomizations: customizations,
+      spiceLevel: (json['spice_level'] as num?)?.toInt(),
+      ingredients: _stringList(json['ingredients']),
+      allergens: _stringList(json['allergens']),
+      funFactEn: json['fun_fact_en']?.toString(),
+      funFactSw: json['fun_fact_sw']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'description': description,
+        'image_url': imageUrl,
+        'price': price,
+        'rating': rating,
+        'rating_count': ratingCount,
+        'calories': calories,
+        'protein': protein,
+        'prep_time_mins': prepTimeMins,
+        'category_id': categoryId,
+        'category_name': categoryName,
+        'available_customizations':
+            availableCustomizations.map((option) => option.toJson()).toList(),
+        'spice_level': spiceLevel,
+        'ingredients': ingredients,
+        'allergens': allergens,
+        'fun_fact_en': funFactEn,
+        'fun_fact_sw': funFactSw,
+      };
 
   MenuItemModel copyWith({
     double? rating,
     int? ratingCount,
     double? price,
+    int? spiceLevel,
+    List<String>? ingredients,
+    List<String>? allergens,
+    String? funFactEn,
+    String? funFactSw,
   }) {
     return MenuItemModel(
       id: id,
@@ -209,8 +321,54 @@ class MenuItemModel {
       categoryId: categoryId,
       categoryName: categoryName,
       availableCustomizations: availableCustomizations,
+      spiceLevel: spiceLevel ?? this.spiceLevel,
+      ingredients: ingredients ?? this.ingredients,
+      allergens: allergens ?? this.allergens,
+      funFactEn: funFactEn ?? this.funFactEn,
+      funFactSw: funFactSw ?? this.funFactSw,
     );
   }
+}
+
+class MenuReviewModel {
+  final String id;
+  final String menuId;
+  final String profileId;
+  final int rating;
+  final String comment;
+  final String createdAt;
+  final String updatedAt;
+
+  const MenuReviewModel({
+    required this.id,
+    required this.menuId,
+    required this.profileId,
+    required this.rating,
+    this.comment = '',
+    this.createdAt = '',
+    this.updatedAt = '',
+  });
+
+  factory MenuReviewModel.fromJson(Map<String, dynamic> json) =>
+      MenuReviewModel(
+        id: (json['id'] ?? '').toString(),
+        menuId: (json['menu_id'] ?? '').toString(),
+        profileId: (json['profile_id'] ?? '').toString(),
+        rating: (json['rating'] as num?)?.toInt() ?? 0,
+        comment: (json['comment'] ?? '').toString(),
+        createdAt: (json['created_at'] ?? '').toString(),
+        updatedAt: (json['updated_at'] ?? '').toString(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'menu_id': menuId,
+        'profile_id': profileId,
+        'rating': rating,
+        'comment': comment,
+        'created_at': createdAt,
+        'updated_at': updatedAt,
+      };
 }
 
 class CartItemModel {
@@ -532,7 +690,7 @@ class PromotionModel {
         id: (json['id'] ?? '').toString(),
         title: (json['title'] ?? '').toString(),
         subtitle: (json['subtitle'] ?? '').toString(),
-        discountBadge: (json['discount_badge'] ?? '🔥 OFFER').toString(),
+        discountBadge: (json['discount_badge'] ?? 'OFFER').toString(),
         promoCode: (json['promo_code'] ?? 'KARIBU2000').toString(),
         bgHex: (json['bg_hex'] ?? '#F6821F').toString(),
         imageKey: (json['image_key'] ?? 'nyamaChoma').toString(),
