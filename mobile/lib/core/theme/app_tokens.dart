@@ -68,3 +68,24 @@ abstract final class AppMotion {
 extension NavClearance on BuildContext {
   double get navClearance => AppSpace.navClearance + MediaQuery.paddingOf(this).bottom;
 }
+
+/// Shared card metrics so real widgets and their skeletons stay in sync
+/// with zero visual drift. All values come from AppRadius / AppSpace tokens.
+abstract final class PromoCardMetrics {
+  static const double width = 285;
+  static const double padding = AppSpace.lg;
+  static const double borderRadius = AppRadius.v22;
+}
+
+abstract final class DiscoveryCardMetrics {
+  static const double padding = AppSpace.lg;
+  static const double borderRadius = AppRadius.md;
+}
+
+abstract final class DishCardMetrics {
+  static const double cardHeight = 270;
+  static const double cardMaxWidth = 230;
+  static const double imageSize = 112;
+  static const double gap = AppSpace.v14;
+  static const double padding = AppSpace.md;
+}

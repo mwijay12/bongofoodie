@@ -10,6 +10,9 @@ import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
 import '../../core/widgets/skeleton/shimmer.dart';
 import '../../core/widgets/skeleton/skeleton_box.dart';
+import '../../core/widgets/skeleton/skeleton_dish_card.dart';
+import '../../core/widgets/skeleton/skeleton_discovery_card.dart';
+import '../../core/widgets/skeleton/skeleton_promo_card.dart';
 import '../../core/widgets/state_message.dart';
 import '../../core/widgets/tanzania_location_sheet.dart';
 import '../../data/mock/showcase_seed_data.dart';
@@ -22,13 +25,8 @@ import '../../state/menu_provider.dart';
 import '../../state/settings_provider.dart';
 import '../menu/widgets/dish_detail_sheet.dart';
 
-abstract final class _SignatureMetrics {
-  static const double cardHeight = 270;
-  static const double cardMaxWidth = 230;
-  static const double imageSize = 112;
-  static const double gap = AppSpace.v14;
-  static const double padding = AppSpace.md;
-}
+/// Shared metrics for dish cards — kept in app_tokens.dart (DishCardMetrics)
+/// so the real card and its skeleton stay in sync.
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -253,6 +251,7 @@ class HomeScreen extends ConsumerWidget {
               // 3. Special Promotions Carousel
               SliverToBoxAdapter(
                 child: promotionsAsync.when(
+                  skipLoadingOnRefresh: true,
                   data: (promos) => SizedBox(
                     height: AppSpace.v148,
                     child: ListView.separated(
@@ -269,7 +268,7 @@ class HomeScreen extends ConsumerWidget {
                             '/search?category=${Uri.encodeComponent(p.targetCategory)}',
                           ),
                           child: Container(
-                            width: 285,
+                            width: PromoCardMetrics.width,
                             padding: const EdgeInsets.all(AppSpace.lg),
                             decoration: BoxDecoration(
                               gradient: bg.green > bg.red
@@ -344,7 +343,16 @@ class HomeScreen extends ConsumerWidget {
                       },
                     ),
                   ),
-                  loading: () => const SizedBox.shrink(),
+                  loading: () => SizedBox(
+                    height: AppSpace.v148,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 2,
+                      separatorBuilder: (_, __) => const SizedBox(width: AppSpace.v14),
+                      itemBuilder: (_, __) => const SkeletonPromoCard(),
+                    ),
+                  ),
                   error: (_, __) => const SizedBox.shrink(),
                 ),
               ),
@@ -354,6 +362,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v18, AppSpace.v20, AppSpace.v10),
                   child: discoveriesAsync.when(
+                    skipLoadingOnRefresh: true,
                     data: (list) {
                       final featured = list.isNotEmpty
                           ? list.first
@@ -425,7 +434,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       );
                     },
-                    loading: () => const SizedBox.shrink(),
+                    loading: () => SkeletonDiscoveryCard(),
                     error: (_, __) => const SizedBox.shrink(),
                   ),
                 ),
@@ -458,6 +467,7 @@ class HomeScreen extends ConsumerWidget {
 
               // 6. Signature Dishes Responsive Grid
               menuAsync.when(
+                skipLoadingOnRefresh: true,
                 data: (items) {
                   final featured = items.take(8).toList();
                   if (featured.isEmpty) {
@@ -472,10 +482,10 @@ class HomeScreen extends ConsumerWidget {
                     sliver: SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: _SignatureMetrics.cardMaxWidth,
-                        mainAxisSpacing: _SignatureMetrics.gap,
-                        crossAxisSpacing: _SignatureMetrics.gap,
-                        mainAxisExtent: _SignatureMetrics.cardHeight,
+                        maxCrossAxisExtent: DishCardMetrics.cardMaxWidth,
+                        mainAxisSpacing: DishCardMetrics.gap,
+                        crossAxisSpacing: DishCardMetrics.gap,
+                        mainAxisExtent: DishCardMetrics.cardHeight,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -519,13 +529,13 @@ class HomeScreen extends ConsumerWidget {
                           padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0,
                               AppSpace.screenH, context.navClearance),
                           gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: _SignatureMetrics.cardMaxWidth,
-                            mainAxisSpacing: _SignatureMetrics.gap,
-                            crossAxisSpacing: _SignatureMetrics.gap,
-                            mainAxisExtent: _SignatureMetrics.cardHeight,
+                            maxCrossAxisExtent: DishCardMetrics.cardMaxWidth,
+                            mainAxisSpacing: DishCardMetrics.gap,
+                            crossAxisSpacing: DishCardMetrics.gap,
+                            mainAxisExtent: DishCardMetrics.cardHeight,
                           ),
                           itemCount: 2,
-                          itemBuilder: (_, __) => const _SignatureDishSkeleton(),
+                          itemBuilder: (_, __) => const SkeletonDishCard(),
                         ),
                       ),
                     ),
@@ -533,6 +543,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 error: (_, __) => SliverToBoxAdapter(
                   child: StateMessage.error(
+                    compact: true,
                     onRetry: () => ref.invalidate(allMenuItemsProvider),
                   ),
                 ),
@@ -640,31 +651,6 @@ class _ChefAtelierCard extends StatelessWidget {
   }
 }
 
-class _SignatureDishSkeleton extends StatelessWidget {
-  const _SignatureDishSkeleton();
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(_SignatureMetrics.padding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Center(child: SkeletonBox(
-              width: _SignatureMetrics.imageSize,
-              height: _SignatureMetrics.imageSize,
-              radius: AppRadius.v18,
-            )),
-            const SizedBox(height: AppSpace.v10),
-            const SkeletonBox(width: AppSpace.v40, height: AppSpace.md),
-            const SizedBox(height: AppSpace.v4),
-            const SkeletonLines(),
-            const Spacer(),
-            const SkeletonBox(width: AppSpace.v40, height: AppSpace.lg),
-          ],
-        ),
-      );
-}
-
 class _SignatureDishCard extends StatelessWidget {
   final MenuItemModel dish;
   final bool isFavorite;
@@ -691,7 +677,7 @@ class _SignatureDishCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.v22),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.all(_SignatureMetrics.padding),
+          padding: const EdgeInsets.all(DishCardMetrics.padding),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadius.v22),
             border: Border.all(
@@ -706,8 +692,8 @@ class _SignatureDishCard extends StatelessWidget {
                   Center(
                     child: DishImage(
                       imageRef: dish.imageUrl,
-                      width: _SignatureMetrics.imageSize,
-                      height: _SignatureMetrics.imageSize,
+                      width: DishCardMetrics.imageSize,
+                      height: DishCardMetrics.imageSize,
                       borderRadius: AppRadius.v18,
                     ),
                   ),
