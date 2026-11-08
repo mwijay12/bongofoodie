@@ -75,14 +75,18 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: RefreshIndicator(
+          child: RefreshIndicator.adaptive(
           color: AppColors.primary,
           onRefresh: () async {
-            ref.invalidate(promotionsProvider);
-            ref.invalidate(allMenuItemsProvider);
-            await ref.read(dailyDiscoveriesProvider.notifier).refresh();
+            await ref.refresh(promotionsProvider).catchError((_) {});
+            await ref.refresh(allMenuItemsProvider).catchError((_) {});
+            await ref
+                .read(dailyDiscoveriesProvider.notifier)
+                .refresh()
+                .catchError((_) {});
           },
           child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               // 1. Top Location + Role/Mode Header
               SliverToBoxAdapter(

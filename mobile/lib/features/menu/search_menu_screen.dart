@@ -102,22 +102,28 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v14, AppSpace.v20, AppSpace.v10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      t.isSw ? 'Menyu ya BongoFoodie' : 'Explore Our Menu',
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w800,
-                              ),
+        child: RefreshIndicator.adaptive(
+          color: AppColors.primary,
+          onRefresh: () async {
+            await ref.refresh(categoriesProvider).catchError((_) {});
+            await ref.refresh(allMenuItemsProvider).catchError((_) {});
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v14, AppSpace.v20, AppSpace.v10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        t.isSw ? 'Menyu ya BongoFoodie' : 'Explore Our Menu',
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                      ),
                     ),
-                  ),
                   PopupMenuButton<MenuSortOption>(
                     tooltip: 'Sort dishes',
                     initialValue: _sortBy,
@@ -349,6 +355,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 }
