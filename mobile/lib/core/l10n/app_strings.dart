@@ -61,6 +61,7 @@ class AppStrings {
       : 'Search Nyama Choma, Pilau, Samaki wa Kupaka...';
   String get allCategories => isSw ? 'Zote' : 'All';
   String get addToCart => isSw ? 'Weka Kikapuni' : 'Add to Cart';
+  String get clearSearch => isSw ? 'Safisha Tafuta' : 'Clear Search';
 
   // Cart & Checkout
   String get emptyCartTitle =>
