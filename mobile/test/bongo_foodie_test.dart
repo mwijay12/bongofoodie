@@ -66,7 +66,7 @@ void main() {
 
   group('MenuRepository & ChefAiRepository Showcase Fallbacks', () {
     test('filters menu accurately by both Category Name and Category ID', () async {
-      final repo = MenuRepository();
+      final repo = MenuRepository(showcaseLatency: Duration.zero);
       final byName = await repo.getMenu(category: 'Nyama Choma');
       final byId = await repo.getMenu(category: 'cat-choma');
 

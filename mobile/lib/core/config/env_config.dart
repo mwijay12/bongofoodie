@@ -1,6 +1,12 @@
 class EnvConfig {
   EnvConfig._();
 
+  static const int _showcaseLatencyMs =
+      int.fromEnvironment('SHOWCASE_LATENCY_MS', defaultValue: 700);
+  static Duration get showcaseLatency => hasSupabaseCredentials
+      ? Duration.zero
+      : Duration(milliseconds: _showcaseLatencyMs < 0 ? 0 : _showcaseLatencyMs);
+
   static const String supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
     defaultValue: '',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
+import '../theme/app_tokens.dart';
+import '../theme/skeleton_colors.dart';
 
 class DishImage extends StatelessWidget {
   final String imageRef;
@@ -15,7 +16,7 @@ class DishImage extends StatelessWidget {
     this.width,
     this.height,
     this.fit = BoxFit.cover,
-    this.borderRadius = 16,
+    this.borderRadius = AppRadius.v16,
   }) : imageRef = imageRef ?? imageKeyOrUrl ?? 'salad';
 
   static const Map<String, String> _localAssetMap = {
@@ -92,7 +93,7 @@ class DishImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
-        errorBuilder: (_, __, ___) => _fallbackBox(),
+        errorBuilder: (context, _, __) => _fallbackBox(context),
       );
     } else if (imageRef.startsWith('http://') || imageRef.startsWith('https://')) {
       child = Image.network(
@@ -100,27 +101,27 @@ class DishImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
-        loadingBuilder: (context, widget, progress) {
-          if (progress == null) return widget;
-          return Container(
-            width: width,
-            height: height,
-            color: AppColors.spiceOrange.withOpacity(0.08),
-            alignment: Alignment.center,
-            child: const SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.2,
-                color: AppColors.spiceOrange,
+        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+          if (wasSynchronouslyLoaded || child is _DishImageFallback) return child;
+          final reducedMotion = MediaQuery.disableAnimationsOf(context);
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: ColoredBox(color: SkeletonColors.of(context).base),
               ),
-            ),
+              AnimatedOpacity(
+                opacity: frame == null ? 0 : 1,
+                duration: reducedMotion ? Duration.zero : AppMotion.base,
+                curve: AppMotion.enter,
+                child: child,
+              ),
+            ],
           );
         },
-        errorBuilder: (_, __, ___) => _fallbackBox(),
+        errorBuilder: (context, _, __) => _fallbackBox(context),
       );
     } else {
-      child = _fallbackBox();
+      child = _fallbackBox(context);
     }
 
     return ClipRRect(
@@ -129,17 +130,25 @@ class DishImage extends StatelessWidget {
     );
   }
 
-  Widget _fallbackBox() {
-    return Container(
-      width: width,
-      height: height,
-      color: AppColors.spiceOrange.withOpacity(0.12),
-      alignment: Alignment.center,
-      child: const Icon(
-        Icons.restaurant_rounded,
-        color: AppColors.spiceOrange,
-        size: 32,
-      ),
-    );
-  }
+  Widget _fallbackBox(BuildContext context) =>
+      _DishImageFallback(width: width, height: height);
+}
+
+class _DishImageFallback extends StatelessWidget {
+  const _DishImageFallback({this.width, this.height});
+  final double? width;
+  final double? height;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: width,
+        height: height,
+        color: SkeletonColors.of(context).base,
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.restaurant_rounded,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          size: AppSpace.xxl,
+        ),
+      );
 }

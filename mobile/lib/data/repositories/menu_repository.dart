@@ -2,14 +2,25 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/supabase_service.dart';
+import '../../core/config/env_config.dart';
 import '../mock/showcase_seed_data.dart';
 import '../models/models.dart';
 
+final showcaseLatencyProvider = Provider<Duration>((ref) {
+  if (SupabaseService.isLive) return Duration.zero;
+  const configuredMs = int.fromEnvironment('SHOWCASE_LATENCY_MS', defaultValue: 700);
+  return Duration(milliseconds: configuredMs < 0 ? 0 : configuredMs);
+});
+
 final menuRepositoryProvider = Provider<MenuRepository>((ref) {
-  return MenuRepository();
+  return MenuRepository(showcaseLatency: ref.watch(showcaseLatencyProvider));
 });
 
 class MenuRepository {
+  MenuRepository({Duration? showcaseLatency})
+      : _showcaseLatency = showcaseLatency ?? EnvConfig.showcaseLatency;
+  final Duration _showcaseLatency;
+
   static const _favPrefKey = 'bongo_favorites_v2';
   static const _discoveriesPrefKey = 'bongo_discoveries_v2';
   static const _quizDatePrefKey = 'bongo_quiz_date_v2';
@@ -17,6 +28,9 @@ class MenuRepository {
 
   Future<List<CategoryModel>> getCategories() async {
     final sb = SupabaseService.client;
+    if (sb == null && _showcaseLatency > Duration.zero) {
+      await Future<void>.delayed(_showcaseLatency);
+    }
     if (sb != null) {
       try {
         final rows = await sb
@@ -40,6 +54,9 @@ class MenuRepository {
   }) async {
     List<MenuItemModel> items = [];
     final sb = SupabaseService.client;
+    if (sb == null && _showcaseLatency > Duration.zero) {
+      await Future<void>.delayed(_showcaseLatency);
+    }
 
     if (sb != null) {
       try {
@@ -133,6 +150,9 @@ class MenuRepository {
 
   Future<List<PromotionModel>> getPromotions() async {
     final sb = SupabaseService.client;
+    if (sb == null && _showcaseLatency > Duration.zero) {
+      await Future<void>.delayed(_showcaseLatency);
+    }
     if (sb != null) {
       try {
         final rows = await sb
@@ -153,6 +173,9 @@ class MenuRepository {
 
   Future<BranchSettingsModel> getBranchSettings() async {
     final sb = SupabaseService.client;
+    if (sb == null && _showcaseLatency > Duration.zero) {
+      await Future<void>.delayed(_showcaseLatency);
+    }
     if (sb != null) {
       try {
         final row = await sb
@@ -170,6 +193,9 @@ class MenuRepository {
 
   Future<Set<String>> getFavoriteIds(String? userId) async {
     final sb = SupabaseService.client;
+    if (sb == null && _showcaseLatency > Duration.zero) {
+      await Future<void>.delayed(_showcaseLatency);
+    }
     if (sb != null && userId != null && !userId.startsWith('demo-')) {
       try {
         final rows = await sb
@@ -246,6 +272,9 @@ class MenuRepository {
 
   Future<List<DiscoveryModel>> getDailyDiscoveries() async {
     final sb = SupabaseService.client;
+    if (sb == null && _showcaseLatency > Duration.zero) {
+      await Future<void>.delayed(_showcaseLatency);
+    }
     if (sb != null) {
       try {
         final rows = await sb

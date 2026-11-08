@@ -4,11 +4,22 @@ import '../../core/theme/app_tokens.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
+import '../../core/widgets/skeleton/shimmer.dart';
+import '../../core/widgets/skeleton/skeleton_box.dart';
+import '../../core/widgets/state_message.dart';
 import '../../data/models/models.dart';
 import '../../state/cart_provider.dart';
 import '../../state/menu_provider.dart';
 import '../../state/settings_provider.dart';
 import 'widgets/dish_detail_sheet.dart';
+
+abstract final class _MenuMetrics {
+  static const gridImage = 108.0;
+  static const listImage = 84.0;
+  static const gridRatio = 0.74;
+  static const gap = AppSpace.v14;
+  static const padding = AppSpace.md;
+}
 
 enum MenuSortOption { topRated, priceLowHigh, fastestPrep }
 
@@ -243,9 +254,9 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        mainAxisSpacing: 14,
-                        crossAxisSpacing: 14,
-                        childAspectRatio: 0.74,
+                        mainAxisSpacing: _MenuMetrics.gap,
+                        crossAxisSpacing: _MenuMetrics.gap,
+                        childAspectRatio: _MenuMetrics.gridRatio,
                       ),
                       itemCount: items.length,
                       itemBuilder: (ctx, i) {
@@ -293,9 +304,36 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                     },
                   );
                 },
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Failed to load menu: $e')),
+                loading: () => Semantics(
+                  label: t.loading,
+                  child: ExcludeSemantics(
+                    child: Shimmer(
+                      child: _gridMode
+                          ? GridView.builder(
+                              padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.xs,
+                                  AppSpace.screenH, context.navClearance),
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: _MenuMetrics.gap,
+                                crossAxisSpacing: _MenuMetrics.gap,
+                                childAspectRatio: _MenuMetrics.gridRatio,
+                              ),
+                              itemCount: 6,
+                              itemBuilder: (_, __) => const _MenuGridSkeleton(),
+                            )
+                          : ListView.separated(
+                              padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.xs,
+                                  AppSpace.screenH, context.navClearance),
+                              itemCount: 6,
+                              separatorBuilder: (_, __) => const SizedBox(height: AppSpace.v12),
+                              itemBuilder: (_, __) => const _MenuRowSkeleton(),
+                            ),
+                    ),
+                  ),
+                ),
+                error: (_, __) => StateMessage.error(
+                  onRetry: () => ref.invalidate(allMenuItemsProvider),
+                ),
               ),
             ),
           ],
@@ -303,6 +341,46 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
       ),
     );
   }
+}
+
+class _MenuGridSkeleton extends StatelessWidget {
+  const _MenuGridSkeleton();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(_MenuMetrics.padding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Center(child: SkeletonBox(
+              width: _MenuMetrics.gridImage,
+              height: _MenuMetrics.gridImage,
+              radius: AppRadius.v16,
+            )),
+            const SizedBox(height: AppSpace.v10),
+            const SkeletonLines(),
+            const Spacer(),
+            const SkeletonBox(width: AppSpace.v40, height: AppSpace.lg),
+          ],
+        ),
+      );
+}
+
+class _MenuRowSkeleton extends StatelessWidget {
+  const _MenuRowSkeleton();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(_MenuMetrics.padding),
+        child: Row(children: [
+          const SkeletonBox(width: _MenuMetrics.listImage,
+              height: _MenuMetrics.listImage, radius: AppRadius.v16),
+          const SizedBox(width: AppSpace.v14),
+          const Expanded(child: SkeletonLines(count: 3)),
+          const SizedBox(width: AppSpace.v14),
+          const SkeletonBox(width: AppSpace.huge, height: AppSpace.huge, circle: true),
+        ]),
+      );
 }
 
 class _MenuGridTile extends StatelessWidget {
@@ -327,7 +405,7 @@ class _MenuGridTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.md),
         onTap: onOpen,
         child: Container(
-          padding: const EdgeInsets.all(AppSpace.md),
+          padding: const EdgeInsets.all(_MenuMetrics.padding),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadius.md),
             border: Border.all(
@@ -340,8 +418,8 @@ class _MenuGridTile extends StatelessWidget {
               Center(
                 child: DishImage(
                   imageRef: dish.imageUrl,
-                  width: 108,
-                  height: 108,
+                  width: _MenuMetrics.gridImage,
+                  height: _MenuMetrics.gridImage,
                   borderRadius: AppRadius.v16,
                 ),
               ),
@@ -426,7 +504,7 @@ class _MenuListTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.md),
         onTap: onOpen,
         child: Container(
-          padding: const EdgeInsets.all(AppSpace.md),
+          padding: const EdgeInsets.all(_MenuMetrics.padding),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadius.md),
             border: Border.all(
@@ -437,8 +515,8 @@ class _MenuListTile extends StatelessWidget {
             children: [
               DishImage(
                 imageRef: dish.imageUrl,
-                width: 84,
-                height: 84,
+                width: _MenuMetrics.listImage,
+                height: _MenuMetrics.listImage,
                 borderRadius: AppRadius.v16,
               ),
               const SizedBox(width: AppSpace.v14),

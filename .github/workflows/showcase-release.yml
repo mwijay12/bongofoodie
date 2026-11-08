@@ -1,0 +1,56 @@
+name: Publish showcase APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (for example showcase-2026-11)
+        required: true
+      run_id:
+        description: Successful Flutter CI run ID on main
+        required: true
+      commit:
+        description: Exact main commit built by that CI run
+        required: true
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ inputs.tag }}
+      SOURCE_RUN: ${{ inputs.run_id }}
+      SOURCE_COMMIT: ${{ inputs.commit }}
+    steps:
+      - name: Verify successful main CI build
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^showcase-[a-zA-Z0-9._-]+$ ]]
+          [[ "$SOURCE_RUN" =~ ^[0-9]+$ ]]
+          [[ "$SOURCE_COMMIT" =~ ^[a-f0-9]{40}$ ]]
+          gh run view "$SOURCE_RUN" --json conclusion,status,headBranch,headSha,workflowName \
+            | jq -e --arg sha "$SOURCE_COMMIT" '.status == "completed" and .conclusion == "success" and .headBranch == "main" and .headSha == $sha and .workflowName == "Flutter Mobile CI & APK Showcase Build"'
+      - name: Download the APK and publish a prerelease
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release already exists; refusing to replace it."
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/bongo-apk"
+          gh run download "$SOURCE_RUN" --name bongo-foodie-release-apk --dir "$RUNNER_TEMP/bongo-apk"
+          mapfile -t apks < <(find "$RUNNER_TEMP/bongo-apk" -type f -name '*.apk')
+          if [ "${#apks[@]}" -ne 1 ]; then
+            echo "Expected exactly one APK, found ${#apks[@]}."
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" "${apks[0]}#BongoFoodie Showcase APK" \
+            --target "$SOURCE_COMMIT" --prerelease --title "BongoFoodie Showcase ($RELEASE_TAG)" \
+            --notes "Showcase APK from successful main CI run https://github.com/$GH_REPO/actions/runs/$SOURCE_RUN at commit $SOURCE_COMMIT. This build uses debug signing; it is for evaluation, not a Play Store release. Navigation and sheet behavior still need a human device check."

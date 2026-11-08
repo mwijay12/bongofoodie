@@ -1,5 +1,6 @@
 import '../../core/widgets/app_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_tokens.dart';
@@ -118,7 +119,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       ),
     ];
 
-    return Scaffold(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: AppColors.clear,
+        systemNavigationBarColor: AppColors.clear,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: Scaffold(
       body: Container(
         color: AppColors.cream,
         child: SafeArea(
@@ -345,6 +352,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
