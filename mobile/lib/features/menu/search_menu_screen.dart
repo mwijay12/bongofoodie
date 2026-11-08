@@ -105,12 +105,8 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
         child: RefreshIndicator.adaptive(
           color: AppColors.primary,
           onRefresh: () async {
-            try {
-              await ref.refresh(categoriesProvider);
-            } catch (_) {}
-            try {
-              await ref.refresh(allMenuItemsProvider);
-            } catch (_) {}
+            ref.invalidate(categoriesProvider);
+            ref.invalidate(allMenuItemsProvider);
           },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

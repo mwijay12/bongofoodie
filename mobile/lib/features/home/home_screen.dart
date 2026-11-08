@@ -9,7 +9,6 @@ import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
 import '../../core/widgets/skeleton/shimmer.dart';
-import '../../core/widgets/skeleton/skeleton_box.dart';
 import '../../core/widgets/skeleton/skeleton_dish_card.dart';
 import '../../core/widgets/skeleton/skeleton_discovery_card.dart';
 import '../../core/widgets/skeleton/skeleton_promo_card.dart';
@@ -78,12 +77,8 @@ class HomeScreen extends ConsumerWidget {
           child: RefreshIndicator.adaptive(
           color: AppColors.primary,
           onRefresh: () async {
-            try {
-              await ref.refresh(promotionsProvider);
-            } catch (_) {}
-            try {
-              await ref.refresh(allMenuItemsProvider);
-            } catch (_) {}
+            ref.invalidate(promotionsProvider);
+            ref.invalidate(allMenuItemsProvider);
             try {
               await ref.read(dailyDiscoveriesProvider.notifier).refresh();
             } catch (_) {}
