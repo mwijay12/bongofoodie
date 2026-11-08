@@ -76,6 +76,7 @@ class _StaffDispatchScreenState extends ConsumerState<StaffDispatchScreen>
     final ordersAsync = ref.watch(staffOrdersProvider);
     final discoveriesAsync = ref.watch(dailyDiscoveriesProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final t = ref.watch(appStringsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -84,23 +85,42 @@ class _StaffDispatchScreenState extends ConsumerState<StaffDispatchScreen>
               context.canPop() ? context.pop() : context.go('/home'),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
-        title: Column(
+        title: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Kitchen & Waiter Dispatch'),
-            Text(
-              '${(user?.role.value ?? 'staff').toUpperCase()} • Kijitonyama Live Queue',
-              style: const TextStyle(
-                fontSize: 11.5,
-                color: AppColors.primary,
-                fontWeight: FontWeight.w700,
-              ),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    t.staffDispatchTitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                  const SizedBox(height: AppSpace.v2),
+                  Text(
+                    '${(user?.role.value ?? 'staff').toUpperCase()} • Kijitonyama Live Queue',
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
         actions: [
           TextButton(
             onPressed: () => context.go('/home'),
+            style: TextButton.styleFrom(
+              minimumSize: const Size.square(AppSpace.huge),
+            ),
             child: const Text('Storefront →'),
           ),
         ],
@@ -236,7 +256,15 @@ class _StaffDispatchScreenState extends ConsumerState<StaffDispatchScreen>
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
-                                      '📍 ${order.deliveryAddress} • 📞 ${order.customerPhone}',
+                                      '📍 ${order.deliveryAddress}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                    Text(
+                                      '📞 ${order.customerPhone}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(fontSize: 12),
                                     ),
                                     const Divider(height: 18),
@@ -254,42 +282,19 @@ class _StaffDispatchScreenState extends ConsumerState<StaffDispatchScreen>
                                       ),
                                     ),
                                     const SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          '${AppStrings.formatTzs(order.totalAmount)} (${order.paymentMethodType.label})',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w800,
-                                            color: AppColors.primary,
-                                          ),
-                                        ),
-                                        const Spacer(),
-                                        if (next != null)
-                                          ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 14,
-                                                      vertical: 10),
-                                            ),
-                                            onPressed: () async {
-                                              await ref
-                                                  .read(staffOrdersProvider
-                                                      .notifier)
-                                                  .advanceStatus(
-                                                      order.id, next);
-                                              await ref
-                                                  .read(userOrdersProvider
-                                                      .notifier)
-                                                  .refresh();
-                                            },
-                                            child: Text(
-                                              _actionLabelFor(order.status),
-                                              style:
-                                                  const TextStyle(fontSize: 12),
-                                            ),
-                                          ),
-                                      ],
+                                    _OrderCardFooter(
+                                      total: AppStrings.formatTzs(order.totalAmount),
+                                      paymentMethod: order.paymentMethodType.label,
+                                      actionLabel:
+                                          next == null ? null : _actionLabelFor(order.status),
+                                      onAdvance: () async {
+                                        await ref
+                                            .read(staffOrdersProvider.notifier)
+                                            .advanceStatus(order.id, next!);
+                                        await ref
+                                            .read(userOrdersProvider.notifier)
+                                            .refresh();
+                                      },
                                     ),
                                   ],
                                 ),
@@ -377,6 +382,88 @@ class _StaffDispatchScreenState extends ConsumerState<StaffDispatchScreen>
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Order-card footer: total + payment method on row 1, full-width action on row 2.
+/// The button spans the full card width so it can never clip past the right edge
+/// of the card or the screen, even at large text scale factors.
+class _OrderCardFooter extends StatelessWidget {
+  const _OrderCardFooter({
+    required this.total,
+    required this.paymentMethod,
+    required this.actionLabel,
+    required this.onAdvance,
+  });
+
+  final String total;
+  final String paymentMethod;
+  final String? actionLabel;
+  final VoidCallback onAdvance;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Card content width: screen width minus the queue ListView horizontal
+    // padding (2 x AppSpace.screenH) and the card container padding (2 x AppSpace.lg).
+    final cardWidth =
+        MediaQuery.sizeOf(context).width - 2 * AppSpace.screenH - 2 * AppSpace.lg;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    total,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppColors.primaryDeep,
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                  const SizedBox(height: AppSpace.v2),
+                  Text(
+                    paymentMethod,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.inkMuted,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpace.v10),
+        if (actionLabel != null)
+          SizedBox(
+            width: cardWidth,
+            height: AppSpace.huge,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(AppSpace.huge),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpace.md),
+              ),
+              onPressed: onAdvance,
+              child: Text(
+                actionLabel!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

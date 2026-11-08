@@ -77,6 +77,7 @@ class AppStrings {
   // Profile & Staff
   String get staffDispatch =>
       isSw ? 'Dashibodi ya Jikoni & Wahudumu' : 'Open Staff Dispatch Console';
+  String get staffDispatchTitle => isSw ? 'Pelekezi ya Jikoni' : 'Kitchen Dispatch';
   String get myOrders => isSw ? 'Oda Zangu' : 'Orders';
   String get favorites => isSw ? 'Pendwa' : 'Favorites';
   String get darkMode => isSw ? 'Mwonekano wa Giza' : 'Dark Mode';

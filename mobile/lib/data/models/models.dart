@@ -32,8 +32,10 @@ enum PaymentMethod {
   String get dbValue =>
       this == PaymentMethod.lipaNamba ? 'lipanamba' : 'cash';
 
+  // Keep free of surrounding parentheses: screens render it as "(TSh ... $label)".
+  // Duplicating parens here caused "TSh 21,000 (Lipa Namba (Mobile Money))".
   String get label =>
-      this == PaymentMethod.lipaNamba ? 'Lipa Namba (Mobile Money)' : 'Cash on Delivery';
+      this == PaymentMethod.lipaNamba ? 'Lipa Namba - Mobile Money' : 'Cash on Delivery';
 
   static PaymentMethod fromString(String? raw) {
     final v = (raw ?? '').toLowerCase();
