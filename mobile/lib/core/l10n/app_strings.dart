@@ -8,6 +8,21 @@ class AppStrings {
 
   bool get isSw => lang == AppLanguage.sw;
 
+  // Loading and content states
+  String get loading => isSw ? 'Inapakia' : 'Loading';
+  String get errorTitle => isSw ? 'Kuna hitilafu' : 'Something went wrong';
+  String get errorBody => isSw
+      ? 'Hatukuweza kupakia. Angalia mtandao kisha jaribu tena.'
+      : 'We could not load this. Check your connection and try again.';
+  String get retry => isSw ? 'Jaribu tena' : 'Try again';
+  String get emptyMenuTitle => isSw ? 'Hakuna sahani zilizopatikana' : 'No dishes found';
+  String get emptyMenuBody => isSw ? 'Jaribu kutafuta kwa jina jingine.' : 'Try a different search.';
+  String get emptyFavoritesTitle => isSw ? 'Bado huna vipendwa' : 'No favorites yet';
+  String get emptyFavoritesBody => isSw ? 'Weka sahani unazopenda hapa ili uzipate kwa urahisi.' : 'Save dishes you love to find them here.';
+  String get emptyOrdersTitle => isSw ? 'Bado hujaagiza' : 'No orders yet';
+  String get emptyOrdersBody => isSw ? 'Oda zako zitaonekana hapa.' : 'Your orders will appear here.';
+  String get browseMenu => isSw ? 'Angalia menyu' : 'Browse menu';
+
   // Navigation
   String get navHome => isSw ? 'Nyumbani' : 'Home';
   String get navSearch => isSw ? 'Menyu' : 'Menu';
