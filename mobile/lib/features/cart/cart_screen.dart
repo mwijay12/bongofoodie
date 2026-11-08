@@ -224,7 +224,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                   ElevatedButton.icon(
                     onPressed: () => context.go('/search'),
                     icon: const Icon(Icons.restaurant_menu_rounded),
-                    label: Text(t.isSw ? 'Fungua Menyu' : 'Browse Swahili Menu'),
+                    label: Text(t.browseMenu),
                   ),
                 ],
               ),

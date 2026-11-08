@@ -1,4 +1,5 @@
 import '../../core/widgets/app_sheet.dart';
+import '../../core/widgets/state_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,7 +20,9 @@ class ProfileScreen extends ConsumerWidget {
   void _openFavoritesModal(
     BuildContext context,
     List<MenuItemModel> favDishes,
+    WidgetRef ref,
   ) {
+    final t = ref.watch(appStringsProvider);
     showAppSheet<void>(
       context,
       showDragHandle: true,
@@ -32,18 +35,26 @@ class ProfileScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '❤️ Saved Favorites (${favDishes.length})',
-                style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
+              Row(
+                children: [
+                  const Icon(Icons.favorite_rounded, color: AppColors.primary),
+                  const SizedBox(width: AppSpace.v8),
+                  Expanded(
+                    child: Text(
+                      '${t.favorites} (${favDishes.length})',
+                      style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
                     ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpace.v12),
               Expanded(
                 child: favDishes.isEmpty
-                    ? const Center(
-                        child: Text(
-                            'Tap the heart icon on any dish to save it here!'),
+                    ? StateMessage.empty(
+                        title: t.emptyFavoritesTitle,
+                        body: t.emptyFavoritesBody,
                       )
                     : ListView.separated(
                         controller: controller,
@@ -273,7 +284,7 @@ class ProfileScreen extends ConsumerWidget {
                   title: t.favorites,
                   value: '${favorites.length}',
                   icon: Icons.favorite_rounded,
-                  onTap: () => _openFavoritesModal(context, favDishes),
+                  onTap: () => _openFavoritesModal(context, favDishes, ref),
                 ),
                 const SizedBox(width: AppSpace.v10),
                 _StatCard(
