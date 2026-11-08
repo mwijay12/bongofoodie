@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../theme/app_tokens.dart';
 import '../theme/app_colors.dart';
 
 /// Floating navigation with equal, accessible targets even on narrow screens.
@@ -33,7 +34,7 @@ class BongoGlassNavBar extends StatelessWidget {
     ];
     final dark = Theme.of(context).brightness == Brightness.dark;
     final reduceMotion = MediaQuery.of(context).disableAnimations;
-    final foreground = dark ? Colors.white : AppColors.deepCharcoal;
+    final foreground = dark ? AppColors.surface : AppColors.deepCharcoal;
 
     return SafeArea(
       top: false,
@@ -46,7 +47,7 @@ class BongoGlassNavBar extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(26),
                 boxShadow: [BoxShadow(
-                  color: Colors.black.withOpacity(dark ? .28 : .10),
+                  color: AppColors.scrim.withOpacity(dark ? .28 : .10),
                   blurRadius: 30,
                   offset: const Offset(0, 10),
                 )],
@@ -58,9 +59,9 @@ class BongoGlassNavBar extends StatelessWidget {
                   child: Container(
                     height: 70,
                     decoration: BoxDecoration(
-                      color: (dark ? const Color(0xFF24252A) : Colors.white).withOpacity(.92),
+                      color: (dark ? AppColors.navDark : AppColors.surface).withOpacity(.92),
                       borderRadius: BorderRadius.circular(26),
-                      border: Border.all(color: dark ? Colors.white12 : Colors.white),
+                      border: Border.all(color: dark ? AppColors.surface.withOpacity(0.12) : AppColors.surface),
                     ),
                     child: Row(
                       children: List.generate(icons.length, (index) {
@@ -88,10 +89,10 @@ class BongoGlassNavBar extends StatelessWidget {
                                       AnimatedContainer(
                                         duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 220),
                                         curve: Curves.easeOutCubic,
-                                        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: AppSpace.xs),
                                         decoration: BoxDecoration(
-                                          color: selected ? AppColors.primary.withOpacity(.14) : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(20),
+                                          color: selected ? AppColors.primary.withOpacity(.14) : AppColors.clear,
+                                          borderRadius: BorderRadius.circular(AppRadius.md),
                                         ),
                                         child: Stack(clipBehavior: Clip.none, children: [
                                           Icon(icons[index], size: 21, color: color),
@@ -100,11 +101,11 @@ class BongoGlassNavBar extends StatelessWidget {
                                               right: -10,
                                               top: -7,
                                               child: Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                                padding: const EdgeInsets.symmetric(horizontal: AppSpace.xs, vertical: 1),
                                                 decoration: BoxDecoration(color: AppColors.primaryDark,
                                                   borderRadius: BorderRadius.circular(10)),
                                                 child: Text(cartCount > 99 ? '99+' : '$cartCount',
-                                                  style: const TextStyle(color: Colors.white, fontSize: 9,
+                                                  style: const TextStyle(color: AppColors.surface, fontSize: 9,
                                                     fontWeight: FontWeight.w700)),
                                               ),
                                             ),

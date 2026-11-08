@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/models.dart';
@@ -140,7 +141,7 @@ class _StaffDispatchScreenState extends ConsumerState<StaffDispatchScreen>
                             'Active Queue (${allOrders.where((o) => o.status != OrderStatus.delivered).length})',
                             style: TextStyle(
                               color: _statusFilter == 'active'
-                                  ? Colors.white
+                                  ? AppColors.surface
                                   : null,
                               fontWeight: FontWeight.w800,
                             ),
@@ -156,7 +157,7 @@ class _StaffDispatchScreenState extends ConsumerState<StaffDispatchScreen>
                             'All Orders (${allOrders.length})',
                             style: TextStyle(
                               color:
-                                  _statusFilter == 'all' ? Colors.white : null,
+                                  _statusFilter == 'all' ? AppColors.surface : null,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -188,12 +189,12 @@ class _StaffDispatchScreenState extends ConsumerState<StaffDispatchScreen>
                               final order = filtered[i];
                               final next = _nextStatusFor(order.status);
                               return Container(
-                                padding: const EdgeInsets.all(16),
+                                padding: const EdgeInsets.all(AppSpace.lg),
                                 decoration: BoxDecoration(
                                   color: isDark
                                       ? AppColors.darkCard
-                                      : Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
+                                      : AppColors.surface,
+                                  borderRadius: BorderRadius.circular(AppRadius.md),
                                   border: Border.all(
                                     color: isDark
                                         ? AppColors.darkBorder
@@ -215,12 +216,12 @@ class _StaffDispatchScreenState extends ConsumerState<StaffDispatchScreen>
                                         const Spacer(),
                                         Container(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 4),
+                                              horizontal: 10, vertical: AppSpace.xs),
                                           decoration: BoxDecoration(
                                             color: AppColors.primary
                                                 .withOpacity(0.14),
                                             borderRadius:
-                                                BorderRadius.circular(999),
+                                                BorderRadius.circular(AppRadius.pill),
                                           ),
                                           child: Text(
                                             order.status.labelEn,
@@ -305,7 +306,7 @@ class _StaffDispatchScreenState extends ConsumerState<StaffDispatchScreen>
 
           // TAB 2: Admin Daily Swahili Discoveries Manager
           ListView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpace.screenH),
             children: [
               const Text(
                 'Publish Daily Swahili Food Fact',

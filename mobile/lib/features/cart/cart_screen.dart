@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
@@ -116,7 +117,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
             const SizedBox(height: 12),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(AppSpace.md),
               decoration: BoxDecoration(
                 color: AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(14),
@@ -186,12 +187,12 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
         body: SafeArea(
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(AppSpace.xxl),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(AppSpace.xl),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.12),
                       shape: BoxShape.circle,
@@ -265,10 +266,10 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
             ...cart.items.map((item) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(AppSpace.md),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkCard : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  color: isDark ? AppColors.darkCard : AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                   border: Border.all(
                     color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
                   ),
@@ -363,10 +364,10 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                             .map(
                               (c) => Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 3),
+                                    horizontal: AppSpace.sm, vertical: 3),
                                 decoration: BoxDecoration(
                                   color: AppColors.primary.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(999),
+                                  borderRadius: BorderRadius.circular(AppRadius.pill),
                                 ),
                                 child: Text(
                                   '+ ${c.name} (${AppStrings.formatTzs(c.price)})',
@@ -391,8 +392,8 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
             // 2. Delivery Location Card
             ListTile(
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              tileColor: isDark ? AppColors.darkCard : Colors.white,
+                  const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: AppSpace.xs),
+              tileColor: isDark ? AppColors.darkCard : AppColors.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
                 side: BorderSide(
@@ -400,7 +401,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                 ),
               ),
               leading: const CircleAvatar(
-                backgroundColor: Color(0x26FE8C00),
+                backgroundColor: AppColors.primarySoft,
                 child: Icon(Icons.location_on_rounded, color: AppColors.primary),
               ),
               title: Text(
@@ -563,10 +564,10 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
 
             // 5. Transparent Order Summary Card
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpace.lg),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkCard : Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                color: isDark ? AppColors.darkCard : AppColors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 border: Border.all(
                   color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
                 ),
@@ -646,11 +647,11 @@ class _PaymentChoiceCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppSpace.md),
         decoration: BoxDecoration(
           color: selected
               ? AppColors.primary.withOpacity(0.14)
-              : (isDark ? AppColors.darkCard : Colors.white),
+              : (isDark ? AppColors.darkCard : AppColors.surface),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: selected
@@ -662,7 +663,7 @@ class _PaymentChoiceCard extends StatelessWidget {
         child: Row(
           children: [
             Icon(icon,
-                color: selected ? AppColors.primary : Colors.grey, size: 22),
+                color: selected ? AppColors.primary : AppColors.inkMuted, size: 22),
             const SizedBox(width: 10),
             Expanded(
               child: Column(

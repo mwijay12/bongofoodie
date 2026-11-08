@@ -156,7 +156,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.4,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           ),
                         )
                       : Text(

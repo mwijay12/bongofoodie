@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme/app_tokens.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
@@ -118,29 +119,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF1E130B),
-              Color(0xFF120D09),
-            ],
-          ),
-        ),
+        color: AppColors.cream,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpace.xl, vertical: 14),
             child: Column(
               children: [
                 // Top Bar: Brand + EN/SW Toggle + Skip
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(AppSpace.sm),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withOpacity(0.18),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
                       ),
                       child: const Icon(
                         Icons.local_fire_department_rounded,
@@ -152,7 +144,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     const Text(
                       'BongoFoodie',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppColors.ink,
                         fontWeight: FontWeight.w800,
                         fontSize: 19,
                         letterSpacing: -0.3,
@@ -160,23 +152,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                     const Spacer(),
                     InkWell(
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
                       onTap: () =>
                           ref.read(appSettingsProvider.notifier).toggleLanguage(),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                            horizontal: AppSpace.md, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(999),
+                          color: AppColors.surfaceWarm,
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.18),
+                            color: AppColors.outline,
                           ),
                         ),
                         child: Text(
                           settings.isSwahili ? '🇹🇿 SW' : '🇬🇧 EN',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppColors.ink,
                             fontWeight: FontWeight.w700,
                             fontSize: 12,
                           ),
@@ -228,7 +220,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 horizontal: 14, vertical: 6),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withOpacity(0.16),
-                              borderRadius: BorderRadius.circular(999),
+                              borderRadius: BorderRadius.circular(AppRadius.pill),
                               border: Border.all(
                                 color: AppColors.primary.withOpacity(0.35),
                               ),
@@ -236,7 +228,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             child: Text(
                               slide.badge,
                               style: const TextStyle(
-                                color: AppColors.primaryLight,
+                                color: AppColors.primaryDeep,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 1.1,
@@ -248,7 +240,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             slide.title,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: AppColors.ink,
                               fontSize: 26,
                               fontWeight: FontWeight.w800,
                               height: 1.2,
@@ -259,7 +251,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             slide.subtitle,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.75),
+                              color: AppColors.inkMuted,
                               fontSize: 14.5,
                               height: 1.5,
                               fontWeight: FontWeight.w500,
@@ -281,14 +273,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     final active = i == _pageIndex;
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 220),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      margin: const EdgeInsets.symmetric(horizontal: AppSpace.xs),
                       height: 8,
                       width: active ? 28 : 8,
                       decoration: BoxDecoration(
                         color: active
                             ? AppColors.primary
-                            : Colors.white.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(999),
+                            : AppColors.outline,
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
                       ),
                     );
                   }),
@@ -313,8 +305,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   width: double.infinity,
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: BorderSide(color: Colors.white.withOpacity(0.28)),
+                      foregroundColor: AppColors.ink,
+                      side: BorderSide(color: AppColors.outline),
                     ),
                     onPressed: () {
                       if (_pageIndex < slides.length - 1) {
@@ -343,7 +335,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         ? 'Masharti ya Huduma & Faragha • Dar es Salaam'
                         : 'Terms of Service & Privacy • Dar es Salaam',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
+                      color: AppColors.inkMuted,
                       fontSize: 12,
                     ),
                   ),
