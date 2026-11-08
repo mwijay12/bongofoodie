@@ -83,21 +83,22 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(SkeletonDishCard), findsNothing);
-      expect(find.text('Retry'), findsWidgets);
-      await tester.tap(find.text('Retry').first);
+      expect(find.text('Try again'), findsWidgets);
+      await tester.tap(find.text('Try again').first);
       await tester.pumpAndSettle();
-      expect(find.text('Retry'), findsWidgets);
+      expect(find.text('Try again'), findsWidgets);
     });
 
     testWidgets('home shows promo and dish skeletons during loading ($brightness)',
         (tester) async {
       SharedPreferences.setMockInitialValues({});
-      final pending = Completer<List<MenuItemModel>>();
+      final pendingMenu = Completer<List<MenuItemModel>>();
+      final pendingPromos = Completer<List<dynamic>>();
       await tester.pumpWidget(ProviderScope(
         overrides: [
           showcaseLatencyProvider.overrideWithValue(Duration.zero),
-          allMenuItemsProvider.overrideWith((ref) => pending.future),
-          promotionsProvider.overrideWith((ref) async => []),
+          allMenuItemsProvider.overrideWith((ref) => pendingMenu.future),
+          promotionsProvider.overrideWith((ref) => pendingPromos.future),
         ],
         child: MaterialApp(
           theme: ThemeData(brightness: brightness),
@@ -108,7 +109,8 @@ void main() {
       expect(find.byType(SkeletonPromoCard), findsWidgets);
       expect(find.byType(SkeletonDishCard), findsWidgets);
       expect(find.byType(CircularProgressIndicator), findsNothing);
-      pending.complete([]);
+      pendingPromos.complete([]);
+      pendingMenu.complete([]);
       await tester.pumpAndSettle();
     });
 
@@ -135,10 +137,11 @@ void main() {
     testWidgets('menu empty with query shows no results ($brightness)',
         (tester) async {
       SharedPreferences.setMockInitialValues({});
+      final pendingMenu = Completer<List<MenuItemModel>>();
       await tester.pumpWidget(ProviderScope(
         overrides: [
           showcaseLatencyProvider.overrideWithValue(Duration.zero),
-          allMenuItemsProvider.overrideWith((ref) async => []),
+          allMenuItemsProvider.overrideWith((ref) => pendingMenu.future),
           categoriesProvider.overrideWith((ref) async => []),
         ],
         child: MaterialApp(
@@ -151,6 +154,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.text('No matching dishes found'), findsWidgets);
+      pendingMenu.complete([]);
+      await tester.pumpAndSettle();
     });
   }
 }
