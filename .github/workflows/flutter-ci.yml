@@ -90,6 +90,7 @@ jobs:
         run: |
           flutter test --reporter expanded > /tmp/flutter-tests.log 2>&1 || {
             cat /tmp/flutter-tests.log
+            while IFS= read -r line; do echo "::error::$line"; done < <(grep -A 12 'The relevant error-causing widget was:' /tmp/flutter-tests.log | head -40)
             while IFS= read -r line; do echo "::error::$line"; done < <(grep -E "\[E\]|Expected:|Actual:|overflowed|Exception|Error|Some tests failed" /tmp/flutter-tests.log | head -9)
             exit 1
           }

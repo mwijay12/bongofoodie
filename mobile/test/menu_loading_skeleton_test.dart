@@ -22,6 +22,7 @@ void main() {
         overrides: [
           showcaseLatencyProvider.overrideWithValue(Duration.zero),
           allMenuItemsProvider.overrideWith((ref) => pending.future),
+          promotionsProvider.overrideWith((ref) async => []),
         ],
         child: MaterialApp(
           theme: ThemeData(brightness: brightness),
@@ -45,6 +46,7 @@ void main() {
         overrides: [
           showcaseLatencyProvider.overrideWithValue(Duration.zero),
           allMenuItemsProvider.overrideWith((ref) => pending.future),
+          promotionsProvider.overrideWith((ref) async => []),
         ],
         child: MaterialApp(
           theme: ThemeData(brightness: brightness),

@@ -1,4 +1,6 @@
 import 'package:bongo_foodie/main.dart';
+import 'package:bongo_foodie/router/app_router.dart';
+import 'package:go_router/go_router.dart';
 import 'package:bongo_foodie/data/repositories/menu_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,8 +16,15 @@ void main() {
         'bongo_theme_dark_v2': dark,
         'bongo_onboarded_v2': true,
       });
+      final router = GoRouter(routes: [
+        GoRoute(path: '/', builder: (context, state) => const Scaffold()),
+      ]);
+      addTearDown(router.dispose);
       await tester.pumpWidget(ProviderScope(
-        overrides: [showcaseLatencyProvider.overrideWithValue(Duration.zero)],
+        overrides: [
+          showcaseLatencyProvider.overrideWithValue(Duration.zero),
+          appRouterProvider.overrideWithValue(router),
+        ],
         child: const BongoFoodieApp(),
       ));
       await tester.pump();
