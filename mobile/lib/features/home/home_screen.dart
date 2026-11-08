@@ -285,6 +285,7 @@ class HomeScreen extends ConsumerWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       if (p.badgeText.isNotEmpty)
                                         Container(
