@@ -182,16 +182,16 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+              padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v12, AppSpace.v20, AppSpace.v8),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(AppSpace.v10),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [AppColors.primary, AppColors.primaryDark],
                       ),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(AppRadius.v14),
                     ),
                     child: const Icon(
                       Icons.auto_awesome_rounded,
@@ -199,7 +199,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                       size: 20,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpace.v12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,7 +249,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
               child: Container(
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkCard : AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(AppRadius.v16),
                   border: Border.all(
                     color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
                   ),
@@ -260,7 +260,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                   dividerColor: AppColors.clear,
                   indicator: BoxDecoration(
                     color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(AppRadius.v14),
                   ),
                   labelColor: AppColors.surface,
                   labelStyle: const TextStyle(
@@ -278,7 +278,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpace.v8),
 
             Expanded(
               child: TabBarView(
@@ -306,12 +306,12 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
     return Column(
       children: [
         SizedBox(
-          height: 38,
+          height: AppSpace.v38,
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
             scrollDirection: Axis.horizontal,
             itemCount: prompts.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, __) => const SizedBox(width: AppSpace.v8),
             itemBuilder: (_, idx) => ActionChip(
               label: Text(
                 prompts[idx],
@@ -324,11 +324,11 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
             ),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppSpace.v6),
         Expanded(
           child: ListView.builder(
             controller: _scrollCtrl,
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+            padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v8, AppSpace.v20, AppSpace.v16),
             itemCount: _messages.length + (_sendingChat ? 1 : 0),
             itemBuilder: (context, index) {
               if (index >= _messages.length) {
@@ -337,7 +337,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                   child: Padding(
                     padding: EdgeInsets.all(AppSpace.md),
                     child: SizedBox(
-                      width: 22,
+                      width: AppSpace.v22,
                       height: 22,
                       child: CircularProgressIndicator(strokeWidth: 2.5),
                     ),
@@ -349,7 +349,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                 alignment:
                     msg.isUser ? Alignment.centerRight : Alignment.centerLeft,
                 child: Container(
-                  margin: const EdgeInsets.only(bottom: 12),
+                  margin: const EdgeInsets.only(bottom: AppSpace.v12),
                   constraints: BoxConstraints(
                     maxWidth: MediaQuery.of(context).size.width * 0.78,
                   ),
@@ -360,10 +360,10 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                         ? AppColors.primary
                         : (isDark ? AppColors.darkCard : AppColors.surface),
                     borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(18),
-                      topRight: const Radius.circular(18),
-                      bottomLeft: Radius.circular(msg.isUser ? 18 : 4),
-                      bottomRight: Radius.circular(msg.isUser ? 4 : 18),
+                      topLeft: const Radius.circular(AppRadius.v18),
+                      topRight: const Radius.circular(AppRadius.v18),
+                      bottomLeft: Radius.circular(msg.isUser ? AppRadius.v18 : AppRadius.v4),
+                      bottomRight: Radius.circular(msg.isUser ? AppRadius.v4 : AppRadius.v18),
                     ),
                     border: msg.isUser
                         ? null
@@ -388,7 +388,8 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 114),
+          padding: EdgeInsets.fromLTRB(AppSpace.lg, AppSpace.xs, AppSpace.lg,
+              MediaQuery.viewInsetsOf(context).bottom > 0 ? AppSpace.md : context.navClearance),
           child: Row(
             children: [
               Expanded(
@@ -402,11 +403,11 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpace.v10),
               IconButton.filled(
                 style: IconButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.all(AppSpace.v14),
                 ),
                 onPressed: _sendingChat ? null : () => _sendMessage(),
                 icon: const Icon(Icons.send_rounded, color: AppColors.surface),
@@ -426,7 +427,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
     ];
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 120),
+      padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.sm, AppSpace.screenH, context.navClearance),
       children: [
         Text(
           isSw
@@ -440,7 +441,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                 : AppColors.lightTextSecondary,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpace.v12),
         TextField(
           controller: _dreamDishCtrl,
           maxLines: 3,
@@ -450,7 +451,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                 : 'e.g. Charcoal-grilled snapper in spicy coconut cream with sweet fried plantains...',
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: AppSpace.v10),
         Wrap(
           spacing: 8,
           runSpacing: 6,
@@ -463,14 +464,14 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
               )
               .toList(),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpace.v14),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
             onPressed: _composingDish ? null : () => _generateCustomDish(),
             icon: _composingDish
                 ? const SizedBox(
-                    width: 18,
+                    width: AppSpace.v18,
                     height: 18,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.2,
@@ -487,12 +488,12 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
         ),
 
         if (_generatedDish != null) ...[
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpace.v20),
           Container(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.all(AppSpace.v18),
             decoration: BoxDecoration(
               color: isDark ? AppColors.darkCard : AppColors.surface,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(AppRadius.v24),
               border: Border.all(
                 color: AppColors.primary.withOpacity(0.45),
                 width: 1.4,
@@ -507,16 +508,16 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                       imageRef: _generatedDish!.imageUrl,
                       width: 84,
                       height: 84,
-                      borderRadius: 18,
+                      borderRadius: AppRadius.v18,
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: AppSpace.v14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpace.sm, vertical: 3),
+                                horizontal: AppSpace.sm, vertical: AppSpace.v3),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withOpacity(0.14),
                               borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -530,7 +531,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                               ),
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: AppSpace.v6),
                           Text(
                             _generatedDish!.name,
                             style: const TextStyle(
@@ -538,7 +539,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                               fontSize: 17,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: AppSpace.v4),
                           Text(
                             '${AppStrings.formatTzs(_generatedDish!.price)} base • ${_generatedDish!.calories} kcal • ${_generatedDish!.protein}g protein',
                             style: const TextStyle(
@@ -552,17 +553,17 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpace.v12),
                 Text(
                   _generatedDish!.description,
                   style: const TextStyle(fontSize: 13, height: 1.45),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpace.v14),
                 const Text(
                   'Optional Chef Sides (+TSh 1,000 each):',
                   style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpace.v8),
                 Wrap(
                   spacing: 8,
                   runSpacing: 6,
@@ -584,7 +585,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                     );
                   }).toList(),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpace.v16),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(

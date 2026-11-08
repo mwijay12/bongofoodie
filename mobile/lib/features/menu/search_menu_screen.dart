@@ -93,7 +93,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
+              padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v14, AppSpace.v20, AppSpace.v10),
               child: Row(
                 children: [
                   Expanded(
@@ -159,11 +159,11 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.v12),
 
             // Category Filter Chips
             SizedBox(
-              height: 42,
+              height: AppSpace.v42,
               child: categoriesAsync.when(
                 data: (cats) {
                   final names = ['All', ...cats.map((c) => c.name)];
@@ -171,7 +171,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
                     scrollDirection: Axis.horizontal,
                     itemCount: names.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    separatorBuilder: (_, __) => const SizedBox(width: AppSpace.v8),
                     itemBuilder: (context, index) {
                       final catName = names[index];
                       final selected = _selectedCategory.toLowerCase() ==
@@ -197,7 +197,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                 error: (_, __) => const SizedBox.shrink(),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.v12),
 
             // Filtered Results
             Expanded(
@@ -213,7 +213,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                           children: [
                             const Icon(Icons.search_off_rounded,
                                 size: 54, color: AppColors.primary),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpace.v12),
                             Text(
                               t.isSw
                                   ? 'Hakuna chakula kilichopatikana'
@@ -223,7 +223,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                                 fontSize: 16,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppSpace.v8),
                             TextButton(
                               onPressed: () {
                                 _searchCtrl.clear();
@@ -239,7 +239,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
 
                   if (_gridMode) {
                     return GridView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 120),
+                      padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.xs, AppSpace.screenH, context.navClearance),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
@@ -270,9 +270,9 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                   }
 
                   return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 120),
+                    padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.xs, AppSpace.screenH, context.navClearance),
                     itemCount: items.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    separatorBuilder: (_, __) => const SizedBox(height: AppSpace.v12),
                     itemBuilder: (ctx, i) {
                       final dish = items[i];
                       return _MenuListTile(
@@ -342,10 +342,10 @@ class _MenuGridTile extends StatelessWidget {
                   imageRef: dish.imageUrl,
                   width: 108,
                   height: 108,
-                  borderRadius: 16,
+                  borderRadius: AppRadius.v16,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpace.v10),
               Text(
                 dish.name,
                 maxLines: 1,
@@ -355,7 +355,7 @@ class _MenuGridTile extends StatelessWidget {
                   fontSize: 14,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: AppSpace.v2),
               Text(
                 '★ ${dish.rating.toStringAsFixed(1)} • ${dish.calories} kcal',
                 style: TextStyle(
@@ -380,12 +380,12 @@ class _MenuGridTile extends StatelessWidget {
                   ),
                   InkWell(
                     onTap: onAdd,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(AppRadius.v10),
                     child: Container(
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(AppSpace.v6),
                       decoration: BoxDecoration(
                         color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(AppRadius.v10),
                       ),
                       child: const Icon(
                         Icons.add_rounded,
@@ -439,9 +439,9 @@ class _MenuListTile extends StatelessWidget {
                 imageRef: dish.imageUrl,
                 width: 84,
                 height: 84,
-                borderRadius: 16,
+                borderRadius: AppRadius.v16,
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: AppSpace.v14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -453,7 +453,7 @@ class _MenuListTile extends StatelessWidget {
                         fontSize: 15,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpace.v4),
                     Text(
                       dish.description,
                       maxLines: 2,
@@ -465,7 +465,7 @@ class _MenuListTile extends StatelessWidget {
                             : AppColors.lightTextSecondary,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpace.v8),
                     Row(
                       children: [
                         Text(
@@ -475,7 +475,7 @@ class _MenuListTile extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: AppSpace.v10),
                         Text(
                           '★ ${dish.rating.toStringAsFixed(1)} • ${dish.prepTimeMins}m',
                           style: const TextStyle(

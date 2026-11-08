@@ -1,3 +1,4 @@
+import '../../core/widgets/app_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,16 +20,15 @@ class ProfileScreen extends ConsumerWidget {
     BuildContext context,
     List<MenuItemModel> favDishes,
   ) {
-    showModalBottomSheet<void>(
-      context: context,
+    showAppSheet<void>(
+      context,
       showDragHandle: true,
-      isScrollControlled: true,
       builder: (ctx) => DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.65,
         maxChildSize: 0.9,
         builder: (_, controller) => Padding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+          padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v4, AppSpace.v20, AppSpace.v24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -38,7 +38,7 @@ class ProfileScreen extends ConsumerWidget {
                       fontWeight: FontWeight.w800,
                     ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpace.v12),
               Expanded(
                 child: favDishes.isEmpty
                     ? const Center(
@@ -48,18 +48,18 @@ class ProfileScreen extends ConsumerWidget {
                     : ListView.separated(
                         controller: controller,
                         itemCount: favDishes.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        separatorBuilder: (_, __) => const SizedBox(height: AppSpace.v10),
                         itemBuilder: (_, idx) {
                           final dish = favDishes[idx];
                           return ListTile(
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(AppRadius.v16),
                             ),
                             leading: DishImage(
                               imageRef: dish.imageUrl,
                               width: 52,
                               height: 52,
-                              borderRadius: 12,
+                              borderRadius: AppRadius.v12,
                             ),
                             title: Text(
                               dish.name,
@@ -141,16 +141,16 @@ class ProfileScreen extends ConsumerWidget {
       body: SafeArea(
         bottom: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 130),
+          padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.md, AppSpace.screenH, context.navClearance),
           children: [
             // 1. User Identity Card
             Container(
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(AppSpace.v18),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [AppColors.ember, AppColors.ink],
                 ),
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(AppRadius.v24),
               ),
               child: Column(
                 children: [
@@ -168,7 +168,7 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 14),
+                      const SizedBox(width: AppSpace.v14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,10 +187,10 @@ class ProfileScreen extends ConsumerWidget {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: AppSpace.v8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: AppSpace.sm, vertical: 2),
+                                      horizontal: AppSpace.sm, vertical: AppSpace.v2),
                                   decoration: BoxDecoration(
                                     color: AppColors.primary.withOpacity(0.28),
                                     borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -206,7 +206,7 @@ class ProfileScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 3),
+                            const SizedBox(height: AppSpace.v3),
                             Text(
                               user?.email ?? 'Sign in to sync across devices',
                               style: TextStyle(
@@ -219,7 +219,7 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: AppSpace.v14),
 
                   // Quick Role Switcher / Staff Console CTA
                   Row(
@@ -257,7 +257,7 @@ class ProfileScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpace.v16),
 
             // 2. Stats Row
             Row(
@@ -268,14 +268,14 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.receipt_long_rounded,
                   onTap: null,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpace.v10),
                 _StatCard(
                   title: t.favorites,
                   value: '${favorites.length}',
                   icon: Icons.favorite_rounded,
                   onTap: () => _openFavoritesModal(context, favDishes),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpace.v10),
                 _StatCard(
                   title: 'Badges',
                   value:
@@ -285,7 +285,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: AppSpace.v18),
 
             // 3. Preferences Card (Dark Mode + Language)
             Container(
@@ -342,7 +342,7 @@ class ProfileScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpace.v20),
 
             // 4. Live 4-Step Order Tracker
             Row(
@@ -362,13 +362,13 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpace.v8),
             if (orders.isEmpty)
               Container(
                 padding: const EdgeInsets.all(AppSpace.screenH),
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkCard : AppColors.surface,
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(AppRadius.v18),
                 ),
                 child: const Text(
                   'No orders yet — place an order from Cart to watch live 4-step kitchen & rider updates!',
@@ -377,7 +377,7 @@ class ProfileScreen extends ConsumerWidget {
             else
               ...orders.take(5).map((order) => _LiveOrderCard(order: order)),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: AppSpace.v18),
 
             // 5. Swahili Foodie Achievements Grid
             Text(
@@ -386,7 +386,7 @@ class ProfileScreen extends ConsumerWidget {
                     fontWeight: FontWeight.w800,
                   ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpace.v10),
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -402,10 +402,10 @@ class ProfileScreen extends ConsumerWidget {
                 return Opacity(
                   opacity: badge.unlocked ? 1.0 : 0.45,
                   child: Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(AppSpace.v10),
                     decoration: BoxDecoration(
                       color: isDark ? AppColors.darkCard : AppColors.surface,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppRadius.v16),
                       border: Border.all(
                         color: badge.unlocked
                             ? AppColors.primary.withOpacity(0.4)
@@ -418,7 +418,7 @@ class ProfileScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(badge.icon, style: const TextStyle(fontSize: 24)),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: AppSpace.v6),
                         Text(
                           badge.title,
                           textAlign: TextAlign.center,
@@ -434,7 +434,7 @@ class ProfileScreen extends ConsumerWidget {
                 );
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpace.v24),
 
             // 6. Sign Out / Switch Account Button
             OutlinedButton.icon(
@@ -476,13 +476,13 @@ class _StatCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppRadius.v18),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+          padding: const EdgeInsets.symmetric(vertical: AppSpace.v14, horizontal: AppSpace.v10),
           decoration: BoxDecoration(
             color: isDark ? AppColors.darkCard : AppColors.surface,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(AppRadius.v18),
             border: Border.all(
               color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
             ),
@@ -490,7 +490,7 @@ class _StatCard extends StatelessWidget {
           child: Column(
             children: [
               Icon(icon, color: AppColors.primary, size: 22),
-              const SizedBox(height: 6),
+              const SizedBox(height: AppSpace.v6),
               Text(
                 value,
                 style: const TextStyle(
@@ -525,7 +525,7 @@ class _LiveOrderCard extends StatelessWidget {
     final activeStep = order.status.stepIndex;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: AppSpace.v12),
       padding: const EdgeInsets.all(AppSpace.lg),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : AppColors.surface,
@@ -556,7 +556,7 @@ class _LiveOrderCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpace.v4),
           Text(
             order.items.map((i) => '${i.quantity}× ${i.name}').join(', '),
             maxLines: 2,
@@ -568,7 +568,7 @@ class _LiveOrderCard extends StatelessWidget {
                   : AppColors.lightTextSecondary,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpace.v12),
           if (order.status == OrderStatus.cancelled)
             const Text(
               'Order Cancelled',
@@ -584,7 +584,7 @@ class _LiveOrderCard extends StatelessWidget {
                     children: [
                       Container(
                         height: 5,
-                        margin: const EdgeInsets.symmetric(horizontal: 2),
+                        margin: const EdgeInsets.symmetric(horizontal: AppSpace.v2),
                         decoration: BoxDecoration(
                           color: done
                               ? AppColors.success
@@ -592,7 +592,7 @@ class _LiveOrderCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(AppRadius.pill),
                         ),
                       ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: AppSpace.v5),
                       Text(
                         steps[i],
                         style: TextStyle(

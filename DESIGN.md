@@ -26,7 +26,7 @@ Tokens live in `mobile/lib/core/theme/app_colors.dart`; the light theme is `buil
 | `promoOrange` | #F58220 → #E8590C | Warm campaign surface |
 | `promoGreen` | #16694A → #0C3F2B | Green campaign surface |
 | `darkBackground`, `darkSurface`, `darkCard`, `darkBorder`, `darkTextSecondary` | #18130F, #251E19, #302721, #4A3E35, #D4C5BA | Existing dark-mode hierarchy |
-| `navDark`, `heroLight`, `heroMuted`, `darkOrange`, `clear`, `scrim` | #302721, #FFC98D, #F3B676, #8A3300, transparent, black | Navigation, hero and overlays |
+| `navDark`, `heroLight`, `heroMuted`, `darkOrange`, `clear`, `scrim` | #24252A, #FFC98D, #F3B676, #8A3300, transparent, black | Navigation, hero and overlays |
 
 `inkMuted` on cream is approximately 5.37:1 and `primaryDeep` on cream 5.13:1. **Accessibility follow-up:** the requested `cta` with white is approximately 3.59:1 and the bright end of `promoOrange` with white approximately 2.59:1; neither meets 4.5:1 for normal text. The prompt's exact colors are preserved, not represented as AA-compliant. Resolve this with a darker action/surface or dark text, and verify gradient contrast before production. Test dark mode and dynamic text sizes as well.
 

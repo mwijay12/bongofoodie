@@ -1,3 +1,4 @@
+import '../../../core/widgets/app_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -12,10 +13,10 @@ import '../../../state/menu_provider.dart';
 import '../../../state/settings_provider.dart';
 
 Future<void> showDishDetailSheet(BuildContext context, MenuItemModel dish) {
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
+  return showAppSheet<void>(
+    context,
     backgroundColor: AppColors.clear,
+    showDragHandle: false,
     builder: (_) => DishDetailSheet(dish: dish),
   );
 }
@@ -85,11 +86,11 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
         return Container(
           decoration: BoxDecoration(
             color: isDark ? AppColors.darkSurface : AppColors.lightBackground,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.v28)),
           ),
           child: Column(
             children: [
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpace.v10),
               Container(
                 width: 44,
                 height: 5,
@@ -101,14 +102,14 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
               Expanded(
                 child: ListView(
                   controller: scrollController,
-                  padding: const EdgeInsets.fromLTRB(22, 14, 22, 24),
+                  padding: const EdgeInsets.fromLTRB(AppSpace.v22, AppSpace.v14, AppSpace.v22, AppSpace.v24),
                   children: [
                     // Top Action Row
                     Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpace.md, vertical: 6),
+                              horizontal: AppSpace.md, vertical: AppSpace.v6),
                           decoration: BoxDecoration(
                             color: AppColors.primary.withOpacity(0.14),
                             borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -150,16 +151,16 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                     // Dish Visual
                     Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        padding: const EdgeInsets.symmetric(vertical: AppSpace.v10),
                         child: DishImage(
                           imageRef: widget.dish.imageUrl,
                           width: 210,
                           height: 210,
-                          borderRadius: 28,
+                          borderRadius: AppRadius.v28,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpace.v8),
 
                     // Title & Price
                     Row(
@@ -174,7 +175,7 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                                 ?.copyWith(fontWeight: FontWeight.w800),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppSpace.v12),
                         Text(
                           AppStrings.formatTzs(widget.dish.price),
                           style: const TextStyle(
@@ -185,7 +186,7 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpace.v10),
                     Text(
                       widget.dish.description,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -195,7 +196,7 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                                 : AppColors.lightTextSecondary,
                           ),
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: AppSpace.v18),
 
                     // Nutrition & Prep Strip
                     Row(
@@ -206,19 +207,19 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                           label:
                               '${_displayRating.toStringAsFixed(1)} (${widget.dish.ratingCount})',
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpace.v8),
                         _MetricPill(
                           icon: Icons.local_fire_department_rounded,
                           iconColor: AppColors.primaryDeep,
                           label: '${widget.dish.calories} kcal',
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpace.v8),
                         _MetricPill(
                           icon: Icons.fitness_center_rounded,
                           iconColor: AppColors.success,
                           label: '${widget.dish.protein}g prot',
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpace.v8),
                         _MetricPill(
                           icon: Icons.schedule_rounded,
                           iconColor: AppColors.info,
@@ -226,7 +227,7 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpace.v20),
 
                     // Customizations Section
                     if (widget.dish.availableCustomizations.isNotEmpty) ...[
@@ -239,7 +240,7 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                                   fontWeight: FontWeight.w800,
                                 ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: AppSpace.v10),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
@@ -271,15 +272,15 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                           );
                         }).toList(),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpace.v20),
                     ],
 
                     // Interactive 5-Star Rating Card
                     Container(
-                      padding: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(AppSpace.v14),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkCard : AppColors.surface,
-                        borderRadius: BorderRadius.circular(18),
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.v18),
                         border: Border.all(
                           color: isDark
                               ? AppColors.darkBorder
@@ -306,7 +307,7 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                               onTap: () => _submitRating(star),
                               child: Padding(
                                 padding:
-                                    const EdgeInsets.symmetric(horizontal: 3),
+                                    const EdgeInsets.symmetric(horizontal: AppSpace.v3),
                                 child: Icon(
                                   active
                                       ? Icons.star_rounded
@@ -325,15 +326,12 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
               ),
 
               // Bottom Sticky Quantity + Add to Cart Bar
-              Container(
-                padding: EdgeInsets.fromLTRB(
-                  20,
-                  14,
-                  20,
-                  MediaQuery.of(context).padding.bottom + 14,
-                ),
+              SafeArea(
+                top: false,
+                child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH, vertical: AppSpace.md),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkCard : AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.scrim.withOpacity(0.08),
@@ -346,7 +344,7 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(AppRadius.v14),
                         border: Border.all(
                           color: isDark
                               ? AppColors.darkBorder
@@ -375,7 +373,7 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: AppSpace.v14),
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () {
@@ -402,6 +400,7 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                     ),
                   ],
                 ),
+                ),
               ),
             ],
           ),
@@ -427,9 +426,9 @@ class _MetricPill extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: AppSpace.sm, horizontal: 6),
+        padding: const EdgeInsets.symmetric(vertical: AppSpace.sm, horizontal: AppSpace.v6),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkCard : AppColors.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(AppRadius.sm),
           border: Border.all(
             color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
@@ -439,7 +438,7 @@ class _MetricPill extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 15, color: iconColor),
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpace.v4),
             Flexible(
               child: Text(
                 label,
