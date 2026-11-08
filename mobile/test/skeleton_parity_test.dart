@@ -13,14 +13,20 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: ThemeData(brightness: brightness),
-            home: SizedBox(
-              width: 390,
-              child: const SkeletonPromoCard(),
+            home: Center(
+              child: SizedBox(
+                width: PromoCardMetrics.width,
+                height: AppSpace.v148,
+                child: const SkeletonPromoCard(),
+              ),
             ),
           ),
         );
+        await tester.pump();
         final skeletonSize = tester.getSize(find.byType(SkeletonPromoCard));
         expect(skeletonSize.width, closeTo(PromoCardMetrics.width, 1));
+        expect(skeletonSize.height, closeTo(AppSpace.v148, 1));
+        expect(tester.takeException(), isNull);
       },
     );
 
@@ -30,11 +36,18 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: ThemeData(brightness: brightness),
-            home: const SkeletonDiscoveryCard(),
+            home: const Center(
+              child: SizedBox(
+                width: 390,
+                child: SkeletonDiscoveryCard(),
+              ),
+            ),
           ),
         );
+        await tester.pump();
         // Discovery card uses padding-only container; verify it renders without overflow
         expect(find.byType(SkeletonDiscoveryCard), findsOneWidget);
+        expect(tester.takeException(), isNull);
       },
     );
 
@@ -44,14 +57,20 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: ThemeData(brightness: brightness),
-            home: SizedBox(
-              width: 390,
-              child: const SkeletonDishCard(),
+            home: Center(
+              child: SizedBox(
+                width: DishCardMetrics.cardMaxWidth,
+                height: DishCardMetrics.cardHeight,
+                child: const SkeletonDishCard(),
+              ),
             ),
           ),
         );
+        await tester.pump();
         final skeletonSize = tester.getSize(find.byType(SkeletonDishCard));
         expect(skeletonSize.width, closeTo(DishCardMetrics.cardMaxWidth, 1));
+        expect(skeletonSize.height, closeTo(DishCardMetrics.cardHeight, 1));
+        expect(tester.takeException(), isNull);
       },
     );
   }

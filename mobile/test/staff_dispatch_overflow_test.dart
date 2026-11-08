@@ -1,4 +1,5 @@
 import 'package:bongo_foodie/core/theme/app_theme.dart';
+import 'package:bongo_foodie/data/repositories/menu_repository.dart';
 import 'package:bongo_foodie/features/cart/cart_screen.dart';
 import 'package:bongo_foodie/features/chef_ai/chef_ai_screen.dart';
 import 'package:bongo_foodie/features/home/home_screen.dart';
@@ -28,6 +29,9 @@ void main() {
   }) async {
     await tester.pumpWidget(
       ProviderScope(
+        overrides: [
+          showcaseLatencyProvider.overrideWithValue(Duration.zero),
+        ],
         child: MediaQuery(
           data: MediaQueryData(
             size: Size(width, 844),
@@ -47,6 +51,7 @@ void main() {
         ),
       ),
     );
+    await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
   }
 
@@ -135,6 +140,9 @@ void main() {
         );
         await tester.pumpWidget(
           ProviderScope(
+            overrides: [
+              showcaseLatencyProvider.overrideWithValue(Duration.zero),
+            ],
             child: MediaQuery(
               data: const MediaQueryData(
                 size: Size(360, 640),
@@ -150,6 +158,7 @@ void main() {
             ),
           ),
         );
+        await tester.pump(const Duration(seconds: 1));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
       });
