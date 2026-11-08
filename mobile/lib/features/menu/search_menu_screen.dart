@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/widgets/dish_image.dart';
+import '../../core/widgets/dish_hero_image.dart';
+import '../../router/dish_route_args.dart';
 import '../../core/widgets/skeleton/shimmer.dart';
 import '../../core/widgets/skeleton/skeleton_chip_row.dart';
 import '../../core/widgets/skeleton/skeleton_dish_card.dart';
@@ -13,7 +15,7 @@ import '../../data/models/models.dart';
 import '../../state/cart_provider.dart';
 import '../../state/menu_provider.dart';
 import '../../state/settings_provider.dart';
-import 'widgets/dish_detail_sheet.dart';
+
 
 abstract final class _MenuMetrics {
   static const gridImage = 108.0;
@@ -280,7 +282,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                         return _MenuGridTile(
                           dish: dish,
                           isDark: isDark,
-                          onOpen: () => showDishDetailSheet(context, dish),
+                          onOpen: () => context.push('/dish/${dish.id}', extra: DishRouteArgs(item: dish, heroScope: DishHeroScopes.menuList)),
                           onAdd: () {
                             ref.read(cartProvider.notifier).addItem(dish: dish);
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -305,7 +307,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                       return _MenuListTile(
                         dish: dish,
                         isDark: isDark,
-                        onOpen: () => showDishDetailSheet(context, dish),
+                        onOpen: () => context.push('/dish/${dish.id}', extra: DishRouteArgs(item: dish, heroScope: DishHeroScopes.menuList)),
                         onAdd: () {
                           ref.read(cartProvider.notifier).addItem(dish: dish);
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -393,8 +395,9 @@ class _MenuGridTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-                child: DishImage(
-                  imageRef: dish.imageUrl,
+                child: DishHeroImage(
+                  item: dish,
+                  heroScope: DishHeroScopes.menuList,
                   width: _MenuMetrics.gridImage,
                   height: _MenuMetrics.gridImage,
                   borderRadius: AppRadius.v16,
@@ -490,8 +493,9 @@ class _MenuListTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              DishImage(
-                imageRef: dish.imageUrl,
+              DishHeroImage(
+                item: dish,
+                heroScope: DishHeroScopes.menuList,
                 width: _MenuMetrics.listImage,
                 height: _MenuMetrics.listImage,
                 borderRadius: AppRadius.v16,

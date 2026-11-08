@@ -6,13 +6,14 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/widgets/dish_image.dart';
+import '../../core/widgets/dish_hero_image.dart';
+import '../../router/dish_route_args.dart';
 import '../../data/models/models.dart';
 import '../../state/auth_provider.dart';
 import '../../state/menu_provider.dart';
 import '../../state/orders_provider.dart';
 import '../../state/settings_provider.dart';
-import '../menu/widgets/dish_detail_sheet.dart';
+
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -66,10 +67,11 @@ class ProfileScreen extends ConsumerWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(AppRadius.v16),
                             ),
-                            leading: DishImage(
-                              imageRef: dish.imageUrl,
-                              width: 52,
-                              height: 52,
+                            leading: DishHeroImage(
+                              item: dish,
+                              heroScope: DishHeroScopes.favorites,
+                              width: AppSpace.v52,
+                              height: AppSpace.v52,
                               borderRadius: AppRadius.v12,
                             ),
                             title: Text(
@@ -81,7 +83,7 @@ class ProfileScreen extends ConsumerWidget {
                             trailing: const Icon(Icons.chevron_right_rounded),
                             onTap: () {
                               Navigator.pop(ctx);
-                              showDishDetailSheet(context, dish);
+                              context.push('/dish/${dish.id}', extra: DishRouteArgs(item: dish, heroScope: DishHeroScopes.favorites));
                             },
                           );
                         },
@@ -594,7 +596,7 @@ class _LiveOrderCard extends StatelessWidget {
                   child: Column(
                     children: [
                       Container(
-                        height: 5,
+                        height: AppSpace.v5,
                         margin: const EdgeInsets.symmetric(horizontal: AppSpace.v2),
                         decoration: BoxDecoration(
                           color: done
