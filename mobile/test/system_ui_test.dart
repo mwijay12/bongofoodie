@@ -1,4 +1,5 @@
 import 'package:bongo_foodie/main.dart';
+import 'package:bongo_foodie/data/repositories/menu_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +14,10 @@ void main() {
         'bongo_theme_dark_v2': dark,
         'bongo_onboarded_v2': true,
       });
-      await tester.pumpWidget(const ProviderScope(child: BongoFoodieApp()));
+      await tester.pumpWidget(ProviderScope(
+        overrides: [showcaseLatencyProvider.overrideWithValue(Duration.zero)],
+        child: const BongoFoodieApp(),
+      ));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       final region = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
