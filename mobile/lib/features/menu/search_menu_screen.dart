@@ -5,7 +5,9 @@ import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
 import '../../core/widgets/skeleton/shimmer.dart';
-import '../../core/widgets/skeleton/skeleton_box.dart';
+import '../../core/widgets/skeleton/skeleton_chip_row.dart';
+import '../../core/widgets/skeleton/skeleton_dish_card.dart';
+import '../../core/widgets/skeleton/skeleton_menu_row.dart';
 import '../../core/widgets/state_message.dart';
 import '../../data/models/models.dart';
 import '../../state/cart_provider.dart';
@@ -100,22 +102,28 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v14, AppSpace.v20, AppSpace.v10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      t.isSw ? 'Menyu ya BongoFoodie' : 'Explore Our Menu',
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w800,
-                              ),
+        child: RefreshIndicator.adaptive(
+          color: AppColors.primary,
+          onRefresh: () async {
+            await ref.refresh(categoriesProvider).catchError((_) {});
+            await ref.refresh(allMenuItemsProvider).catchError((_) {});
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v14, AppSpace.v20, AppSpace.v10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        t.isSw ? 'Menyu ya BongoFoodie' : 'Explore Our Menu',
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                      ),
                     ),
-                  ),
                   PopupMenuButton<MenuSortOption>(
                     tooltip: 'Sort dishes',
                     initialValue: _sortBy,
@@ -176,6 +184,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
             SizedBox(
               height: AppSpace.v42,
               child: categoriesAsync.when(
+                skipLoadingOnRefresh: true,
                 data: (cats) {
                   final names = ['All', ...cats.map((c) => c.name)];
                   return ListView.separated(
@@ -204,7 +213,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                     },
                   );
                 },
-                loading: () => const SizedBox.shrink(),
+                loading: () => const SkeletonChipRow(),
                 error: (_, __) => const SizedBox.shrink(),
               ),
             ),
@@ -213,7 +222,14 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
             // Filtered Results
             Expanded(
               child: menuAsync.when(
+                skipLoadingOnRefresh: true,
                 data: (allItems) {
+                  if (allItems.isEmpty) {
+                    return StateMessage.empty(
+                      title: t.emptyMenuTitle,
+                      body: t.emptyMenuBody,
+                    );
+                  }
                   final items = _applyFilters(allItems);
                   if (items.isEmpty) {
                     return Center(
@@ -240,7 +256,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                                 _searchCtrl.clear();
                                 setState(() => _selectedCategory = 'All');
                               },
-                              child: const Text('Reset Filters'),
+                              child: Text(t.clearSearch),
                             ),
                           ],
                         ),
@@ -319,14 +335,14 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                                 childAspectRatio: _MenuMetrics.gridRatio,
                               ),
                               itemCount: 6,
-                              itemBuilder: (_, __) => const _MenuGridSkeleton(),
+                              itemBuilder: (_, __) => const SkeletonDishCard(),
                             )
                           : ListView.separated(
                               padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.xs,
                                   AppSpace.screenH, context.navClearance),
                               itemCount: 6,
                               separatorBuilder: (_, __) => const SizedBox(height: AppSpace.v12),
-                              itemBuilder: (_, __) => const _MenuRowSkeleton(),
+                              itemBuilder: (_, __) => const SkeletonMenuRow(),
                             ),
                     ),
                   ),
@@ -339,48 +355,9 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
           ],
         ),
       ),
+    ),
     );
   }
-}
-
-class _MenuGridSkeleton extends StatelessWidget {
-  const _MenuGridSkeleton();
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(_MenuMetrics.padding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Center(child: SkeletonBox(
-              width: _MenuMetrics.gridImage,
-              height: _MenuMetrics.gridImage,
-              radius: AppRadius.v16,
-            )),
-            const SizedBox(height: AppSpace.v10),
-            const SkeletonLines(),
-            const Spacer(),
-            const SkeletonBox(width: AppSpace.v40, height: AppSpace.lg),
-          ],
-        ),
-      );
-}
-
-class _MenuRowSkeleton extends StatelessWidget {
-  const _MenuRowSkeleton();
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(_MenuMetrics.padding),
-        child: Row(children: [
-          const SkeletonBox(width: _MenuMetrics.listImage,
-              height: _MenuMetrics.listImage, radius: AppRadius.v16),
-          const SizedBox(width: AppSpace.v14),
-          const Expanded(child: SkeletonLines(count: 3)),
-          const SizedBox(width: AppSpace.v14),
-          const SkeletonBox(width: AppSpace.huge, height: AppSpace.huge, circle: true),
-        ]),
-      );
 }
 
 class _MenuGridTile extends StatelessWidget {

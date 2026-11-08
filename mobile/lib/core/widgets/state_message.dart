@@ -4,14 +4,19 @@ import '../../state/settings_provider.dart';
 import '../theme/app_tokens.dart';
 
 class StateMessage extends ConsumerWidget {
-  const StateMessage.error({super.key, this.onRetry})
-      : title = null, body = null, actionLabel = null, onAction = null, _error = true;
+  const StateMessage.error({super.key, this.onRetry, this.compact = false})
+      : title = null,
+        body = null,
+        actionLabel = null,
+        onAction = null,
+        _error = true;
   const StateMessage.empty({
     super.key,
     required this.title,
     required this.body,
     this.actionLabel,
     this.onAction,
+    this.compact = false,
   }) : onRetry = null, _error = false;
 
   final String? title;
@@ -20,6 +25,7 @@ class StateMessage extends ConsumerWidget {
   final VoidCallback? onAction;
   final VoidCallback? onRetry;
   final bool _error;
+  final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,15 +33,18 @@ class StateMessage extends ConsumerWidget {
     final theme = Theme.of(context);
     final action = _error ? onRetry : onAction;
     final label = _error ? strings.retry : actionLabel;
+    final pad = compact ? AppSpace.md : AppSpace.xl;
+    final gap = compact ? AppSpace.sm : AppSpace.lg;
+    final iconSize = compact ? AppSpace.navHeight - 24 : AppSpace.navHeight;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpace.xl),
+        padding: EdgeInsets.all(pad),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: AppSpace.navHeight,
-              height: AppSpace.navHeight,
+              width: iconSize,
+              height: iconSize,
               decoration: BoxDecoration(
                 color: theme.colorScheme.primaryContainer,
                 shape: BoxShape.circle,
@@ -43,14 +52,14 @@ class StateMessage extends ConsumerWidget {
               child: Icon(_error ? Icons.wifi_off_rounded : Icons.inbox_rounded,
                   color: theme.colorScheme.onPrimaryContainer),
             ),
-            const SizedBox(height: AppSpace.lg),
+            const SizedBox(height: AppSpace.sm),
             Text(_error ? strings.errorTitle : title!,
                 textAlign: TextAlign.center, style: theme.textTheme.titleMedium),
             const SizedBox(height: AppSpace.sm),
             Text(_error ? strings.errorBody : body!,
                 textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
             if (action != null && label != null) ...[
-              const SizedBox(height: AppSpace.lg),
+              const SizedBox(height: gap),
               FilledButton.tonal(onPressed: action, child: Text(label)),
             ],
           ],

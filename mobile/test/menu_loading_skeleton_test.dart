@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:bongo_foodie/core/widgets/skeleton/shimmer.dart';
 import 'package:bongo_foodie/core/widgets/skeleton/skeleton_box.dart';
+import 'package:bongo_foodie/core/widgets/skeleton/skeleton_dish_card.dart';
+import 'package:bongo_foodie/core/widgets/skeleton/skeleton_promo_card.dart';
 import 'package:bongo_foodie/data/models/models.dart';
 import 'package:bongo_foodie/data/repositories/menu_repository.dart';
 import 'package:bongo_foodie/features/home/home_screen.dart';
@@ -62,6 +64,93 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       pending.complete([]);
       await tester.pump();
+    });
+
+    testWidgets('home menu error shows retry button ($brightness)',
+        (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          showcaseLatencyProvider.overrideWithValue(Duration.zero),
+          allMenuItemsProvider.overrideWith((ref) => Future.error('boom')),
+          promotionsProvider.overrideWith((ref) async => []),
+        ],
+        child: MaterialApp(
+          theme: ThemeData(brightness: brightness),
+          home: const HomeScreen(),
+        ),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byType(SkeletonDishCard), findsNothing);
+      expect(find.text('Retry'), findsWidgets);
+      await tester.tap(find.text('Retry').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Retry'), findsWidgets);
+    });
+
+    testWidgets('home shows promo and dish skeletons during loading ($brightness)',
+        (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final pending = Completer<List<MenuItemModel>>();
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          showcaseLatencyProvider.overrideWithValue(Duration.zero),
+          allMenuItemsProvider.overrideWith((ref) => pending.future),
+          promotionsProvider.overrideWith((ref) async => []),
+        ],
+        child: MaterialApp(
+          theme: ThemeData(brightness: brightness),
+          home: const HomeScreen(),
+        ),
+      ));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(SkeletonPromoCard), findsWidgets);
+      expect(find.byType(SkeletonDishCard), findsWidgets);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      pending.complete([]);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('menu empty without query shows empty state ($brightness)',
+        (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          showcaseLatencyProvider.overrideWithValue(Duration.zero),
+          allMenuItemsProvider.overrideWith((ref) async => []),
+          categoriesProvider.overrideWith((ref) async => []),
+        ],
+        child: MaterialApp(
+          theme: ThemeData(brightness: brightness),
+          home: const SearchMenuScreen(initialCategory: 'All'),
+        ),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byType(SkeletonDishCard), findsNothing);
+      expect(find.text('No dishes found'), findsWidgets);
+    });
+
+    testWidgets('menu empty with query shows no results ($brightness)',
+        (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          showcaseLatencyProvider.overrideWithValue(Duration.zero),
+          allMenuItemsProvider.overrideWith((ref) async => []),
+          categoriesProvider.overrideWith((ref) async => []),
+        ],
+        child: MaterialApp(
+          theme: ThemeData(brightness: brightness),
+          home: const SearchMenuScreen(initialCategory: 'All'),
+        ),
+      ));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'nonexistent dish xyz');
+      await tester.pumpAndSettle();
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.text('No matching dishes found'), findsWidgets);
     });
   }
 }
