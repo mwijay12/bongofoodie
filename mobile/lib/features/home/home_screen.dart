@@ -9,7 +9,6 @@ import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
 import '../../core/widgets/skeleton/shimmer.dart';
-import '../../core/widgets/skeleton/skeleton_box.dart';
 import '../../core/widgets/skeleton/skeleton_dish_card.dart';
 import '../../core/widgets/skeleton/skeleton_discovery_card.dart';
 import '../../core/widgets/skeleton/skeleton_promo_card.dart';
@@ -78,12 +77,11 @@ class HomeScreen extends ConsumerWidget {
           child: RefreshIndicator.adaptive(
           color: AppColors.primary,
           onRefresh: () async {
-            await ref.refresh(promotionsProvider).catchError((_) {});
-            await ref.refresh(allMenuItemsProvider).catchError((_) {});
-            await ref
-                .read(dailyDiscoveriesProvider.notifier)
-                .refresh()
-                .catchError((_) {});
+            ref.invalidate(promotionsProvider);
+            ref.invalidate(allMenuItemsProvider);
+            try {
+              await ref.read(dailyDiscoveriesProvider.notifier).refresh();
+            } catch (_) {}
           },
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -287,11 +285,12 @@ class HomeScreen extends ConsumerWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       if (p.badgeText.isNotEmpty)
                                         Container(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: AppSpace.sm, vertical: AppSpace.v3),
+                                              horizontal: AppSpace.sm, vertical: AppSpace.v2),
                                           decoration: BoxDecoration(
                                             color:
                                                 AppColors.scrim.withOpacity(0.22),
@@ -300,6 +299,8 @@ class HomeScreen extends ConsumerWidget {
                                           ),
                                           child: Text(
                                             p.badgeText,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
                                               color: AppColors.surface,
                                               fontSize: 16,
@@ -321,7 +322,7 @@ class HomeScreen extends ConsumerWidget {
                                       const SizedBox(height: AppSpace.v4),
                                       Text(
                                         p.subtitle,
-                                        maxLines: 2,
+                                        maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color: AppColors.surface,

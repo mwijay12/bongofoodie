@@ -1,4 +1,5 @@
 import 'package:bongo_foodie/core/theme/app_theme.dart';
+import 'package:bongo_foodie/data/repositories/menu_repository.dart';
 import 'package:bongo_foodie/features/cart/cart_screen.dart';
 import 'package:bongo_foodie/features/chef_ai/chef_ai_screen.dart';
 import 'package:bongo_foodie/features/home/home_screen.dart';
@@ -28,11 +29,14 @@ void main() {
   }) async {
     await tester.pumpWidget(
       ProviderScope(
+        overrides: [
+          showcaseLatencyProvider.overrideWithValue(Duration.zero),
+        ],
         child: MediaQuery(
           data: MediaQueryData(
             size: Size(width, 844),
             textScaleFactor: textScaleFactor,
-            brightness: brightness,
+            platformBrightness: brightness,
           ),
           child: MaterialApp(
             theme: brightness == Brightness.dark
@@ -47,6 +51,7 @@ void main() {
         ),
       ),
     );
+    await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
   }
 
@@ -74,9 +79,9 @@ void main() {
     for (final width in widths) {
       for (final scale in scales) {
         for (final brightness in brightnesses) {
-          test(
+          testWidgets(
             'no layout overflow at ${width.toInt()}dp, textScale $scale, ${brightness.name}',
-            () async {
+            (tester) async {
               await pumpStaffScreen(
                 tester,
                 width: width,
@@ -118,7 +123,7 @@ void main() {
       '/profile',
       '/staff',
     ]) {
-      test('no layout exceptions on $route', () async {
+      testWidgets('no layout exceptions on $route', (tester) async {
         final router = GoRouter(
           initialLocation: route,
           routes: <RouteBase>[
@@ -135,11 +140,14 @@ void main() {
         );
         await tester.pumpWidget(
           ProviderScope(
+            overrides: [
+              showcaseLatencyProvider.overrideWithValue(Duration.zero),
+            ],
             child: MediaQuery(
               data: const MediaQueryData(
                 size: Size(360, 640),
                 textScaleFactor: 1.3,
-                brightness: Brightness.light,
+                platformBrightness: Brightness.light,
               ),
               child: MaterialApp.router(
                 theme: buildAppTheme(),
@@ -150,6 +158,7 @@ void main() {
             ),
           ),
         );
+        await tester.pump(const Duration(seconds: 1));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
       });
