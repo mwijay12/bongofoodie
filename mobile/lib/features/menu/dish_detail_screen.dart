@@ -14,6 +14,7 @@ import '../../core/widgets/skeleton/skeleton_detail_screen.dart';
 import '../../core/widgets/state_message.dart';
 import '../../data/models/models.dart';
 import '../../router/dish_route_args.dart';
+import '../../state/cart_provider.dart';
 import '../../state/menu_provider.dart';
 import '../../state/settings_provider.dart';
 
@@ -36,6 +37,9 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
     duration: AppMotion.slow,
   );
   bool _entranceScheduled = false;
+  int _quantity = DishDetailMetrics.quantityMin;
+  bool _added = false;
+  Timer? _addedTimer;
 
   AnimationController get entranceController => _entranceController;
 
@@ -43,6 +47,7 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (MediaQuery.disableAnimationsOf(context)) {
+      _entranceController.stop();
       _entranceController.value = 1;
       return;
     }
@@ -59,11 +64,58 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
 
   @override
   void dispose() {
+    _addedTimer?.cancel();
     _entranceController.dispose();
     super.dispose();
   }
 
-  Widget _buildStickyBarPlaceholder() => const _DishStickyBarPlaceholder();
+  void _incrementQuantity() {
+    if (_quantity >= DishDetailMetrics.quantityMax) return;
+    setState(() => _quantity++);
+  }
+
+  void _decrementQuantity() {
+    if (_quantity <= DishDetailMetrics.quantityMin) return;
+    setState(() => _quantity--);
+  }
+
+  double _totalFor(MenuItemModel item, int quantity) {
+    // Prompt 4 owns add-on selection; for now the existing pricing function
+    // is used with an empty selection, exactly as the cart notifier does.
+    return CartItemModel(
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      imageUrl: item.imageUrl,
+      quantity: quantity,
+      customizations: const <CustomizationOption>[],
+    ).lineTotal;
+  }
+
+  void _onAdd(MenuItemModel item) {
+    HapticFeedback.mediumImpact();
+    ref.read(cartProvider.notifier).addItem(
+          dish: item,
+          quantity: _quantity,
+          customizations: const <CustomizationOption>[],
+        );
+    _addedTimer?.cancel();
+    setState(() => _added = true);
+    _addedTimer = Timer(AppMotion.addedLabel, () {
+      if (mounted) setState(() => _added = false);
+    });
+  }
+
+  Widget _buildStickyBar(MenuItemModel item) {
+    return _DishStickyBar(
+      quantity: _quantity,
+      total: _totalFor(item, _quantity),
+      added: _added,
+      onIncrement: _incrementQuantity,
+      onDecrement: _decrementQuantity,
+      onAdd: () => _onAdd(item),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,12 +132,12 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
                 item: args.item,
                 heroScope: args.heroScope,
                 entrance: _entranceController,
-                stickyBar: _buildStickyBarPlaceholder(),
+                stickyBarBuilder: _buildStickyBar,
               )
             : _DeepLinkView(
                 id: widget.id,
                 entrance: _entranceController,
-                stickyBar: _buildStickyBarPlaceholder(),
+                stickyBarBuilder: _buildStickyBar,
               ),
       ),
     );
@@ -96,12 +148,12 @@ class _DeepLinkView extends ConsumerWidget {
   const _DeepLinkView({
     required this.id,
     required this.entrance,
-    required this.stickyBar,
+    required this.stickyBarBuilder,
   });
 
   final String id;
   final AnimationController entrance;
-  final Widget stickyBar;
+  final Widget Function(MenuItemModel item) stickyBarBuilder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -122,7 +174,7 @@ class _DeepLinkView extends ConsumerWidget {
         item: item!,
         heroScope: DishHeroScopes.deepLink,
         entrance: entrance,
-        stickyBar: stickyBar,
+        stickyBarBuilder: stickyBarBuilder,
       ),
     );
   }
@@ -133,13 +185,13 @@ class _DishDetailView extends ConsumerWidget {
     required this.item,
     required this.heroScope,
     required this.entrance,
-    required this.stickyBar,
+    required this.stickyBarBuilder,
   });
 
   final MenuItemModel item;
   final String heroScope;
   final AnimationController entrance;
-  final Widget stickyBar;
+  final Widget Function(MenuItemModel item) stickyBarBuilder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -191,9 +243,168 @@ class _DishDetailView extends ConsumerWidget {
           left: AppSpace.v0,
           right: AppSpace.v0,
           bottom: AppSpace.v0,
-          child: stickyBar,
+          child: stickyBarBuilder(item),
         ),
       ],
+    );
+  }
+}
+
+class _DishStickyBar extends ConsumerWidget {
+  const _DishStickyBar({
+    required this.quantity,
+    required this.total,
+    required this.added,
+    required this.onIncrement,
+    required this.onDecrement,
+    required this.onAdd,
+  });
+
+  final int quantity;
+  final double total;
+  final bool added;
+  final VoidCallback onIncrement;
+  final VoidCallback onDecrement;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = ref.watch(appStringsProvider);
+    final theme = Theme.of(context);
+    final canIncrease = quantity < DishDetailMetrics.quantityMax;
+    final canDecrease = quantity > DishDetailMetrics.quantityMin;
+    final addLabel = '${t.addToCart}  ${AppStrings.formatTzs(total)}';
+
+    return SafeArea(
+      top: false,
+      child: Container(
+        height: DishDetailMetrics.stickyBarHeight,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpace.screenH,
+          vertical: AppSpace.md,
+        ),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          border: Border(
+            top: BorderSide(
+              color: theme.colorScheme.outline,
+              width: AppSpace.hairline,
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            Semantics(
+              label: t.quantity,
+              value: '$quantity',
+              increasedValue: canIncrease ? '${quantity + 1}' : null,
+              decreasedValue: canDecrease ? '${quantity - 1}' : null,
+              onIncrease: canIncrease ? onIncrement : null,
+              onDecrease: canDecrease ? onDecrement : null,
+              child: ExcludeSemantics(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(AppRadius.v14),
+                    border: Border.all(color: theme.colorScheme.outline),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _StepperButton(
+                        icon: Icons.remove_rounded,
+                        tooltip: t.decreaseQuantity,
+                        enabled: canDecrease,
+                        onPressed: onDecrement,
+                      ),
+                      AnimatedSwitcher(
+                        duration: AppMotion.fast,
+                        child: Text(
+                          '$quantity',
+                          key: ValueKey<int>(quantity),
+                          style: theme.textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      _StepperButton(
+                        icon: Icons.add_rounded,
+                        tooltip: t.increaseQuantity,
+                        enabled: canIncrease,
+                        onPressed: onIncrement,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpace.v14),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: onAdd,
+                icon: AnimatedSwitcher(
+                  duration: AppMotion.fast,
+                  child: added
+                      ? const Icon(
+                          Icons.check_rounded,
+                          key: ValueKey('dish-added-icon'),
+                        )
+                      : const Icon(
+                          Icons.shopping_bag_rounded,
+                          key: ValueKey('dish-cart-icon'),
+                        ),
+                ),
+                label: AnimatedSwitcher(
+                  duration: AppMotion.fast,
+                  child: added
+                      ? Text(
+                          t.added,
+                          key: const ValueKey('dish-added-label'),
+                        )
+                      : FittedBox(
+                          key: ValueKey<double>(total),
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            addLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StepperButton extends StatelessWidget {
+  const _StepperButton({
+    required this.icon,
+    required this.tooltip,
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final bool enabled;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: IconButton(
+        constraints: const BoxConstraints.tightFor(
+          width: AppSpace.huge,
+          height: AppSpace.huge,
+        ),
+        padding: EdgeInsets.zero,
+        onPressed: enabled ? onPressed : null,
+        icon: Icon(icon, size: AppSpace.v24),
+      ),
     );
   }
 }
@@ -313,12 +524,9 @@ class DishHeroState extends State<DishHero> with SingleTickerProviderStateMixin 
                       : (curved.value - 0.5) *
                           2 *
                           DishDetailMetrics.floatDistance;
-                  return Opacity(
-                    opacity: 1,
-                    child: Transform.translate(
-                      offset: Offset(0, offset),
-                      child: child,
-                    ),
+                  return Transform.translate(
+                    offset: Offset(0, offset),
+                    child: child,
                   );
                 },
                 child: DishHeroImage(
@@ -572,12 +780,4 @@ class _DescriptionBlockState extends ConsumerState<_DescriptionBlock> {
       ),
     );
   }
-}
-
-class _DishStickyBarPlaceholder extends StatelessWidget {
-  const _DishStickyBarPlaceholder();
-
-  @override
-  Widget build(BuildContext context) =>
-      const SizedBox(height: DishDetailMetrics.stickyBarHeight);
 }
