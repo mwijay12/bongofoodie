@@ -91,12 +91,12 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.v24)),
         title: Row(
           children: [
             const Icon(Icons.verified_rounded,
                 color: AppColors.success, size: 28),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpace.v10),
             Expanded(
               child: Text(
                 'Oda Imepokelewa! (#${order.id})',
@@ -114,13 +114,13 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
               'Kitchen dispatch in Kijitonyama is now preparing your meal (${order.items.length} item${order.items.length == 1 ? '' : 's'}).',
               style: const TextStyle(height: 1.4),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.v12),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(AppSpace.md),
               decoration: BoxDecoration(
                 color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(AppRadius.v14),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,7 +133,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                       fontSize: 16,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpace.v4),
                   Text(
                     order.paymentMethodType == PaymentMethod.lipaNamba
                         ? 'Lipa Namba: ${branch.lipaNamba} (${branch.lipaName})'
@@ -203,14 +203,14 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                       color: AppColors.primary,
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: AppSpace.v18),
                   Text(
                     t.emptyCartTitle,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
                         ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpace.v8),
                   Text(
                     t.emptyCartSub,
                     textAlign: TextAlign.center,
@@ -220,7 +220,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                           : AppColors.lightTextSecondary,
                     ),
                   ),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: AppSpace.v22),
                   ElevatedButton.icon(
                     onPressed: () => context.go('/search'),
                     icon: const Icon(Icons.restaurant_menu_rounded),
@@ -238,7 +238,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
       body: SafeArea(
         bottom: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 130),
+          padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.md, AppSpace.screenH, context.navClearance),
           children: [
             Row(
               children: [
@@ -260,12 +260,12 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpace.v10),
 
             // 1. Cart Line Items with transparent Customization Chips
             ...cart.items.map((item) {
               return Container(
-                margin: const EdgeInsets.only(bottom: 12),
+                margin: const EdgeInsets.only(bottom: AppSpace.v12),
                 padding: const EdgeInsets.all(AppSpace.md),
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkCard : AppColors.surface,
@@ -283,9 +283,9 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                           imageRef: item.imageUrl,
                           width: 68,
                           height: 68,
-                          borderRadius: 14,
+                          borderRadius: AppRadius.v14,
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppSpace.v12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,7 +294,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                                 children: [
                                   if (item.isCustomAiDish)
                                     const Padding(
-                                      padding: EdgeInsets.only(right: 4),
+                                      padding: EdgeInsets.only(right: AppSpace.v4),
                                       child: Icon(
                                         Icons.auto_awesome_rounded,
                                         size: 14,
@@ -312,7 +312,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: AppSpace.v4),
                               Text(
                                 AppStrings.formatTzs(item.lineTotal),
                                 style: const TextStyle(
@@ -356,15 +356,15 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                       ],
                     ),
                     if (item.customizations.isNotEmpty) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpace.v8),
                       Wrap(
-                        spacing: 6,
-                        runSpacing: 4,
+                        spacing: AppSpace.v6,
+                        runSpacing: AppSpace.v4,
                         children: item.customizations
                             .map(
                               (c) => Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSpace.sm, vertical: 3),
+                                    horizontal: AppSpace.sm, vertical: AppSpace.v3),
                                 decoration: BoxDecoration(
                                   color: AppColors.primary.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -387,7 +387,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
               );
             }),
 
-            const SizedBox(height: 6),
+            const SizedBox(height: AppSpace.v6),
 
             // 2. Delivery Location Card
             ListTile(
@@ -395,7 +395,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                   const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: AppSpace.xs),
               tileColor: isDark ? AppColors.darkCard : AppColors.surface,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(AppRadius.v18),
                 side: BorderSide(
                   color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
                 ),
@@ -419,7 +419,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                 child: Text(t.isSw ? 'Badili' : 'Change'),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.v12),
 
             // Contact Phone + Kitchen Notes
             TextField(
@@ -431,7 +431,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                 prefixIcon: const Icon(Icons.phone_rounded),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.v12),
 
             // 3. Promo Code Box (KARIBU2000)
             Row(
@@ -457,7 +457,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpace.v10),
                 ElevatedButton(
                   onPressed: () {
                     final ok = ref.read(cartProvider.notifier).applyPromoCode(
@@ -478,14 +478,14 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpace.v16),
 
             // 4. Payment Method Selector (Lipa Namba vs Cash)
             Text(
               t.isSw ? 'Chagua Njia ya Malipo' : 'Payment Method',
               style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpace.v8),
             Row(
               children: [
                 Expanded(
@@ -498,7 +498,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                         setState(() => _paymentMethod = PaymentMethod.lipaNamba),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpace.v10),
                 Expanded(
                   child: _PaymentChoiceCard(
                     selected: _paymentMethod == PaymentMethod.cashOnDelivery,
@@ -513,12 +513,12 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
             ),
 
             if (_paymentMethod == PaymentMethod.lipaNamba) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpace.v10),
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(AppSpace.v14),
                 decoration: BoxDecoration(
                   color: AppColors.success.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(AppRadius.v16),
                   border: Border.all(color: AppColors.success.withOpacity(0.3)),
                 ),
                 child: Row(
@@ -560,7 +560,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                 ),
               ),
             ],
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpace.v16),
 
             // 5. Transparent Order Summary Card
             Container(
@@ -578,13 +578,13 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                     label: t.subtotal,
                     value: AppStrings.formatTzs(cart.subtotal),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpace.v8),
                   _SummaryRow(
                     label: t.deliveryFee,
                     value: AppStrings.formatTzs(cart.effectiveDeliveryFee),
                   ),
                   if (cart.effectiveDiscount > 0) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpace.v8),
                     _SummaryRow(
                       label: 'Promo (${cart.appliedPromoCode})',
                       value: '- ${AppStrings.formatTzs(cart.effectiveDiscount)}',
@@ -592,7 +592,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                     ),
                   ],
                   const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10),
+                    padding: EdgeInsets.symmetric(vertical: AppSpace.v10),
                     child: Divider(),
                   ),
                   _SummaryRow(
@@ -604,7 +604,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpace.v16),
 
             SizedBox(
               width: double.infinity,
@@ -644,7 +644,7 @@ class _PaymentChoiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(AppRadius.v16),
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(AppSpace.md),
@@ -652,7 +652,7 @@ class _PaymentChoiceCard extends StatelessWidget {
           color: selected
               ? AppColors.primary.withOpacity(0.14)
               : (isDark ? AppColors.darkCard : AppColors.surface),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppRadius.v16),
           border: Border.all(
             color: selected
                 ? AppColors.primary
@@ -664,7 +664,7 @@ class _PaymentChoiceCard extends StatelessWidget {
           children: [
             Icon(icon,
                 color: selected ? AppColors.primary : AppColors.inkMuted, size: 22),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpace.v10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

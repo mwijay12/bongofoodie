@@ -1,3 +1,4 @@
+import '../../core/widgets/app_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -41,11 +42,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _showTermsSheet(AppStrings t) {
-    showModalBottomSheet<void>(
-      context: context,
+    showAppSheet<void>(
+      context,
       showDragHandle: true,
       builder: (ctx) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+        padding: const EdgeInsets.fromLTRB(AppSpace.v24, AppSpace.v8, AppSpace.v24, AppSpace.v32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,14 +59,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     fontWeight: FontWeight.w800,
                   ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.v12),
             Text(
               t.isSw
                   ? 'BongoFoodie inalinda taarifa zako kwa kutumia Supabase Row-Level Security (RLS). Malipo ya Lipa Namba na Pesa Taslimu yanathibitishwa papo hapo na timu yetu ya Kijitonyama, Dar es Salaam.'
                   : 'BongoFoodie safeguards your account and order history using strict Supabase Row-Level Security (RLS). Lipa Namba & Cash on Delivery orders are verified directly by our Kijitonyama, Dar es Salaam kitchen dispatch.',
               style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.5),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpace.v20),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -122,7 +123,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         color: AppColors.cream,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpace.xl, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpace.xl, vertical: AppSpace.v14),
             child: Column(
               children: [
                 // Top Bar: Brand + EN/SW Toggle + Skip
@@ -140,7 +141,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         size: 22,
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: AppSpace.v10),
                     const Text(
                       'BongoFoodie',
                       style: TextStyle(
@@ -157,7 +158,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ref.read(appSettingsProvider.notifier).toggleLanguage(),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpace.md, vertical: 6),
+                            horizontal: AppSpace.md, vertical: AppSpace.v6),
                         decoration: BoxDecoration(
                           color: AppColors.surfaceWarm,
                           borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -177,7 +178,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpace.v16),
 
                 // Carousel
                 Expanded(
@@ -197,7 +198,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           Container(
                             height: 235,
                             width: 235,
-                            padding: const EdgeInsets.all(14),
+                            padding: const EdgeInsets.all(AppSpace.v14),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
@@ -211,13 +212,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               imageRef: slide.imageKey,
                               width: 205,
                               height: 205,
-                              borderRadius: 999,
+                              borderRadius: AppRadius.v999,
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: AppSpace.v24),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 6),
+                                horizontal: AppSpace.v14, vertical: AppSpace.v6),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withOpacity(0.16),
                               borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -235,7 +236,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpace.v16),
                           Text(
                             slide.title,
                             textAlign: TextAlign.center,
@@ -246,7 +247,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               height: 1.2,
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppSpace.v12),
                           Text(
                             slide.subtitle,
                             textAlign: TextAlign.center,
@@ -285,7 +286,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     );
                   }),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpace.v24),
 
                 // Primary CTA
                 SizedBox(
@@ -300,7 +301,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpace.v10),
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
@@ -327,7 +328,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpace.v8),
                 TextButton(
                   onPressed: () => _showTermsSheet(t),
                   child: Text(

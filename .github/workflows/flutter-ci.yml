@@ -43,6 +43,20 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Record main analyzer baseline
+        run: |
+          git fetch origin main --depth=1
+          git worktree add /tmp/bongo-main FETCH_HEAD
+          cd /tmp/bongo-main/mobile
+          flutter create --platforms=android,ios,web --org tz.co.bongofoodie --project-name bongo_foodie .
+          rm -f test/widget_test.dart
+          flutter pub get
+          flutter analyze --no-fatal-infos --no-fatal-warnings > /tmp/bongo-baseline.log 2>&1 || true
+          warnings=$(grep -c 'warning •' /tmp/bongo-baseline.log || true)
+          infos=$(grep -c 'info •' /tmp/bongo-baseline.log || true)
+          errors=$(grep -c 'error •' /tmp/bongo-baseline.log || true)
+          echo "::notice::Main analyzer baseline: $warnings warnings, $infos infos, $errors errors"
+
       - name: Static Analysis
         run: |
           flutter analyze --no-fatal-infos --no-fatal-warnings > /tmp/flutter-analysis.log 2>&1 || {
@@ -53,6 +67,10 @@ jobs:
             exit 1
           }
           cat /tmp/flutter-analysis.log
+          warnings=$(grep -c 'warning •' /tmp/flutter-analysis.log || true)
+          infos=$(grep -c 'info •' /tmp/flutter-analysis.log || true)
+          echo "::notice::Branch analyzer: $warnings warnings, $infos infos"
+          grep -E '(warning|info) •.*(app_shell|app_sheet|bongo_glass_nav_bar|tanzania_location_sheet|cart_screen|chef_ai_screen|home_screen|search_menu_screen|dish_detail_sheet|onboarding_screen|profile_screen|app_router|app_tokens|app_colors|shell_navigation_test)' /tmp/flutter-analysis.log | head -9 | while IFS= read -r line; do echo "::warning::$line"; done || true
 
       - name: Build Release Android APK
         run: |

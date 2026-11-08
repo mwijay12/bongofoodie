@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../core/widgets/bongo_glass_nav_bar.dart';
+import '../core/widgets/app_shell.dart';
 import '../features/auth/sign_in_screen.dart';
 import '../features/auth/sign_up_screen.dart';
 import '../features/cart/cart_screen.dart';
@@ -108,10 +109,9 @@ class _CustomerMainShell extends ConsumerWidget {
     final t = ref.watch(appStringsProvider);
     final cartCount = ref.watch(cartProvider.select((c) => c.totalItems));
 
-    return Scaffold(
-      extendBody: true,
+    return AppShell(
       body: navigationShell,
-      bottomNavigationBar: BongoGlassNavBar(
+      nav: BongoGlassNavBar(
         currentIndex: navigationShell.currentIndex,
         cartCount: cartCount,
         labels: [

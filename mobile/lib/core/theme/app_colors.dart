@@ -26,7 +26,7 @@ abstract final class AppColors {
   static const darkCard = Color(0xFF302721);
   static const darkBorder = Color(0xFF4A3E35);
   static const darkTextSecondary = Color(0xFFD4C5BA);
-  static const navDark = Color(0xFF302721);
+  static const navDark = Color(0xFF24252A);
   static const heroLight = Color(0xFFFFC98D);
   static const heroMuted = Color(0xFFF3B676);
   static const darkOrange = Color(0xFF8A3300);

@@ -1,3 +1,5 @@
+import '../theme/app_tokens.dart';
+import 'app_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/models.dart';
@@ -5,9 +7,8 @@ import '../../data/repositories/location_repository.dart';
 import '../theme/app_colors.dart';
 
 Future<String?> showTanzaniaLocationPicker(BuildContext context) {
-  return showModalBottomSheet<String>(
-    context: context,
-    isScrollControlled: true,
+  return showAppSheet<String>(
+    context,
     showDragHandle: true,
     builder: (_) => const TanzaniaLocationSheet(),
   );
@@ -139,14 +140,14 @@ class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        22,
-        4,
-        22,
-        MediaQuery.of(context).viewInsets.bottom + 26,
+        AppSpace.v22,
+        AppSpace.v4,
+        AppSpace.v22,
+        MediaQuery.of(context).viewInsets.bottom + AppSpace.v26,
       ),
       child: _loading
           ? const SizedBox(
-              height: 220,
+              height: AppSpace.v220,
               child: Center(child: CircularProgressIndicator()),
             )
           : Column(
@@ -157,7 +158,7 @@ class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
                   children: [
                     const Icon(Icons.location_on_rounded,
                         color: AppColors.primary),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpace.v8),
                     Text(
                       'Select Delivery Location (Tanzania)',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -166,7 +167,7 @@ class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpace.v16),
                 DropdownButtonFormField<TzRegion>(
                   value: _selectedRegion,
                   decoration: const InputDecoration(
@@ -180,7 +181,7 @@ class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
                       .toList(),
                   onChanged: _onRegionChanged,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpace.v12),
                 DropdownButtonFormField<TzDistrict>(
                   value: _selectedDistrict,
                   decoration: const InputDecoration(
@@ -194,7 +195,7 @@ class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
                       .toList(),
                   onChanged: _onDistrictChanged,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpace.v12),
                 DropdownButtonFormField<TzWard>(
                   value: _selectedWard,
                   decoration: const InputDecoration(
@@ -208,7 +209,7 @@ class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
                       .toList(),
                   onChanged: (w) => setState(() => _selectedWard = w),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpace.v12),
                 TextField(
                   controller: _streetCtrl,
                   decoration: const InputDecoration(
@@ -217,7 +218,7 @@ class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
                     prefixIcon: Icon(Icons.home_work_outlined),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpace.v20),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
