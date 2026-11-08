@@ -254,12 +254,14 @@ class HomeScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: promotionsAsync.when(
                   skipLoadingOnRefresh: true,
-                  data: (promos) => ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: promos.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: AppSpace.v14),
-                    itemBuilder: (context, index) {
+                  data: (promos) => SizedBox(
+                    height: AppSpace.v148,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: promos.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: AppSpace.v14),
+                      itemBuilder: (context, index) {
                         final p = promos[index];
                         final bg = _parseHex(p.bgColorHex);
                         return InkWell(
@@ -288,7 +290,7 @@ class HomeScreen extends ConsumerWidget {
                                       if (p.badgeText.isNotEmpty)
                                         Container(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: AppSpace.sm, vertical: AppSpace.v3),
+                                              horizontal: AppSpace.sm, vertical: AppSpace.v2),
                                           decoration: BoxDecoration(
                                             color:
                                                 AppColors.scrim.withOpacity(0.22),
@@ -297,6 +299,8 @@ class HomeScreen extends ConsumerWidget {
                                           ),
                                           child: Text(
                                             p.badgeText,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
                                               color: AppColors.surface,
                                               fontSize: 16,
@@ -318,7 +322,7 @@ class HomeScreen extends ConsumerWidget {
                                       const SizedBox(height: AppSpace.v4),
                                       Text(
                                         p.subtitle,
-                                        maxLines: 2,
+                                        maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color: AppColors.surface,
@@ -343,6 +347,7 @@ class HomeScreen extends ConsumerWidget {
                         );
                       },
                     ),
+                  ),
                   loading: () => SizedBox(
                     height: AppSpace.v148,
                     child: ListView.separated(
