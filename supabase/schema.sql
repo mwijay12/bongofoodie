@@ -214,6 +214,8 @@ alter table public.menu add column if not exists rating_count integer default 12
 alter table public.menu add column if not exists prep_time_mins integer default 20;
 alter table public.menu add column if not exists is_available boolean default true;
 
+alter table public.menu add column if not exists spice_level smallint check (spice_level between 0 and 5), add column if not exists ingredients text[] not null default '{}', add column if not exists allergens text[] not null default '{}', add column if not exists fun_fact_en text, add column if not exists fun_fact_sw text;
+
 create index if not exists idx_menu_category_id on public.menu(category_id);
 
 alter table public.menu enable row level security;
@@ -458,7 +460,7 @@ create table if not exists public.settings (
   halo_till text default '112233',
   nmb_account text default '9900112233',
   crdb_account text default '8877665544',
-  logo text default '🔥',
+  logo text default '',
   delivery_fee numeric default 3000,
   promo_code text default 'KARIBU2000',
   promo_discount numeric default 2000,
@@ -493,7 +495,7 @@ insert into public.settings (
 values (
   'branch_settings', 'Bongo Foodie', 'Kijitonyama Branch, Dar es Salaam', '+255 712 345 678',
   '556677', '223344', '889900', '112233', '9900112233', '8877665544',
-  '🔥', 3000, 'KARIBU2000', 2000, true
+  '', 3000, 'KARIBU2000', 2000, true
 )
 on conflict (id) do nothing;
 
@@ -942,6 +944,116 @@ set
   prep_time_mins = excluded.prep_time_mins,
   category_id = excluded.category_id;
 
+-- 13C2. Premium dish-detail seed values (idempotent, admin setup path only)
+with menu_details(name, spice_level, ingredients, allergens, fun_fact_en, fun_fact_sw) as (
+  values
+  (
+    'Chipsi Mayai',
+    2,
+    array['French fries', 'eggs', 'tomatoes', 'onions', 'tamarind', 'chili']::text[],
+    array['egg']::text[],
+    'Chipsi mayai combines fried potatoes with eggs in one omelette.',
+    'Chipsi mayai huchanganya viazi vya kukaanga na mayai katika omeleti moja.'
+  ),
+  (
+    'Nyama Choma & Ugali',
+    2,
+    array['beef', 'maize flour', 'spinach', 'coconut milk', 'tomatoes', 'onions', 'ginger', 'lime']::text[],
+    array['coconut']::text[],
+    'Ugali is a firm maize-meal porridge often served with grilled meat.',
+    'Ugali ni uji mzito wa unga wa mahindi unaotolewa mara nyingi na nyama ya kuchoma.'
+  ),
+  (
+    'Pilau ya Kuku',
+    3,
+    array['basmati rice', 'chicken', 'onions', 'cardamom', 'cloves', 'tomatoes']::text[],
+    '{}'::text[],
+    'Pilau is rice cooked with whole spices such as cardamom and cloves.',
+    'Pilau ni wali unaopikwa na viungo vizima kama iliki na karafuu.'
+  ),
+  (
+    'Samaki wa Kupaka',
+    2,
+    array['snapper', 'coconut cream', 'turmeric', 'garlic', 'mango', 'tamarind']::text[],
+    array['fish', 'coconut']::text[],
+    'Samaki wa kupaka is fish simmered in coconut cream or coconut milk.',
+    'Samaki wa kupaka hupikwa kwa tui la nazi au maziwa ya nazi.'
+  ),
+  (
+    'Mishkaki ya Ng''ombe',
+    3,
+    array['beef', 'papaya', 'ginger', 'garlic', 'black pepper']::text[],
+    '{}'::text[],
+    'Mishkaki are small pieces of meat grilled on skewers.',
+    'Mishkaki ni vipande vidogo vya nyama vinavyochomwa kwenye vijiti.'
+  ),
+  (
+    'Wali wa Nazi na Maharage',
+    1,
+    array['rice', 'coconut milk', 'red kidney beans', 'cardamom']::text[],
+    array['coconut']::text[],
+    'Wali wa nazi is rice cooked with coconut milk.',
+    'Wali wa nazi hupikwa kwa tui la nazi.'
+  ),
+  (
+    'Mchuzi wa Kuku na Chapati',
+    2,
+    array['chicken', 'coconut milk', 'wheat flour', 'ghee', 'spices']::text[],
+    array['gluten', 'milk']::text[],
+    'Chapati is a layered flatbread cooked on a hot pan.',
+    'Chapati ni mkate bapa wenye tabaka unaopikwa kwenye sufuria moto.'
+  ),
+  (
+    'Ndizi Mzuzu Kaanga',
+    2,
+    array['plantain', 'black pepper', 'sea salt', 'tamarind']::text[],
+    '{}'::text[],
+    'Ripe plantains are naturally sweet before they are fried.',
+    'Ndizi mzuzu mbivu huwa na utamu wa asili kabla ya kukaangwa.'
+  ),
+  (
+    'Bongo Pili-Pili Smash Burger',
+    3,
+    array['beef', 'cheddar', 'aioli', 'avocado', 'onions', 'brioche bun']::text[],
+    array['gluten', 'egg', 'milk']::text[],
+    'A smash burger is made by pressing the patty flat on a hot surface.',
+    'Smash burger hutengenezwa kwa kubana nyama iliyo bapa kwenye uso moto.'
+  ),
+  (
+    'Zanzibar Spice Wood-Fired Pizza',
+    2,
+    array['sourdough crust', 'beef', 'mozzarella', 'sweet peppers', 'red onions', 'coriander']::text[],
+    array['gluten', 'milk']::text[],
+    'Sourdough crust is made with a fermented flour-and-water starter.',
+    'Ukoko wa sourdough hutengenezwa kwa chachu ya unga na maji iliyochachuka.'
+  ),
+  (
+    'Juisi ya Passion & Embe Baridi',
+    0,
+    array['passion fruit', 'mango', 'mint']::text[],
+    '{}'::text[],
+    'Passion fruit and mango grow in tropical regions.',
+    'Matunda ya passion na embe hukua katika maeneo ya kitropiki.'
+  ),
+  (
+    'Stoney Tangawizi Baridi',
+    1,
+    array['ginger soda']::text[],
+    '{}'::text[],
+    'Ginger soda gets its sharp taste from ginger.',
+    'Soda ya tangawizi hupata ladha yake kali kutoka kwa tangawizi.'
+  )
+)
+update public.menu as m
+set
+  spice_level = d.spice_level,
+  ingredients = d.ingredients,
+  allergens = d.allergens,
+  fun_fact_en = d.fun_fact_en,
+  fun_fact_sw = d.fun_fact_sw
+from menu_details as d
+where m.name = d.name;
+
 -- 13D. Link Menu Customizations Automatically
 insert into public.menu_customizations (menu_id, customization_id)
 select m.id, c.id
@@ -957,9 +1069,9 @@ on conflict (menu_id, customization_id) do nothing;
 -- 13E. Promotional Campaigns
 insert into public.promotions (title, subtitle, discount_badge, promo_code, bg_hex, image_key, is_active, sort_order)
 values
-  ('KARIBU BONGO FEAST', 'Save TSh 2,000 on any Swahili main dish with code KARIBU2000', '🔥 TSh 2,000 OFF', 'KARIBU2000', '#F6821F', 'nyamaChoma', true, 1),
-  ('IJUMAA PILAU & JUICE', 'Zanzibar Pilau ya Kuku + Fresh Passion Mango Juice combo', '🍛 15% OFF', 'KARIBU2000', '#0F5132', 'pilauYaKuku', true, 2),
-  ('WEEKEND PIZZA & BURGER', 'Wood-fired Zanzibar Pizza & Smash Burger family deal', '🍕 20% OFF', 'KARIBU2000', '#181C2E', 'pizzaOne', true, 3)
+  ('KARIBU BONGO FEAST', 'Save TSh 2,000 on any Swahili main dish with code KARIBU2000', 'TSh 2,000 OFF', 'KARIBU2000', '#F6821F', 'nyamaChoma', true, 1),
+  ('IJUMAA PILAU & JUICE', 'Zanzibar Pilau ya Kuku + Fresh Passion Mango Juice combo', '15% OFF', 'KARIBU2000', '#0F5132', 'pilauYaKuku', true, 2),
+  ('WEEKEND PIZZA & BURGER', 'Wood-fired Zanzibar Pizza & Smash Burger family deal', '20% OFF', 'KARIBU2000', '#181C2E', 'pizzaOne', true, 3)
 on conflict (title) do update
 set
   subtitle = excluded.subtitle,
@@ -970,12 +1082,12 @@ set
 
 -- 13F. Daily Discoveries
 insert into public.daily_discoveries (title, description) values
-  ('Zanzibar Spice Capital 🌴', 'Zanzibar (Unguja) is nicknamed the ''Spice Island'' because it remains one of the world''s top producers of aromatic Cloves (Karafuu), Cinnamon (Mdalasini), and Nutmeg (Kungumanga).'),
-  ('Bongo Foodie Sourcing 🧑‍🌾', 'We source 100% of our organic vegetables, Morogoro rice, and free-range poultry directly from Tanzanian smallholder farms.'),
-  ('National Street Icon 🍟', 'Chipsi Mayai started at Dar es Salaam roadside banda stalls and became Tanzania''s most beloved comfort meal — always paired with tangy kachumbari!'),
-  ('The Pilau Spice Path 🍛', 'Authentic Swahili Pilau toasts whole cumin, cardamom, black pepper, cloves, and cinnamon in deeply caramelized onions before simmering meat and rice together.'),
-  ('Coastal Coconut Magic 🥥', 'Tui la Nazi (freshly grated coconut milk) is the soul of coastal Swahili gastronomy, giving Samaki wa Kupaka and Wali wa Nazi their signature silkiness.'),
-  ('Kijitonyama Flagship Kitchen 📍', 'Our flagship Bongo Foodie kitchen in Kijitonyama, Dar es Salaam blends charcoal mkaa grilling heritage with AI-assisted recipe personalization.')
+  ('Zanzibar Spice Capital', 'Zanzibar (Unguja) is nicknamed the ''Spice Island'' because it remains one of the world''s top producers of aromatic Cloves (Karafuu), Cinnamon (Mdalasini), and Nutmeg (Kungumanga).'),
+  ('Bongo Foodie Sourcing', 'We source 100% of our organic vegetables, Morogoro rice, and free-range poultry directly from Tanzanian smallholder farms.'),
+  ('National Street Icon', 'Chipsi Mayai started at Dar es Salaam roadside banda stalls and became Tanzania''s most beloved comfort meal — always paired with tangy kachumbari!'),
+  ('The Pilau Spice Path', 'Authentic Swahili Pilau toasts whole cumin, cardamom, black pepper, cloves, and cinnamon in deeply caramelized onions before simmering meat and rice together.'),
+  ('Coastal Coconut Magic', 'Tui la Nazi (freshly grated coconut milk) is the soul of coastal Swahili gastronomy, giving Samaki wa Kupaka and Wali wa Nazi their signature silkiness.'),
+  ('Kijitonyama Flagship Kitchen', 'Our flagship Bongo Foodie kitchen in Kijitonyama, Dar es Salaam blends charcoal mkaa grilling heritage with AI-assisted recipe personalization.')
 on conflict (title) do nothing;
 
 -- 13G. Staff & Inventory Defaults
