@@ -12,6 +12,11 @@ export interface MenuItem {
   protein?: number;
   prep_time_mins?: number;
   categories?: string;
+  spice_level?: number | null;
+  ingredients?: string[] | null;
+  allergens?: string[] | null;
+  fun_fact_en?: string | null;
+  fun_fact_sw?: string | null;
 }
 
 export interface Category {

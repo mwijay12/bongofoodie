@@ -19,6 +19,25 @@ final allMenuItemsProvider = FutureProvider<List<MenuItemModel>>((ref) async {
   return ref.watch(menuRepositoryProvider).getMenu();
 });
 
+final dishCustomizationsProvider =
+    FutureProvider.family<List<CustomizationOption>, String>((ref, dishId) async {
+  return ref.watch(menuRepositoryProvider).getDishCustomizations(dishId);
+});
+
+final dishReviewsProvider =
+    FutureProvider.family<List<MenuReviewModel>, String>((ref, dishId) async {
+  return ref.watch(menuRepositoryProvider).getDishReviews(dishId);
+});
+
+final menuItemByIdProvider =
+    FutureProvider.family<MenuItemModel?, String>((ref, dishId) async {
+  final items = await ref.watch(allMenuItemsProvider.future);
+  for (final item in items) {
+    if (item.id == dishId) return item;
+  }
+  return null;
+});
+
 final dailyDiscoveriesProvider =
     StateNotifierProvider<DailyDiscoveriesNotifier, AsyncValue<List<DiscoveryModel>>>(
         (ref) {
