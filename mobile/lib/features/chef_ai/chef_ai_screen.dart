@@ -453,8 +453,8 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
         ),
         const SizedBox(height: AppSpace.v10),
         Wrap(
-          spacing: 8,
-          runSpacing: 6,
+          spacing: AppSpace.v8,
+          runSpacing: AppSpace.v6,
           children: ideas
               .map(
                 (idea) => ActionChip(
@@ -565,8 +565,8 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                 ),
                 const SizedBox(height: AppSpace.v8),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
+                  spacing: AppSpace.v8,
+                  runSpacing: AppSpace.v6,
                   children: _generatedDish!.customizations.map((side) {
                     final checked = _checkedCustomSides.contains(side);
                     return FilterChip(

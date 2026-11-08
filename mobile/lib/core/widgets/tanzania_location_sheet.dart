@@ -143,7 +143,7 @@ class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
         AppSpace.v22,
         AppSpace.v4,
         AppSpace.v22,
-        MediaQuery.of(context).viewInsets.bottom + 26,
+        MediaQuery.of(context).viewInsets.bottom + AppSpace.v26,
       ),
       child: _loading
           ? const SizedBox(

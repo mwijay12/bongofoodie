@@ -358,8 +358,8 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                     if (item.customizations.isNotEmpty) ...[
                       const SizedBox(height: AppSpace.v8),
                       Wrap(
-                        spacing: 6,
-                        runSpacing: 4,
+                        spacing: AppSpace.v6,
+                        runSpacing: AppSpace.v4,
                         children: item.customizations
                             .map(
                               (c) => Container(

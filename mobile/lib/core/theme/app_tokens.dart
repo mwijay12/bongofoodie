@@ -22,6 +22,7 @@ abstract final class AppSpace {
   static const double v20 = 20;
   static const double v22 = 22;
   static const double v24 = 24;
+  static const double v26 = 26;
   static const double v30 = 30;
   static const double v32 = 32;
   static const double v40 = 40;
@@ -39,6 +40,7 @@ abstract final class AppRadius {
   static const double v18 = 18;
   static const double v22 = 22;
   static const double v24 = 24;
+  static const double v26 = 26;
   static const double v28 = 28;
   static const double v999 = 999;
 

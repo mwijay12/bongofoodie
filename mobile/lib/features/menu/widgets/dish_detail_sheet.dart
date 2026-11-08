@@ -242,8 +242,8 @@ class _DishDetailSheetState extends ConsumerState<DishDetailSheet> {
                       ),
                       const SizedBox(height: AppSpace.v10),
                       Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
+                        spacing: AppSpace.v8,
+                        runSpacing: AppSpace.v8,
                         children: widget.dish.availableCustomizations.map((opt) {
                           final selected =
                               _selectedCustomizationIds.contains(opt.id);
