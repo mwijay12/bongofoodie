@@ -27,6 +27,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const Size _screenSize = Size(360, 640);
+const Size _overlaySurfaceSize = Size(800, 1200);
 const AppStrings _englishStrings = AppStrings(AppLanguage.en);
 const String _longTitle = 'KARIBU BONGO FEAST SAVE TWO THOUSAND TZS';
 const String _longSubtitle =
@@ -120,8 +121,9 @@ Widget _host({
   );
 }
 
-Future<void> _configureSurface(WidgetTester tester) async {
-  tester.view.physicalSize = _screenSize;
+Future<void> _configureSurface(WidgetTester tester,
+    {Size size = _screenSize}) async {
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -130,6 +132,19 @@ Future<void> _configureSurface(WidgetTester tester) async {
 Future<void> _disposeTree(WidgetTester tester) async {
   await tester.pumpWidget(const SizedBox.shrink());
   await tester.pump(Duration.zero);
+}
+
+Future<void> _revealPromo(WidgetTester tester) async {
+  await tester.pump(const Duration(milliseconds: 100));
+  for (var i = 0; i < 4; i += 1) {
+    if (find.text(_longTitle).evaluate().isNotEmpty) break;
+    await tester.drag(
+      find.byType(CustomScrollView).first,
+      const Offset(0, -AppSpace.v190),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+  await tester.pump(const Duration(milliseconds: 100));
 }
 
 Future<void> _pumpHome(
@@ -153,6 +168,7 @@ Future<void> _pumpHome(
   );
   await tester.pump(const Duration(milliseconds: 100));
   await tester.pump(const Duration(milliseconds: 100));
+  await tester.pump(const Duration(milliseconds: 100));
 }
 
 Future<void> _pumpRoutedApp(
@@ -172,7 +188,7 @@ Future<void> _pumpRoutedApp(
     ],
   );
   addTearDown(router.dispose);
-  await _configureSurface(tester);
+  await _configureSurface(tester, size: _overlaySurfaceSize);
   await tester.pumpWidget(
     ProviderScope(
       overrides: <Override>[
@@ -197,7 +213,7 @@ void main() {
   });
 
   test('shared promo and nav metrics stay in sync', () {
-    expect(PromoCardMetrics.height, AppSpace.v190);
+    expect(PromoCardMetrics.height, AppSpace.v220);
     expect(AppSpace.navClearance, AppSpace.navHeight + AppSpace.lg);
   });
 
@@ -250,6 +266,7 @@ void main() {
             const <PromotionModel>[_longPromo],
           ),
         );
+        await _revealPromo(tester);
         expect(find.text(_longTitle), findsOneWidget);
         expect(find.text(_longSubtitle), findsOneWidget);
         expect(tester.takeException(), isNull);
@@ -330,7 +347,7 @@ void main() {
         '${entry.key} dark-hero overlay uses light icons '
         '(${dark ? 'dark' : 'light'} theme)',
         (tester) async {
-          await _configureSurface(tester);
+          await _configureSurface(tester, size: _overlaySurfaceSize);
           await tester.pumpWidget(
             ProviderScope(
               overrides: _overrides(
@@ -343,6 +360,7 @@ void main() {
               ),
               child: _host(
                 brightness: dark ? Brightness.dark : Brightness.light,
+                textScale: 1.0,
                 home: entry.value,
               ),
             ),

@@ -73,6 +73,7 @@ class HomeScreen extends ConsumerWidget {
     final menuAsync = ref.watch(allMenuItemsProvider);
     final favorites = ref.watch(favoritesProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bottomClearance = context.navClearance;
 
     return Scaffold(
       body: SafeArea(
@@ -459,18 +460,35 @@ class HomeScreen extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0, AppSpace.screenH, AppSpace.lg),
                   child: Row(
                     children: [
-                      Text(
-                        t.popularDishes,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
-                      ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: () => context.go('/search'),
+                      Flexible(
                         child: Text(
-                          t.isSw ? 'Ona Menyu Yote →' : 'Full Menu →',
-                          style: const TextStyle(fontWeight: FontWeight.w800),
+                          t.popularDishes,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpace.sm),
+                      Flexible(
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            minimumSize:
+                                const Size(AppSpace.huge, AppSpace.huge),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpace.sm,
+                            ),
+                          ),
+                          onPressed: () => context.go('/search'),
+                          child: Text(
+                            t.isSw ? 'Ona Menyu Yote →' : 'Full Menu →',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w800),
+                          ),
                         ),
                       ),
                     ],
@@ -565,6 +583,9 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+              SliverToBoxAdapter(
+                child: SizedBox(height: bottomClearance),
+              ),
             ],
           ),
         ),
@@ -646,10 +667,21 @@ class _ChefAtelierCard extends StatelessWidget {
                               fontSize: 12, height: 1.45)),
                             const SizedBox(height: AppSpace.v18),
                             Row(mainAxisSize: MainAxisSize.min, children: [
-                              Text(action, style: const TextStyle(color: AppColors.heroLight,
-                                fontSize: 12, fontWeight: FontWeight.w700)),
+                              Flexible(
+                                child: Text(
+                                  action,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: AppColors.heroLight,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
                               const SizedBox(width: AppSpace.v7),
-                              const Icon(Icons.arrow_forward_rounded, color: AppColors.heroLight, size: 16),
+                              const Icon(Icons.arrow_forward_rounded,
+                                  color: AppColors.heroLight, size: 16),
                             ]),
                           ],
                         ),
@@ -740,7 +772,7 @@ class _SignatureDishCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpace.v10),
+              const SizedBox(height: AppSpace.sm),
               Row(
                 children: [
                   const Icon(Icons.star_rounded,
@@ -765,7 +797,7 @@ class _SignatureDishCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpace.v4),
+              const SizedBox(height: AppSpace.v2),
               Text(
                 dish.name,
                 maxLines: 1,
@@ -805,7 +837,7 @@ class _SignatureDishCard extends StatelessWidget {
                     onTap: onQuickAdd,
                     borderRadius: BorderRadius.circular(AppRadius.sm),
                     child: Container(
-                      padding: const EdgeInsets.all(AppSpace.v7),
+                      padding: const EdgeInsets.all(AppSpace.v6),
                       decoration: BoxDecoration(
                         color: AppColors.cta,
                         borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -878,10 +910,6 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
-              ),
-              SliverPadding(
-                padding: EdgeInsets.only(bottom: context.navClearance),
-                sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
               ),
             ],
           ),

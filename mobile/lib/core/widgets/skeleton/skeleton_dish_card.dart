@@ -35,7 +35,7 @@ class SkeletonDishCard extends StatelessWidget {
             radius: AppRadius.sm,
           ),
           const SizedBox(height: AppSpace.v4),
-          const SkeletonLines(),
+          const SkeletonLines(count: 1),
           const Spacer(),
           const SkeletonBox(
             width: AppSpace.v40,
