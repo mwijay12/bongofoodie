@@ -415,11 +415,11 @@ class ShowcaseSeedData {
     PromotionModel(
       id: 'promo-2',
       title: 'IJUMAA PILAU & JUICE',
-      subtitle: 'Zanzibar Pilau ya Kuku + Fresh Passion Mango Juice combo',
+      subtitle: 'Zanzibar Beef Pilau + Fresh Passion Mango Juice combo',
       discountBadge: '15% OFF',
       promoCode: 'KARIBU2000',
       bgHex: '#0F5132',
-      imageKey: 'pilauYaKuku',
+      imageKey: 'zanzibarPilau',
     ),
     PromotionModel(
       id: 'promo-3',
@@ -630,9 +630,9 @@ class ShowcaseSeedData {
         items: const [
           CartItemModel(
             id: 'menu-pilau-kuku',
-            name: 'Pilau ya Kuku',
+            name: 'Zanzibar Pilau',
             price: 10000,
-            imageUrl: 'pilauYaKuku',
+            imageUrl: 'zanzibarPilau',
             quantity: 2,
           ),
         ],
