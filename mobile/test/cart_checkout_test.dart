@@ -106,10 +106,13 @@ void main() {
     final container = await _pump(tester);
     final before = container.read(cartProvider).items.single;
     await tester.tap(find.text('Remove'));
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(Duration.zero);
+    await tester.pump(const Duration(milliseconds: 400));
     expect(container.read(cartProvider).items, isEmpty);
+    expect(find.text('Undo').hitTestable(), findsOneWidget);
     await tester.tap(find.text('Undo'));
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(Duration.zero);
+    await tester.pump(const Duration(milliseconds: 400));
     expect(container.read(cartProvider).items.single, same(before));
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(milliseconds: 50));
