@@ -1,3 +1,4 @@
+import '../../core/widgets/promo_dish_image.dart';
 import '../../core/utils/dish_image_cache.dart';
 import '../../core/l10n/dish_copy.dart';
 import '../../core/widgets/app_sheet.dart';
@@ -384,14 +385,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: PromoCardMetrics.imageGap),
-                                DishImage(
-                                  imageRef: p.imageKey,
-                                  clip: false,
-                                  transparentFallback: true,
-                                  width: PromoCardMetrics.imageSize,
-                                  height: PromoCardMetrics.imageSize,
-                                  borderRadius: PromoCardMetrics.imageRadius,
-                                ),
+                                PromoDishImage(imageRef: p.imageKey),
                               ],
                             ),
                           ),

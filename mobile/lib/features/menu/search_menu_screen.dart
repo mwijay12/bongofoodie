@@ -19,9 +19,9 @@ import '../../state/settings_provider.dart';
 
 
 abstract final class _MenuMetrics {
-  static const gridImage = 108.0;
-  static const listImage = 84.0;
-  static const gridRatio = 0.74;
+  static const gridImage = 128.0;
+  static const listImage = AppSpace.v92;
+  static const gridRatio = 0.64;
   static const gap = AppSpace.v14;
   static const padding = AppSpace.md;
 }

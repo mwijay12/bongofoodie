@@ -31,12 +31,7 @@ class DishImage extends StatelessWidget {
   }) : imageRef = imageRef ?? imageKeyOrUrl ?? 'salad';
 
   static const Map<String, String> _localAssetMap = {
-    'chipsiMayai': 'assets/dishes/menu-chipsi-mayai.png',
-    'nyamaChoma': 'assets/dishes/menu-nyama-choma.png',
-    'zanzibarPilau': 'assets/dishes/menu-pilau-kuku.png',
     'pilauYaKuku': 'assets/images/pilau-ya-kuku.png',
-    'samakiWaKupaka': 'assets/dishes/menu-samaki-kupaka.png',
-    'mishkakiYaNgombe': 'assets/dishes/menu-mishkaki.png',
     'burgerOne': 'assets/images/burger-one.png',
     'burgerTwo': 'assets/images/burger-two.png',
     'pizzaOne': 'assets/images/pizza-one.png',
@@ -59,6 +54,14 @@ class DishImage extends StatelessWidget {
   static String? resolveLocalAsset(String raw) {
     final trimmed = raw.trim();
     if (trimmed.isEmpty) return null;
+    if (dishAssetIds.contains(trimmed)) {
+      return resolveDishAsset(trimmed, fallback: trimmed);
+    }
+    for (final entry in dishImageKeys.entries) {
+      if (entry.key.toLowerCase() == trimmed.toLowerCase()) {
+        return resolveDishAsset(entry.value, fallback: trimmed);
+      }
+    }
     if (_localAssetMap.containsKey(trimmed)) {
       return _localAssetMap[trimmed];
     }
