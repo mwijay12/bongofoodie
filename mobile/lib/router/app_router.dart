@@ -150,7 +150,14 @@ class _CustomerMainShell extends ConsumerWidget {
     final t = ref.watch(appStringsProvider);
     final cartCount = ref.watch(cartProvider.select((c) => c.totalItems));
 
-    return AppShell(
+    return PopScope<Object?>(
+      canPop: navigationShell.currentIndex == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && navigationShell.currentIndex != 0) {
+          navigationShell.goBranch(0);
+        }
+      },
+      child: AppShell(
       body: navigationShell,
       nav: BongoGlassNavBar(
         currentIndex: navigationShell.currentIndex,
@@ -168,6 +175,7 @@ class _CustomerMainShell extends ConsumerWidget {
             initialLocation: idx == navigationShell.currentIndex,
           );
         },
+      ),
       ),
     );
   }

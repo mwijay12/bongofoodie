@@ -1,3 +1,4 @@
+import '../../core/l10n/dish_copy.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -75,6 +76,8 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
           item.categoryId.toLowerCase() == catTarget;
       final matchesQuery = q.isEmpty ||
           item.name.toLowerCase().contains(q) ||
+          dishName(item.id, item.name, isSw: true).toLowerCase().contains(q) ||
+          dishName(item.id, item.name, isSw: false).toLowerCase().contains(q) ||
           item.description.toLowerCase().contains(q) ||
           item.categoryName.toLowerCase().contains(q);
       return matchesCat && matchesQuery;
@@ -287,7 +290,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                             ref.read(cartProvider.notifier).addItem(dish: dish);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('${dish.name} added to Cart!'),
+                                content: Text('${dishName(dish.id, dish.name, isSw: t.isSw)}: ${t.added}'),
                                 duration: const Duration(seconds: 1),
                                 behavior: SnackBarBehavior.floating,
                               ),
@@ -312,7 +315,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                           ref.read(cartProvider.notifier).addItem(dish: dish);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('${dish.name} added to Cart!'),
+                              content: Text('${dishName(dish.id, dish.name, isSw: t.isSw)}: ${t.added}'),
                               duration: const Duration(seconds: 1),
                               behavior: SnackBarBehavior.floating,
                             ),
@@ -362,7 +365,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
   }
 }
 
-class _MenuGridTile extends StatelessWidget {
+class _MenuGridTile extends ConsumerWidget {
   final MenuItemModel dish;
   final bool isDark;
   final VoidCallback onOpen;
@@ -376,7 +379,7 @@ class _MenuGridTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Material(
       color: isDark ? AppColors.darkCard : AppColors.surface,
       borderRadius: BorderRadius.circular(AppRadius.md),
@@ -405,7 +408,7 @@ class _MenuGridTile extends StatelessWidget {
               ),
               const SizedBox(height: AppSpace.v10),
               Text(
-                dish.name,
+                dishName(dish.id, dish.name, isSw: ref.watch(appStringsProvider).isSw),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -462,7 +465,7 @@ class _MenuGridTile extends StatelessWidget {
   }
 }
 
-class _MenuListTile extends StatelessWidget {
+class _MenuListTile extends ConsumerWidget {
   final MenuItemModel dish;
   final bool isDark;
   final VoidCallback onOpen;
@@ -476,7 +479,7 @@ class _MenuListTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Material(
       color: isDark ? AppColors.darkCard : AppColors.surface,
       borderRadius: BorderRadius.circular(AppRadius.md),
@@ -506,7 +509,7 @@ class _MenuListTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      dish.name,
+                      dishName(dish.id, dish.name, isSw: ref.watch(appStringsProvider).isSw),
                       style: const TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 15,

@@ -219,7 +219,7 @@ class ShowcaseSeedData {
       name: 'Wali wa Nazi na Maharage',
       description:
           'Creamy coconut-steamed rice paired with velvety red kidney beans braised in fresh coconut milk and sweet coastal cardamom.',
-      imageUrl: 'pilauYaKuku',
+      imageUrl: '',
       price: 6000,
       rating: 4.6,
       ratingCount: 42,
@@ -240,7 +240,7 @@ class ShowcaseSeedData {
       name: 'Mchuzi wa Kuku na Chapati',
       description:
           'Rich coastal chicken coconut curry served with two flaky pan-layered golden chapatis brushed with ghee.',
-      imageUrl: 'samakiWaKupaka',
+      imageUrl: '',
       price: 9500,
       rating: 4.8,
       ratingCount: 58,
@@ -258,10 +258,10 @@ class ShowcaseSeedData {
     ),
     MenuItemModel(
       id: 'menu-ndizi-mzuzu',
-      name: 'Ndizi Mzuzu Kaanga',
+      name: 'Ndizi za Kukaanga',
       description:
           'Caramelized ripe sweet plantain medallions lightly spiced with black pepper and sea salt, served with pili pili ya ukwaju.',
-      imageUrl: 'fries',
+      imageUrl: '',
       price: 4000,
       rating: 4.6,
       ratingCount: 39,
@@ -324,7 +324,7 @@ class ShowcaseSeedData {
       name: 'Juisi ya Passion & Embe Baridi',
       description:
           'Freshly pressed Morogoro passion fruit and ripe coastal mango juice served chilled with fresh mint.',
-      imageUrl: 'orangeJuiceIcon',
+      imageUrl: '',
       price: 3500,
       rating: 4.9,
       ratingCount: 68,
@@ -345,7 +345,7 @@ class ShowcaseSeedData {
       name: 'Stoney Tangawizi Baridi',
       description:
           'Ice-cold East African fiery ginger soda — the undisputed companion to hot Nyama Choma and Mishkaki.',
-      imageUrl: 'orangeJuiceIcon',
+      imageUrl: '',
       price: 2000,
       rating: 4.8,
       ratingCount: 91,

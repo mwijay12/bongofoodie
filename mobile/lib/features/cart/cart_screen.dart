@@ -1,3 +1,4 @@
+import '../../core/l10n/dish_copy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -281,6 +282,7 @@ Asante kwa kuchagua BongoFoodie TZ!
                       children: [
                         DishImage(
                           imageRef: item.imageUrl,
+                          dishId: item.id,
                           width: 68,
                           height: 68,
                           borderRadius: AppRadius.v14,
@@ -303,7 +305,7 @@ Asante kwa kuchagua BongoFoodie TZ!
                                     ),
                                   Expanded(
                                     child: Text(
-                                      item.name,
+                                      dishName(item.id, item.name, isSw: t.isSw),
                                       style: const TextStyle(
                                         fontWeight: FontWeight.w800,
                                         fontSize: 14.5,

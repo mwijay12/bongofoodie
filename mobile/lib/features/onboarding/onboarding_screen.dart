@@ -95,7 +95,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         subtitle: t.isSw
             ? 'Kuanzia Nyama Choma ya mkaa, Pilau ya Kuku wa Kienyeji hadi Samaki wa Kupaka wa tui la nazi.'
             : 'From smoky charcoal Nyama Choma & spiced Zanzibar Pilau to velvety coconut Samaki wa Kupaka.',
-        imageKey: 'nyamaChoma',
+        imageKey: 'mishkakiYaNgombe',
       ),
       (
         badge: t.isSw ? 'MPISHI AI WA KISWAHILI' : 'AI SWAHILI EXECUTIVE CHEF',
@@ -105,7 +105,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         subtitle: t.isSw
             ? 'Uliza siri za mapishi kwa Kiswahili au Kiingereza na uagize chakula chako maalum papo hapo.'
             : 'Chat in Kiswahili or English, invent your dream Swahili fusion plate, and order it straight from our kitchen.',
-        imageKey: 'bongoChefMascot',
+        imageKey: 'robotChef',
       ),
       (
         badge: t.isSw ? 'UFIKISHAJI WA HARAKA DAR - TZ' : 'FAST TANZANIA DELIVERY',
@@ -115,7 +115,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         subtitle: t.isSw
             ? 'Chagua Mkoa, Wilaya na Kata yako, lipa kwa M-Pesa/Tigo Pesa au Pesa Taslimu mlangoni.'
             : 'Pick your exact Region, District & Ward, pay via Mobile Money Till or Cash on Delivery, and track every step live.',
-        imageKey: 'pilauYaKuku',
+        imageKey: 'zanzibarPilau',
       ),
     ];
 
@@ -134,7 +134,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         backgroundColor: AppColors.ember,
         body: SafeArea(
           child: Container(
-            color: AppColors.cream,
+            color: AppColors.ember,
             child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpace.xl, vertical: AppSpace.v14),
             child: Column(
@@ -158,7 +158,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     const Text(
                       'BongoFoodie',
                       style: TextStyle(
-                        color: AppColors.ink,
+                        color: AppColors.surface,
                         fontWeight: FontWeight.w800,
                         fontSize: 19,
                         letterSpacing: -0.3,
@@ -182,7 +182,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         child: Text(
                           settings.isSwahili ? 'SW' : 'EN',
                           style: const TextStyle(
-                            color: AppColors.ink,
+                            color: AppColors.surface,
                             fontWeight: FontWeight.w700,
                             fontSize: 12,
                           ),
@@ -209,8 +209,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            height: 235,
-                            width: 235,
+                            height: OnboardingImageMetrics.size,
+                            width: OnboardingImageMetrics.size,
                             padding: const EdgeInsets.all(AppSpace.v14),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
@@ -223,9 +223,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             ),
                             child: DishImage(
                               imageRef: slide.imageKey,
-                              width: 205,
-                              height: 205,
-                              borderRadius: AppRadius.v999,
+                              width: OnboardingImageMetrics.size,
+                              height: OnboardingImageMetrics.size,
+                              clip: false,
+                              fit: BoxFit.contain,
+                              transparentFallback: true,
                             ),
                           ),
                           const SizedBox(height: AppSpace.v24),
@@ -242,7 +244,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             child: Text(
                               slide.badge,
                               style: const TextStyle(
-                                color: AppColors.primaryDeep,
+                                color: AppColors.heroLight,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 1.1,
@@ -254,7 +256,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             slide.title,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: AppColors.ink,
+                              color: AppColors.surface,
                               fontSize: 26,
                               fontWeight: FontWeight.w800,
                               height: 1.2,
@@ -265,7 +267,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             slide.subtitle,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: AppColors.inkMuted,
+                              color: AppColors.darkTextSecondary,
                               fontSize: 14.5,
                               height: 1.5,
                               fontWeight: FontWeight.w500,
@@ -349,7 +351,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         ? 'Masharti ya Huduma & Faragha • Dar es Salaam'
                         : 'Terms of Service & Privacy • Dar es Salaam',
                     style: TextStyle(
-                      color: AppColors.inkMuted,
+                      color: AppColors.darkTextSecondary,
                       fontSize: 12,
                     ),
                   ),

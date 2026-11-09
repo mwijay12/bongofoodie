@@ -1,3 +1,4 @@
+import '../../core/l10n/dish_copy.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/icons/app_icon_key.dart';
 import '../../core/widgets/app_icon.dart';
@@ -382,6 +383,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 const SizedBox(width: PromoCardMetrics.imageGap),
                                 DishImage(
                                   imageRef: p.imageKey,
+                                  clip: false,
+                                  transparentFallback: true,
                                   width: PromoCardMetrics.imageSize,
                                   height: PromoCardMetrics.imageSize,
                                   borderRadius: PromoCardMetrics.imageRadius,
@@ -593,7 +596,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content:
-                                      Text('${dish.name} added to your Cart!'),
+                                      Text('${dishName(dish.id, dish.name, isSw: t.isSw)}: ${t.added}'),
                                   duration: const Duration(seconds: 1),
                                   behavior: SnackBarBehavior.floating,
                                 ),
@@ -742,7 +745,7 @@ class _ChefAtelierCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: AppSpace.v12),
-                      const DishImage(imageRef: 'bongoChefMascot', width: AppSpace.v92, height: AppSpace.v118, borderRadius: AppRadius.v22),
+                      const DishImage(imageRef: 'robotChef', clip: false, transparentFallback: true, width: AppSpace.v92, height: AppSpace.v118, borderRadius: AppRadius.v22),
                     ],
                   ),
                 ),
@@ -755,7 +758,7 @@ class _ChefAtelierCard extends StatelessWidget {
   }
 }
 
-class _SignatureDishCard extends StatelessWidget {
+class _SignatureDishCard extends ConsumerWidget {
   final MenuItemModel dish;
   final bool isFavorite;
   final VoidCallback onTap;
@@ -771,7 +774,7 @@ class _SignatureDishCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
@@ -854,7 +857,7 @@ class _SignatureDishCard extends StatelessWidget {
               ),
               const SizedBox(height: AppSpace.v2),
               Text(
-                dish.name,
+                dishName(dish.id, dish.name, isSw: ref.watch(appStringsProvider).isSw),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -887,7 +890,7 @@ class _SignatureDishCard extends StatelessWidget {
                     ),
                   ),
                   Tooltip(
-                    message: 'Add ${dish.name} to cart',
+                    message: '${ref.watch(appStringsProvider).addToCart}: ${dishName(dish.id, dish.name, isSw: ref.watch(appStringsProvider).isSw)}',
                     child: InkWell(
                     onTap: onQuickAdd,
                     borderRadius: BorderRadius.circular(AppRadius.sm),

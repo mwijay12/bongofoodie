@@ -1,3 +1,4 @@
+import '../../core/l10n/dish_copy.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/icons/app_icon_key.dart';
 import '../../core/widgets/app_icon.dart';
@@ -77,7 +78,7 @@ class ProfileScreen extends ConsumerWidget {
                               borderRadius: AppRadius.v12,
                             ),
                             title: Text(
-                              dish.name,
+                              dishName(dish.id, dish.name, isSw: ref.watch(appStringsProvider).isSw),
                               style:
                                   const TextStyle(fontWeight: FontWeight.w800),
                             ),

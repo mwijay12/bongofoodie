@@ -1,3 +1,5 @@
+import '../../core/widgets/dish_back_scope.dart';
+import '../../core/l10n/dish_copy.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -168,7 +170,8 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
         : SystemUiOverlayStyle.dark;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlay,
-      child: Scaffold(
+      child: DishBackScope(
+        child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: args != null && args.item.id == widget.id
             ? _DishDetailView(
@@ -184,6 +187,7 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
                 stickyBarBuilder: _buildStickyBar,
                 addOnsBuilder: _buildAddOnsSection,
               ),
+        ),
       ),
     );
   }
@@ -206,7 +210,10 @@ class _DeepLinkView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(appStringsProvider);
     final asyncItem = ref.watch(menuItemByIdProvider(id));
-    return AsyncSkeleton<MenuItemModel?>(
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        AsyncSkeleton<MenuItemModel?>(
       value: asyncItem,
       skeleton: const SkeletonDetailScreen(),
       onRetry: () => ref.invalidate(menuItemByIdProvider(id)),
@@ -224,6 +231,14 @@ class _DeepLinkView extends ConsumerWidget {
         stickyBarBuilder: stickyBarBuilder,
         addOnsBuilder: addOnsBuilder,
       ),
+        ),
+        if (asyncItem.valueOrNull == null)
+          Positioned(
+            top: MediaQuery.paddingOf(context).top + AppSpace.sm,
+            left: AppSpace.screenH,
+            child: BackButton(onPressed: () => backFromDish(context)),
+          ),
+      ],
     );
   }
 }
@@ -639,13 +654,7 @@ class DishHeroState extends State<DishHero> with SingleTickerProviderStateMixin 
             child: _HeroCircleButton(
               icon: Icons.arrow_back_rounded,
               tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-              onPressed: () {
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.go('/home');
-                }
-              },
+              onPressed: () => backFromDish(context),
             ),
           ),
           Positioned(
@@ -775,9 +784,11 @@ class _TitleBlock extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(item.name, style: theme.textTheme.headlineMedium),
+          Text(dishName(item.id, item.name, isSw: t.isSw), style: theme.textTheme.headlineMedium),
           const SizedBox(height: AppSpace.v4),
-          Text(t.dishSecondaryName, style: theme.textTheme.bodyMedium),
+          if (dishOtherName(item.id, isSw: t.isSw).isNotEmpty)
+            Text(dishOtherName(item.id, isSw: t.isSw),
+                style: theme.textTheme.bodyMedium),
           const SizedBox(height: AppSpace.md),
           Wrap(
             spacing: AppSpace.sm,
@@ -863,7 +874,7 @@ class _DescriptionBlockState extends ConsumerState<_DescriptionBlock> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.item.description,
+            dishDescription(widget.item.id, widget.item.description, isSw: t.isSw),
             maxLines: _expanded ? null : 3,
             overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyLarge,
@@ -1511,13 +1522,13 @@ class _RelatedSection extends ConsumerWidget {
 
 /// Compact version of the signature dish card, using the shared DishCardMetrics
 /// so the real card, its skeleton and this row stay in one geometry.
-class _RelatedDishCard extends StatelessWidget {
+class _RelatedDishCard extends ConsumerWidget {
   const _RelatedDishCard({super.key, required this.dish});
 
   final MenuItemModel dish;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return SizedBox(
       width: DishCardMetrics.cardMaxWidth,
@@ -1526,7 +1537,7 @@ class _RelatedDishCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.v22),
         child: InkWell(
           borderRadius: BorderRadius.circular(AppRadius.v22),
-          onTap: () => context.pushReplacement(
+          onTap: () => context.push(
             '/dish/${Uri.encodeComponent(dish.id)}',
             extra: DishRouteArgs(
               item: dish,
@@ -1555,7 +1566,7 @@ class _RelatedDishCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpace.v10),
                 Text(
-                  dish.name,
+                  dishName(dish.id, dish.name, isSw: ref.watch(appStringsProvider).isSw),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
