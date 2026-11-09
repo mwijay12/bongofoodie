@@ -42,6 +42,9 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       duration: CheckoutMetrics.undoDuration,
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.fromLTRB(
+          AppSpace.lg, AppSpace.sm, AppSpace.lg, context.navClearance),
       content: Text(t.isSw ? 'Bidhaa imeondolewa' : 'Item removed'),
       action: SnackBarAction(
         label: t.isSw ? 'Rejesha' : 'Undo',
@@ -114,15 +117,14 @@ class _CartScreenState extends ConsumerState<CartScreen> {
   void _showReceiptDialog(OrderModel order, BranchSettingsModel branch) {
     final t = ref.read(appStringsProvider);
     final receiptText = '''
-BONGOFOODIE OFFICIAL RECEIPT
-Order: #${order.id}
-Customer: ${order.customerName}
-Deliver to: ${order.deliveryAddress}
-Items:
-${order.items.map((i) => '• ${i.quantity}x ${i.name} (${AppStrings.formatTzs(i.lineTotal)})').join('\n')}
-Total Paid/Due: ${AppStrings.formatTzs(order.totalAmount)}
-Payment: ${order.paymentMethodType.label}${order.paymentMethodType == PaymentMethod.lipaNamba ? ' (Till ${branch.lipaNamba})' : ''}
-Asante kwa kuchagua BongoFoodie TZ!
+BONGOFOODIE — ${t.isSw ? 'RISITI' : 'RECEIPT'}
+${t.isSw ? 'Oda' : 'Order'}: #${order.id}
+${t.isSw ? 'Mteja' : 'Customer'}: ${order.customerName}
+${t.deliverTo}: ${order.deliveryAddress}
+${order.items.map((i) => '${i.quantity}x ${dishName(i.id, i.name, isSw: t.isSw)} (${AppStrings.formatTzs(i.lineTotal)})').join('\n')}
+${t.total}: ${AppStrings.formatTzs(order.totalAmount)}
+${t.isSw ? 'Malipo' : 'Payment'}: ${order.paymentMethodType == PaymentMethod.lipaNamba ? 'Lipa Namba (${branch.lipaNamba})' : (t.isSw ? 'Taslimu' : 'Cash on delivery')}
+${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing BongoFoodie TZ!'}
 ''';
 
     showDialog<void>(
