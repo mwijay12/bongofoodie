@@ -1,5 +1,16 @@
+import 'package:flutter/foundation.dart';
+
 class EnvConfig {
   EnvConfig._();
+
+  static const bool _showEnvBadgeDefine =
+      bool.fromEnvironment('SHOW_ENV_BADGE', defaultValue: false);
+  static const bool showEnvBadge = kDebugMode || _showEnvBadgeDefine;
+
+  static bool shouldShowEnvBadge({
+    required bool debugMode,
+    bool dartDefine = _showEnvBadgeDefine,
+  }) => debugMode || dartDefine;
 
   static const int _showcaseLatencyMs =
       int.fromEnvironment('SHOWCASE_LATENCY_MS', defaultValue: 700);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_tokens.dart';
@@ -100,10 +101,18 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final t = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      key: const ValueKey('sign-in-system-ui'),
+      value: (isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+          .copyWith(
+        statusBarColor: AppColors.clear,
+        systemNavigationBarColor: AppColors.clear,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(22, 16, 22, 32),
+          padding: const EdgeInsets.fromLTRB(AppSpace.v22, AppSpace.lg, AppSpace.v22, AppSpace.xxl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -111,17 +120,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(AppSpace.v10),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.14),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(AppRadius.v14),
                     ),
                     child: const Icon(
                       Icons.restaurant_menu_rounded,
                       color: AppColors.primary,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpace.md),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -150,19 +159,19 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpace.v20),
 
               // 1-Tap Portfolio Showcase Card
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.all(AppSpace.v18),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: isDark
                         ? [AppColors.ember, AppColors.ink]
                         : [AppColors.cream, AppColors.surfaceWarm],
                   ),
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BorderRadius.circular(AppRadius.v22),
                   border: Border.all(
                     color: AppColors.primary.withOpacity(0.35),
                   ),
@@ -177,7 +186,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           color: AppColors.primary,
                           size: 18,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpace.sm),
                         Expanded(
                           child: Text(
                             EnvConfig.hasSupabaseCredentials
@@ -193,14 +202,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: AppSpace.v6),
                     Text(
                       t.showcaseHint,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             height: 1.4,
                           ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSpace.v14),
                     _DemoRoleTile(
                       icon: Icons.person_rounded,
                       title: t.demoCustomer,
@@ -210,7 +219,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           ? null
                           : () => _loginDemo(UserRole.customer),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpace.sm),
                     _DemoRoleTile(
                       icon: Icons.delivery_dining_rounded,
                       title: t.demoWaiter,
@@ -220,7 +229,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           ? null
                           : () => _loginDemo(UserRole.waiter),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpace.sm),
                     _DemoRoleTile(
                       icon: Icons.verified_user_rounded,
                       title: t.demoAdmin,
@@ -235,19 +244,19 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               ),
 
               if (auth.errorMessage != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpace.lg),
                 Container(
                   padding: const EdgeInsets.all(AppSpace.md),
                   decoration: BoxDecoration(
                     color: AppColors.error.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(AppRadius.v14),
                     border: Border.all(color: AppColors.error.withOpacity(0.3)),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.info_outline_rounded,
                           color: AppColors.error, size: 20),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: AppSpace.v10),
                       Expanded(
                         child: Text(
                           auth.errorMessage!,
@@ -263,7 +272,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 ),
               ],
 
-              const SizedBox(height: 22),
+              const SizedBox(height: AppSpace.v22),
               Row(
                 children: [
                   const Expanded(child: Divider()),
@@ -281,7 +290,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   const Expanded(child: Divider()),
                 ],
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: AppSpace.v18),
 
               TextField(
                 controller: _emailCtrl,
@@ -292,7 +301,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   prefixIcon: Icon(Icons.mail_outline_rounded),
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpace.v14),
               TextField(
                 controller: _passwordCtrl,
                 obscureText: _obscure,
@@ -318,15 +327,15 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpace.xs),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: auth.isLoading ? null : _submitEmailLogin,
                   child: auth.isLoading
                       ? const SizedBox(
-                          width: 20,
-                          height: 20,
+                          width: AppSpace.v20,
+                          height: AppSpace.v20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.4,
                             color: AppColors.surface,
@@ -335,7 +344,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       : Text(t.isSw ? 'Ingia Sasa' : 'Sign In'),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpace.md),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
@@ -348,7 +357,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: AppSpace.v18),
               Center(
                 child: TextButton(
                   onPressed: () => context.push('/sign-up'),
@@ -363,6 +372,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -389,23 +399,23 @@ class _DemoRoleTile extends StatelessWidget {
 
     return Material(
       color: isDark ? AppColors.darkCard : AppColors.surface,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(AppRadius.v14),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadius.v14),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpace.md, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpace.md, vertical: AppSpace.v10),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(AppSpace.sm),
                 decoration: BoxDecoration(
                   color: badgeColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppRadius.v10),
                 ),
                 child: Icon(icon, color: badgeColor, size: 20),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpace.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

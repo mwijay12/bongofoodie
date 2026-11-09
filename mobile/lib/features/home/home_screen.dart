@@ -29,7 +29,9 @@ import '../../router/dish_route_args.dart';
 /// so the real card and its skeleton stay in sync.
 
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.showEnvBadge = EnvConfig.showEnvBadge});
+
+  final bool showEnvBadge;
 
   Future<void> _openSpiceTriviaSheet(
     BuildContext context,
@@ -113,8 +115,10 @@ class HomeScreen extends ConsumerWidget {
                                         letterSpacing: 1.0,
                                       ),
                                     ),
-                                    const SizedBox(width: AppSpace.v6),
-                                    Container(
+                                    if (widget.showEnvBadge)
+                                      const SizedBox(width: AppSpace.v6),
+                                    if (widget.showEnvBadge)
+                                      Container(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: AppSpace.v7, vertical: AppSpace.v2),
                                       decoration: BoxDecoration(
