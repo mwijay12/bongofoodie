@@ -1,3 +1,4 @@
+import '../../core/utils/dish_image_cache.dart';
 import '../../core/l10n/dish_copy.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/icons/app_icon_key.dart';
@@ -49,10 +50,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.didChangeDependencies();
     if (_imagesWarmed) return;
     _imagesWarmed = true;
-    for (final key in ['chipsiMayai', 'nyamaChoma', 'zanzibarPilau']) {
-      final asset = DishImage.resolveLocalAsset(key)!;
-      precacheImage(AssetImage(asset), context);
-    }
+    precacheDishAssetsAfterFrame(
+      context,
+      ['chipsiMayai', 'nyamaChoma', 'zanzibarPilau']
+          .map((key) => DishImage.resolveLocalAsset(key)!),
+      DishCardMetrics.imageSize,
+    );
   }
 
   Future<void> _openSpiceTriviaSheet(

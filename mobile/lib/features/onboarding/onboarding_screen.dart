@@ -1,3 +1,4 @@
+import '../../core/utils/dish_image_cache.dart';
 import '../../core/widgets/app_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,6 +22,21 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _pageIndex = 0;
+
+  bool _imagesWarmed = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_imagesWarmed) return;
+    _imagesWarmed = true;
+    precacheDishAssetsAfterFrame(
+      context,
+      ['mishkakiYaNgombe', 'robotChef', 'zanzibarPilau']
+          .map((key) => DishImage.resolveLocalAsset(key)!),
+      OnboardingImageMetrics.size - OnboardingImageMetrics.padding * 2,
+    );
+  }
 
   @override
   void dispose() {
@@ -211,7 +227,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           Container(
                             height: OnboardingImageMetrics.size,
                             width: OnboardingImageMetrics.size,
-                            padding: const EdgeInsets.all(AppSpace.v14),
+                            padding: const EdgeInsets.all(OnboardingImageMetrics.padding),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
@@ -223,8 +239,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             ),
                             child: DishImage(
                               imageRef: slide.imageKey,
-                              width: OnboardingImageMetrics.size,
-                              height: OnboardingImageMetrics.size,
+                              width: OnboardingImageMetrics.size - OnboardingImageMetrics.padding * 2,
+                              height: OnboardingImageMetrics.size - OnboardingImageMetrics.padding * 2,
                               clip: false,
                               fit: BoxFit.contain,
                               transparentFallback: true,

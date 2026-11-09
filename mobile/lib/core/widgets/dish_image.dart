@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../utils/dish_asset.dart';
+import '../utils/dish_image_cache.dart';
 import '../theme/app_tokens.dart';
 import '../theme/skeleton_colors.dart';
 
@@ -93,6 +94,7 @@ class DishImage extends StatelessWidget {
         width: width,
         height: height,
         fit: imageFit,
+        cacheWidth: dishDecodeWidth(context, width),
         frameBuilder: _frameBuilder,
         errorBuilder: (context, _, __) => _fallbackBox(context),
       );
@@ -102,6 +104,7 @@ class DishImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
+        cacheWidth: dishDecodeWidth(context, width),
         frameBuilder: _frameBuilder,
         errorBuilder: (context, _, __) => _fallbackBox(context),
       );
