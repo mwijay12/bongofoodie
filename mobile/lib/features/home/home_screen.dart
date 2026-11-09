@@ -115,9 +115,9 @@ class HomeScreen extends ConsumerWidget {
                                         letterSpacing: 1.0,
                                       ),
                                     ),
-                                    if (widget.showEnvBadge)
+                                    if (showEnvBadge)
                                       const SizedBox(width: AppSpace.v6),
-                                    if (widget.showEnvBadge)
+                                    if (showEnvBadge)
                                       Container(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: AppSpace.v7, vertical: AppSpace.v2),

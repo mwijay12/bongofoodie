@@ -85,7 +85,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     final settings = ref.watch(appSettingsProvider);
     final t = ref.watch(appStringsProvider);
-    final dark = Theme.of(context).brightness == Brightness.dark;
 
     final slides = [
       (
@@ -122,17 +121,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       key: const ValueKey('onboarding-system-ui'),
-      value: (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
-          .copyWith(
-        statusBarColor: AppColors.clear,
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: AppColors.ember,
         systemNavigationBarColor: AppColors.clear,
+        systemNavigationBarIconBrightness:
+            Theme.of(context).brightness == Brightness.dark
+                ? Brightness.light
+                : Brightness.dark,
         systemNavigationBarContrastEnforced: false,
       ),
       child: Scaffold(
-      body: Container(
-        color: AppColors.cream,
-        child: SafeArea(
-          child: Padding(
+        backgroundColor: AppColors.ember,
+        body: SafeArea(
+          child: Container(
+            color: AppColors.cream,
+            child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpace.xl, vertical: AppSpace.v14),
             child: Column(
               children: [

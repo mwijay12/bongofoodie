@@ -103,15 +103,19 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       key: const ValueKey('sign-in-system-ui'),
-      value: (isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
-          .copyWith(
-        statusBarColor: AppColors.clear,
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: AppColors.ember,
         systemNavigationBarColor: AppColors.clear,
+        systemNavigationBarIconBrightness:
+            isDark ? Brightness.light : Brightness.dark,
         systemNavigationBarContrastEnforced: false,
       ),
       child: Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
+        backgroundColor: AppColors.ember,
+        body: SafeArea(
+          child: Container(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(AppSpace.v22, AppSpace.lg, AppSpace.v22, AppSpace.xxl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -372,6 +376,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             ],
           ),
         ),
+      ),
       ),
       ),
     );
