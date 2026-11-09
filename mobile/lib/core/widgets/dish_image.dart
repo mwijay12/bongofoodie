@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../utils/dish_asset.dart';
 import '../theme/app_tokens.dart';
 import '../theme/skeleton_colors.dart';
 
 class DishImage extends StatelessWidget {
   final String imageRef;
+  final String? dishId;
   final double? width;
   final double? height;
   final BoxFit fit;
@@ -15,6 +17,7 @@ class DishImage extends StatelessWidget {
   const DishImage({
     super.key,
     String? imageRef,
+    this.dishId,
     String? imageKeyOrUrl,
     this.width,
     this.height,
@@ -25,12 +28,12 @@ class DishImage extends StatelessWidget {
   }) : imageRef = imageRef ?? imageKeyOrUrl ?? 'salad';
 
   static const Map<String, String> _localAssetMap = {
-    'chipsiMayai': 'assets/dishes/chipsi_mayai.png',
-    'nyamaChoma': 'assets/dishes/nyama_choma_ugali.png',
-    'zanzibarPilau': 'assets/dishes/zanzibar_pilau.png',
+    'chipsiMayai': 'assets/dishes/menu-chipsi-mayai.png',
+    'nyamaChoma': 'assets/dishes/menu-nyama-choma.png',
+    'zanzibarPilau': 'assets/dishes/menu-pilau-kuku.png',
     'pilauYaKuku': 'assets/images/pilau-ya-kuku.png',
-    'samakiWaKupaka': 'assets/images/samaki-wa-kupaka.png',
-    'mishkakiYaNgombe': 'assets/images/mishkaki-ya-ngombe.png',
+    'samakiWaKupaka': 'assets/dishes/menu-samaki-kupaka.png',
+    'mishkakiYaNgombe': 'assets/dishes/menu-mishkaki.png',
     'burgerOne': 'assets/images/burger-one.png',
     'burgerTwo': 'assets/images/burger-two.png',
     'pizzaOne': 'assets/images/pizza-one.png',
@@ -90,7 +93,8 @@ class DishImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localAsset = resolveLocalAsset(imageRef);
+    final source = resolveDishAsset(dishId ?? '', fallback: imageRef);
+    final localAsset = resolveLocalAsset(source);
 
     Widget child;
     if (localAsset != null) {
@@ -101,9 +105,9 @@ class DishImage extends StatelessWidget {
         fit: fit,
         errorBuilder: (context, _, __) => _fallbackBox(context),
       );
-    } else if (imageRef.startsWith('http://') || imageRef.startsWith('https://')) {
+    } else if (source.startsWith('http://') || source.startsWith('https://')) {
       child = Image.network(
-        imageRef,
+        source,
         width: width,
         height: height,
         fit: fit,

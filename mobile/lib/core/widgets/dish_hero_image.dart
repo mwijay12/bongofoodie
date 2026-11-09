@@ -36,6 +36,7 @@ class DishHeroImage extends StatelessWidget {
       transitionOnUserGestures: true,
       child: DishImage(
         imageRef: item.imageUrl,
+        dishId: item.id,
         width: width,
         height: height,
         fit: fit,
