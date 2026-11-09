@@ -6,6 +6,7 @@ abstract final class AppSpace {
   static const double v42 = 42;
   static const double v52 = 52;
   static const double v55 = 55;
+  static const double v56 = 56;
   static const double v65 = 65;
   static const double v76 = 76;
   static const double v92 = 92;
@@ -57,10 +58,18 @@ abstract final class AppRadius {
 
 abstract final class AppShadows {
   static const soft = <BoxShadow>[
-    BoxShadow(color: Color(0x142B1B12), blurRadius: 24, offset: Offset(0, 8)),
+    BoxShadow(
+      color: Color(0x142B1B12),
+      blurRadius: AppSpace.v24,
+      offset: Offset(AppSpace.v0, AppSpace.v8),
+    ),
   ];
   static const lifted = <BoxShadow>[
-    BoxShadow(color: Color(0x242B1B12), blurRadius: 36, offset: Offset(0, 16)),
+    BoxShadow(
+      color: Color(0x242B1B12),
+      blurRadius: AppSpace.v32 + AppSpace.v4,
+      offset: Offset(AppSpace.v0, AppSpace.v16),
+    ),
   ];
 }
 
@@ -78,6 +87,7 @@ abstract final class AppMotion {
   static const double staggerOffset = 18;
   static const double transitionScaleBegin = 0.98;
   static const double popScale = 1.18;
+  static const double floatMidpoint = 0.5;
 }
 
 extension NavClearance on BuildContext {
@@ -111,6 +121,7 @@ abstract final class DishDetailMetrics {
   static const double heroHeightFactor = 0.42;
   static const double heroMaxHeight = 380;
   static const double heroCircleSize = 260;
+  static const double heroCircleAlignmentY = 0.08;
   static const double heroImageSize = 240;
   static const double floatDistance = 6;
   static const double contactShadowWidth = 160;
@@ -119,5 +130,10 @@ abstract final class DishDetailMetrics {
   static const double stickyBarHeight = 80;
   static const int quantityMin = 1;
   static const int quantityMax = 20;
-  static const int staggerItems = 4;
+  static const int staggerItems = 8;
+  static const double sectionTop = AppSpace.v18;
+  static const double sectionBottom = AppSpace.v10;
+  static const double sectionGap = AppSpace.md;
+  static const double spicePillHeight = AppSpace.v10;
+  static const double addOnRowMinHeight = AppSpace.v56;
 }

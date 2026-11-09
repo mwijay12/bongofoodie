@@ -14,6 +14,7 @@ class AsyncSkeleton<T> extends ConsumerWidget {
     this.onRetry,
     this.isEmpty,
     this.empty,
+    this.errorWidget,
   });
   final AsyncValue<T> value;
   final Widget Function(T data) data;
@@ -21,6 +22,7 @@ class AsyncSkeleton<T> extends ConsumerWidget {
   final VoidCallback? onRetry;
   final bool Function(T data)? isEmpty;
   final Widget? empty;
+  final Widget? errorWidget;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,7 +41,7 @@ class AsyncSkeleton<T> extends ConsumerWidget {
         ),
         error: (_, __) => KeyedSubtree(
           key: const ValueKey('error'),
-          child: StateMessage.error(onRetry: onRetry),
+          child: errorWidget ?? StateMessage.error(onRetry: onRetry),
         ),
         data: (d) => KeyedSubtree(
           key: const ValueKey('data'),
