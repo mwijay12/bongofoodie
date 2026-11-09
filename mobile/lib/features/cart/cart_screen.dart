@@ -195,6 +195,9 @@ Asante kwa kuchagua BongoFoodie TZ!
         )),
         actions: [
           OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(AppSpace.huge, AppSpace.huge),
+            ),
             onPressed: () {
               Share.share(receiptText);
             },
@@ -696,6 +699,9 @@ Asante kwa kuchagua BongoFoodie TZ!
                         ),
                       ),
                       OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(AppSpace.huge, AppSpace.huge),
+                        ),
                         onPressed: () {
                           Clipboard.setData(
                             ClipboardData(text: branch.lipaNamba),
