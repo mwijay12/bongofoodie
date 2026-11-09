@@ -1,6 +1,7 @@
 import '../../core/widgets/app_sheet.dart';
 import '../../core/icons/app_icon_key.dart';
 import '../../core/widgets/app_icon.dart';
+import '../../core/utils/emoji_sanitizer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -321,7 +322,7 @@ class HomeScreen extends ConsumerWidget {
                                               const SizedBox(width: AppSpace.v6),
                                               Flexible(
                                                 child: Text(
-                                                  p.badgeText,
+                                                  stripEmoji(p.badgeText),
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
                                                   style: const TextStyle(
@@ -336,7 +337,7 @@ class HomeScreen extends ConsumerWidget {
                                         ),
                                       const SizedBox(height: AppSpace.v8),
                                       Text(
-                                        p.title,
+                                        stripEmoji(p.title),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
@@ -347,7 +348,7 @@ class HomeScreen extends ConsumerWidget {
                                       ),
                                       const SizedBox(height: AppSpace.v4),
                                       Text(
-                                        p.subtitle,
+                                        stripEmoji(p.subtitle),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(

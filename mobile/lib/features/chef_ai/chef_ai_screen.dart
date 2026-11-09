@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/icons/app_icon_key.dart';
 import '../../core/widgets/app_icon.dart';
+import '../../core/utils/emoji_sanitizer.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
@@ -420,7 +421,9 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                           ),
                   ),
                   child: Text(
-                    msg.content,
+                    // AI replies are remote/generated text; user messages are
+                    // deliberately left untouched.
+                    msg.isUser ? msg.content : stripEmoji(msg.content),
                     style: TextStyle(
                       color: msg.isUser ? AppColors.surface : null,
                       fontSize: 13.8,
