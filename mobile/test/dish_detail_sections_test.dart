@@ -6,7 +6,6 @@ import 'package:bongo_foodie/data/repositories/menu_repository.dart';
 import 'package:bongo_foodie/features/menu/dish_detail_screen.dart';
 import 'package:bongo_foodie/router/dish_route_args.dart';
 import 'package:bongo_foodie/state/cart_provider.dart';
-import 'package:bongo_foodie/state/menu_provider.dart';
 import 'package:bongo_foodie/state/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -173,8 +172,8 @@ Widget _host({
   );
 }
 
-void _configureSurface(WidgetTester tester) {
-  tester.view.physicalSize = _screen;
+void _configureSurface(WidgetTester tester, {Size size = _screen}) {
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -210,8 +209,9 @@ Future<ProviderContainer> _pump(
   );
   // Bounded pumps only: the hero float and shimmer never settle.
   await tester.pump(const Duration(milliseconds: 100));
-  await tester.pump(const Duration(milliseconds: 100));
-  await tester.pump(const Duration(milliseconds: 100));
+  await tester.pump(AppMotion.slow + AppMotion.staggerDelay);
+  await tester.pump(AppMotion.slow);
+  await tester.pump(AppMotion.base);
   return ProviderScope.containerOf(
     tester.element(find.byType(DishDetailScreen)),
     listen: false,
@@ -400,7 +400,7 @@ void main() {
 
   testWidgets('related tap pushes a route with the related hero scope',
       (tester) async {
-    _configureSurface(tester);
+    _configureSurface(tester, size: const Size(800, 1200));
     final router = GoRouter(
       initialLocation: '/detail',
       routes: <RouteBase>[
@@ -445,16 +445,11 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(AppMotion.slow + AppMotion.staggerDelay);
+    await tester.pump(AppMotion.slow);
+    await tester.pump(AppMotion.base);
 
     final card = find.byKey(const ValueKey<String>('dish-related-r1'));
-    for (var i = 0; i < 10 && card.evaluate().isEmpty; i++) {
-      await tester.drag(
-        find.byType(CustomScrollView).first,
-        const Offset(0, -180),
-      );
-      await tester.pump(const Duration(milliseconds: 100));
-    }
     expect(card, findsOneWidget);
 
     await tester.tap(card);

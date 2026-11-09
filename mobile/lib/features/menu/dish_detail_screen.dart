@@ -876,6 +876,7 @@ class _SectionShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
+      key: key,
       padding: const EdgeInsets.fromLTRB(
         AppSpace.screenH,
         DishDetailMetrics.sectionTop,
