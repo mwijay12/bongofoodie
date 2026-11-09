@@ -370,12 +370,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                       onPressed: () {
                         if (_pageIndex < slides.length - 1) {
-                          _pageController.nextPage(
-                            duration: MediaQuery.disableAnimationsOf(context)
-                                ? Duration.zero
-                                : AppMotion.base,
-                            curve: Curves.easeOutCubic,
-                          );
+                          if (MediaQuery.disableAnimationsOf(context)) {
+                            _pageController.jumpToPage(_pageIndex + 1);
+                          } else {
+                            _pageController.nextPage(
+                              duration: AppMotion.base,
+                              curve: AppMotion.enter,
+                            );
+                          }
                         } else {
                           _finishToSignIn();
                         }

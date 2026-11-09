@@ -185,7 +185,25 @@ void main() {
         )));
         await tester.pump(const Duration(milliseconds: 100));
         for (var slide = 0; slide < 3; slide++) {
-          expect(tester.takeException(), isNull);
+          final error = tester.takeException();
+          if (error != null) {
+            for (final element in find.byType(Row).evaluate()) {
+              final flex = element.renderObject! as RenderFlex;
+              if (!flex.hasSize) continue;
+              for (RenderBox? child = flex.firstChild; child != null;) {
+                final data = child.parentData! as FlexParentData;
+                if (child.hasSize &&
+                    data.offset.dx + child.size.width > flex.size.width + 1) {
+                  debugPrint('::error::Onboarding slide $slide overflow: '
+                      '${flex.debugCreator}; width=${flex.size.width}; '
+                      'childEnd=${data.offset.dx + child.size.width}');
+                  break;
+                }
+                child = data.nextSibling;
+              }
+            }
+          }
+          expect(error, isNull, reason: 'onboarding slide $slide at $size');
           if (slide < 2) {
             await tester.tap(find.byType(OutlinedButton));
             await tester.pump(const Duration(milliseconds: 350));
