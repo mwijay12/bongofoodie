@@ -9,7 +9,8 @@ import 'package:bongo_foodie/core/widgets/dish_image.dart';
 import 'package:bongo_foodie/core/widgets/promo_dish_image.dart';
 import 'package:bongo_foodie/data/mock/showcase_seed_data.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show RenderBox, RenderFlex, FlexParentData;
+import 'package:flutter/rendering.dart'
+    show RenderBox, RenderFlex, FlexParentData;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bongo_foodie/features/onboarding/onboarding_screen.dart';

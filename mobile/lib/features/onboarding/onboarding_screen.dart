@@ -176,22 +176,31 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         ),
                       ),
                       const SizedBox(width: AppSpace.v10),
-                      const Text(
-                        'BongoFoodie',
-                        style: TextStyle(
-                          color: AppColors.surface,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 19,
-                          letterSpacing: -0.3,
+                      const Expanded(
+                        child: Text(
+                          'BongoFoodie',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: AppColors.surface,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 19,
+                            letterSpacing: -0.3,
+                          ),
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: AppSpace.sm),
                       InkWell(
                         borderRadius: BorderRadius.circular(AppRadius.pill),
                         onTap: () => ref
                             .read(appSettingsProvider.notifier)
                             .toggleLanguage(),
                         child: Container(
+                          constraints: const BoxConstraints(
+                            minWidth: AppSpace.huge,
+                            minHeight: AppSpace.huge,
+                          ),
+                          alignment: Alignment.center,
                           padding: const EdgeInsets.symmetric(
                               horizontal: AppSpace.md, vertical: AppSpace.v6),
                           decoration: BoxDecoration(
