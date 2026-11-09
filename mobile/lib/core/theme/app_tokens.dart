@@ -168,3 +168,7 @@ abstract final class OnboardingImageMetrics {
   static const double padding = AppSpace.v14;
   static const double activeIndicatorWidth = 28;
 }
+
+abstract final class CheckoutMetrics {
+  static const undoDuration = Duration(seconds: 5);
+}

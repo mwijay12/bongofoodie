@@ -77,16 +77,15 @@ class OrderRepository {
   }
 
   Future<OrderModel> createOrder(OrderModel order) async {
-    // Always store locally first so offline & Showcase views update instantaneously
+    final sb = SupabaseService.client;
+    if (sb != null && !(order.profileId?.startsWith('demo-') ?? false)) {
+      // A failed live write must reach checkout. Never turn it into demo success
+      // and never time out/retry a write whose server outcome is still unknown.
+      await sb.from('orders').insert(order.toDbJson());
+      return order;
+    }
     final local = await _loadLocalOrders();
     await _saveLocalOrders([order, ...local]);
-
-    final sb = SupabaseService.client;
-    if (sb != null) {
-      try {
-        await sb.from('orders').insert(order.toDbJson());
-      } catch (_) {}
-    }
     return order;
   }
 
@@ -145,13 +144,10 @@ class OrderRepository {
     final sb = SupabaseService.client;
     if (sb != null) {
       try {
-        await sb
-            .from('orders')
-            .update({
-              'status': nextStatus.dbValue,
-              'updated_at': DateTime.now().toIso8601String(),
-            })
-            .eq('id', orderId);
+        await sb.from('orders').update({
+          'status': nextStatus.dbValue,
+          'updated_at': DateTime.now().toIso8601String(),
+        }).eq('id', orderId);
       } catch (_) {}
     }
   }

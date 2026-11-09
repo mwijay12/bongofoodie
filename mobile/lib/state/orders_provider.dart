@@ -51,7 +51,10 @@ class OrdersNotifier extends StateNotifier<AsyncValue<List<OrderModel>>> {
 
   Future<OrderModel> placeOrder(OrderModel order) async {
     final created = await _repo.createOrder(order);
-    await refresh();
+    // Confirmation is the write response, not a second potentially slow read.
+    final previous = state.valueOrNull ?? const <OrderModel>[];
+    state = AsyncValue.data(
+        [created, ...previous.where((o) => o.id != created.id)]);
     return created;
   }
 
