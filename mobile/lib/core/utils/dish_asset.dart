@@ -8,8 +8,25 @@ const Set<String> dishAssetIds = {
   'menu-mishkaki',
 };
 
-String resolveDishAsset(String dishId, {required String fallback}) =>
-    dishAssetIds.contains(dishId) ? 'assets/dishes/$dishId.png' : fallback;
+String resolveDishAsset(String dishId,
+    {required String fallback, String productName = ''}) {
+  if (dishAssetIds.contains(dishId)) return 'assets/dishes/$dishId.png';
+  // Reject only known legacy substitutions, never infer a remote image's content.
+  final name = productName.toLowerCase();
+  if ((fallback == 'orangeJuiceIcon' &&
+          (name.contains('passion') ||
+              name.contains('pasheni') ||
+              name.contains('stoney'))) ||
+      (fallback == 'fries' &&
+          (name.contains('ndizi') || name.contains('plantain'))) ||
+      (fallback == 'samakiWaKupaka' &&
+          (name.contains('kuku') || name.contains('chicken'))) ||
+      (fallback == 'pilauYaKuku' &&
+          (name.contains('wali wa nazi') || name.contains('coconut rice')))) {
+    return '';
+  }
+  return fallback;
+}
 
 /// Compatibility keys used by promotions and onboarding, not product names.
 const Map<String, String> dishImageKeys = {

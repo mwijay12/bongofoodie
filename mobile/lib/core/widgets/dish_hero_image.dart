@@ -37,6 +37,7 @@ class DishHeroImage extends StatelessWidget {
       child: DishImage(
         imageRef: item.imageUrl,
         dishId: item.id,
+        productName: item.name,
         width: width,
         height: height,
         fit: fit,

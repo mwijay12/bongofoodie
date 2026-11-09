@@ -18,4 +18,27 @@ void main() {
         'https://example.com/food.png');
     expect(resolveDishAsset('unknown', fallback: ''), '');
   });
+  test('legacy live placeholders cannot masquerade as different products', () {
+    for (final pair in [
+      ('Juisi ya Passion & Embe', 'orangeJuiceIcon'),
+      ('Stoney Tangawizi', 'orangeJuiceIcon'),
+      ('Ndizi Mzuzu Kaanga', 'fries'),
+      ('Kuku na Chapati', 'samakiWaKupaka'),
+      ('Wali wa Nazi na Maharage', 'pilauYaKuku'),
+    ]) {
+      expect(
+          resolveDishAsset('live-uuid',
+              fallback: pair.$2, productName: pair.$1),
+          isEmpty);
+    }
+    expect(
+        resolveDishAsset('live-uuid',
+            fallback: 'fries', productName: 'French Fries'),
+        'fries');
+    expect(
+        resolveDishAsset('live-uuid',
+            fallback: 'https://example.com/drink.png',
+            productName: 'Passion Juice'),
+        'https://example.com/drink.png');
+  });
 }

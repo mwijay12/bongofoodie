@@ -287,6 +287,7 @@ Asante kwa kuchagua BongoFoodie TZ!
                         DishImage(
                           imageRef: item.imageUrl,
                           dishId: item.id,
+                          productName: item.name,
                           width: MenuImageMetrics.cartImage,
                           height: MenuImageMetrics.cartImage,
                           borderRadius: AppRadius.v14,

@@ -8,6 +8,7 @@ import '../theme/skeleton_colors.dart';
 class DishImage extends StatelessWidget {
   final String imageRef;
   final String? dishId;
+  final String productName;
   final double? width;
   final double? height;
   final BoxFit fit;
@@ -20,6 +21,7 @@ class DishImage extends StatelessWidget {
     super.key,
     String? imageRef,
     this.dishId,
+    this.productName = '',
     String? imageKeyOrUrl,
     this.width,
     this.height,
@@ -77,7 +79,8 @@ class DishImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final source = resolveDishAsset(dishId ?? '', fallback: imageRef);
+    final source = resolveDishAsset(dishId ?? '',
+        fallback: imageRef, productName: productName);
     final localAsset = resolveLocalAsset(source);
 
     final cutout = localAsset != null &&
