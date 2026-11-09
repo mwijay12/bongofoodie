@@ -16,7 +16,7 @@ void main() {
             home: Center(
               child: SizedBox(
                 width: PromoCardMetrics.width,
-                height: AppSpace.v148,
+                height: PromoCardMetrics.height,
                 child: const SkeletonPromoCard(),
               ),
             ),
@@ -25,7 +25,7 @@ void main() {
         await tester.pump();
         final skeletonSize = tester.getSize(find.byType(SkeletonPromoCard));
         expect(skeletonSize.width, closeTo(PromoCardMetrics.width, 1));
-        expect(skeletonSize.height, closeTo(AppSpace.v148, 1));
+        expect(skeletonSize.height, closeTo(PromoCardMetrics.height, 1));
         expect(tester.takeException(), isNull);
       },
     );

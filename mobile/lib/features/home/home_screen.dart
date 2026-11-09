@@ -256,7 +256,7 @@ class HomeScreen extends ConsumerWidget {
                 child: promotionsAsync.when(
                   skipLoadingOnRefresh: true,
                   data: (promos) => SizedBox(
-                    height: AppSpace.v148,
+                    height: PromoCardMetrics.height,
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
                       scrollDirection: Axis.horizontal,
@@ -266,22 +266,22 @@ class HomeScreen extends ConsumerWidget {
                         final p = promos[index];
                         final bg = _parseHex(p.bgColorHex);
                         return InkWell(
-                          borderRadius: BorderRadius.circular(AppRadius.v22),
+                          borderRadius: BorderRadius.circular(PromoCardMetrics.borderRadius),
                           onTap: () => context.go(
                             '/search?category=${Uri.encodeComponent(p.targetCategory)}',
                           ),
                           child: Container(
                             width: PromoCardMetrics.width,
-                            padding: const EdgeInsets.all(AppSpace.lg),
+                            padding: const EdgeInsets.all(PromoCardMetrics.padding),
                             decoration: BoxDecoration(
                               gradient: bg.green > bg.red
                                   ? AppColors.promoGreen
                                   : AppColors.promoOrange,
-                              borderRadius: BorderRadius.circular(AppRadius.v22),
+                              borderRadius: BorderRadius.circular(PromoCardMetrics.borderRadius),
                             ),
                             child: Row(
                               children: [
-                                Expanded(
+                                Flexible(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -312,7 +312,7 @@ class HomeScreen extends ConsumerWidget {
                                       const SizedBox(height: AppSpace.v8),
                                       Text(
                                         p.title,
-                                        maxLines: 1,
+                                        maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                           color: AppColors.surface,
@@ -323,7 +323,7 @@ class HomeScreen extends ConsumerWidget {
                                       const SizedBox(height: AppSpace.v4),
                                       Text(
                                         p.subtitle,
-                                        maxLines: 1,
+                                        maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color: AppColors.surface,
@@ -335,12 +335,12 @@ class HomeScreen extends ConsumerWidget {
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: AppSpace.v10),
+                                const SizedBox(width: PromoCardMetrics.imageGap),
                                 DishImage(
                                   imageRef: p.imageKey,
-                                  width: AppSpace.v76,
-                                  height: AppSpace.v76,
-                                  borderRadius: AppRadius.v16,
+                                  width: PromoCardMetrics.imageSize,
+                                  height: PromoCardMetrics.imageSize,
+                                  borderRadius: PromoCardMetrics.imageRadius,
                                 ),
                               ],
                             ),
@@ -350,7 +350,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   loading: () => SizedBox(
-                    height: AppSpace.v148,
+                    height: PromoCardMetrics.height,
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
                       scrollDirection: Axis.horizontal,

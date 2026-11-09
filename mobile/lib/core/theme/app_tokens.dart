@@ -9,6 +9,7 @@ abstract final class AppSpace {
   static const double v56 = 56;
   static const double v65 = 65;
   static const double v76 = 76;
+  static const double v80 = 80;
   static const double v92 = 92;
   static const double v118 = 118;
   static const double v148 = 148;
@@ -98,8 +99,12 @@ extension NavClearance on BuildContext {
 /// with zero visual drift. All values come from AppRadius / AppSpace tokens.
 abstract final class PromoCardMetrics {
   static const double width = 285;
+  static const double height = AppSpace.v190;
   static const double padding = AppSpace.lg;
   static const double borderRadius = AppRadius.v22;
+  static const double imageSize = AppSpace.v76;
+  static const double imageRadius = AppRadius.v16;
+  static const double imageGap = AppSpace.v10;
 }
 
 abstract final class DiscoveryCardMetrics {

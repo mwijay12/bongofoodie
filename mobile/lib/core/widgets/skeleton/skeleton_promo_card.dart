@@ -13,7 +13,8 @@ class SkeletonPromoCard extends StatelessWidget {
     final colors = SkeletonColors.of(context);
     return Container(
       width: PromoCardMetrics.width,
-      padding: const EdgeInsets.all(AppSpace.lg),
+      height: PromoCardMetrics.height,
+      padding: const EdgeInsets.all(PromoCardMetrics.padding),
       decoration: BoxDecoration(
         color: colors.base,
         borderRadius: BorderRadius.circular(PromoCardMetrics.borderRadius),
@@ -26,7 +27,7 @@ class SkeletonPromoCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SkeletonBox(
-                  width: 80,
+                  width: AppSpace.v80,
                   height: AppSpace.md,
                   radius: AppRadius.pill,
                 ),
@@ -37,11 +38,11 @@ class SkeletonPromoCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: AppSpace.v10),
+          const SizedBox(width: PromoCardMetrics.imageGap),
           const SkeletonBox(
-            width: 76,
-            height: 76,
-            radius: AppRadius.v16,
+            width: PromoCardMetrics.imageSize,
+            height: PromoCardMetrics.imageSize,
+            radius: PromoCardMetrics.imageRadius,
           ),
         ],
       ),
