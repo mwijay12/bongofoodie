@@ -92,7 +92,7 @@ class HomeScreen extends ConsumerWidget {
               // 1. Top Location + Role/Mode Header
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v12, AppSpace.v20, AppSpace.v8),
+                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.md, AppSpace.screenH, AppSpace.lg),
                   child: Row(
                     children: [
                       Expanded(
@@ -222,7 +222,7 @@ class HomeScreen extends ConsumerWidget {
               // 2. Greeting + Chef AI Atelier Hero Card
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v6, AppSpace.v20, AppSpace.v16),
+                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0, AppSpace.screenH, AppSpace.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -257,7 +257,9 @@ class HomeScreen extends ConsumerWidget {
 
               // 3. Special Promotions Carousel
               SliverToBoxAdapter(
-                child: promotionsAsync.when(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpace.lg),
+                  child: promotionsAsync.when(
                   skipLoadingOnRefresh: true,
                   data: (promos) => SizedBox(
                     height: PromoCardMetrics.height,
@@ -364,13 +366,14 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   error: (_, __) => const SizedBox.shrink(),
+                  ),
                 ),
               ),
 
               // 4. Daily Swahili Discovery + Trivia Challenge Card
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v18, AppSpace.v20, AppSpace.v10),
+                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0, AppSpace.screenH, AppSpace.lg),
                   child: discoveriesAsync.when(
                     skipLoadingOnRefresh: true,
                     data: (list) {
@@ -453,7 +456,7 @@ class HomeScreen extends ConsumerWidget {
               // 5. Signature Dishes Section Header
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v10, AppSpace.v20, AppSpace.v10),
+                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0, AppSpace.screenH, AppSpace.lg),
                   child: Row(
                     children: [
                       Text(
@@ -488,7 +491,7 @@ class HomeScreen extends ConsumerWidget {
                     );
                   }
                   return SliverPadding(
-                    padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0, AppSpace.screenH, context.navClearance),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
                     sliver: SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -501,7 +504,9 @@ class HomeScreen extends ConsumerWidget {
                         (context, index) {
                           final dish = featured[index];
                           final isFav = favorites.contains(dish.id);
-                          return _SignatureDishCard(
+                          return KeyedSubtree(
+                            key: ValueKey('home-dish-${dish.id}'),
+                            child: _SignatureDishCard(
                             dish: dish,
                             isFavorite: isFav,
                             onTap: () => context.push('/dish/${dish.id}', extra: DishRouteArgs(item: dish, heroScope: DishHeroScopes.homeSignature)),
@@ -521,6 +526,7 @@ class HomeScreen extends ConsumerWidget {
                                 ),
                               );
                             },
+                            ),
                           );
                         },
                         childCount: featured.length,
@@ -536,8 +542,9 @@ class HomeScreen extends ConsumerWidget {
                         child: GridView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0,
-                              AppSpace.screenH, context.navClearance),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpace.screenH,
+                          ),
                           gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                             maxCrossAxisExtent: DishCardMetrics.cardMaxWidth,
                             mainAxisSpacing: DishCardMetrics.gap,
@@ -871,6 +878,10 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.only(bottom: context.navClearance),
+                sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
               ),
             ],
           ),
