@@ -70,6 +70,19 @@ class AppStrings {
   String get decreaseQuantity => isSw ? 'Punguza idadi' : 'Decrease quantity';
   String get favorite => isSw ? 'Kipendwa' : 'Favorite';
   String get dishSecondaryName => isSw ? 'Jina la Kiswahili' : 'Swahili name';
+  String get spice => isSw ? 'Kiwango cha ukali' : 'Spice level';
+  String get spiceMild => isSw ? 'Ukali mdogo' : 'Mild';
+  String get spiceMedium => isSw ? 'Ukali wastani' : 'Medium';
+  String get spiceHot => isSw ? 'Kali' : 'Hot';
+  String get spiceExtraHot => isSw ? 'Kali sana' : 'Extra hot';
+  String get ingredients => isSw ? 'Viungo vilivyotumika' : 'Ingredients';
+  String get contains => isSw ? 'Ina' : 'Contains';
+  String get addOns => isSw ? 'Nyongeza' : 'Add-ons';
+  String get didYouKnow => isSw ? 'Je, ulijua?' : 'Did you know?';
+  String get reviews => isSw ? 'Maoni ya wateja' : 'Reviews';
+  String get noReviews => isSw ? 'Bado hakuna maoni' : 'No reviews yet';
+  String get youMayAlsoLike => isSw ? 'Huenda ukapenda pia' : 'You may also like';
+  String get customer => isSw ? 'Mteja' : 'Customer';
   String get dishNotFoundTitle => isSw ? 'Sahani haipatikani' : 'Dish not found';
   String get dishNotFoundBody => isSw
       ? 'Sahani hii haipatikani tena kwenye menyu.'
@@ -99,6 +112,10 @@ class AppStrings {
   String get achievements =>
       isSw ? 'Tuzo za Mla Chakula Bora' : 'Swahili Foodie Badges';
   String get signOut => isSw ? 'Ondoka / Badili Akaunti' : 'Sign Out / Switch Role';
+
+  String spiceLevelSemantics(int level) => isSw
+      ? 'Kiwango cha ukali $level kati ya 5'
+      : 'Spice level $level of 5';
 
   static String formatTzs(num value) {
     final intVal = value.round();

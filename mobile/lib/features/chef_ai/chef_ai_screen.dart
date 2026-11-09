@@ -328,7 +328,8 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
         Expanded(
           child: ListView.builder(
             controller: _scrollCtrl,
-            padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v8, AppSpace.v20, AppSpace.v16),
+            padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.sm,
+                AppSpace.screenH, context.navClearance),
             itemCount: _messages.length + (_sendingChat ? 1 : 0),
             itemBuilder: (context, index) {
               if (index >= _messages.length) {

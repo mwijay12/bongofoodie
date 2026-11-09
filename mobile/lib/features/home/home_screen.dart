@@ -29,7 +29,9 @@ import '../../router/dish_route_args.dart';
 /// so the real card and its skeleton stay in sync.
 
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.showEnvBadge = EnvConfig.showEnvBadge});
+
+  final bool showEnvBadge;
 
   Future<void> _openSpiceTriviaSheet(
     BuildContext context,
@@ -71,6 +73,7 @@ class HomeScreen extends ConsumerWidget {
     final menuAsync = ref.watch(allMenuItemsProvider);
     final favorites = ref.watch(favoritesProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bottomClearance = context.navClearance;
 
     return Scaffold(
       body: SafeArea(
@@ -90,7 +93,7 @@ class HomeScreen extends ConsumerWidget {
               // 1. Top Location + Role/Mode Header
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v12, AppSpace.v20, AppSpace.v8),
+                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.md, AppSpace.screenH, AppSpace.lg),
                   child: Row(
                     children: [
                       Expanded(
@@ -113,8 +116,10 @@ class HomeScreen extends ConsumerWidget {
                                         letterSpacing: 1.0,
                                       ),
                                     ),
-                                    const SizedBox(width: AppSpace.v6),
-                                    Container(
+                                    if (showEnvBadge)
+                                      const SizedBox(width: AppSpace.v6),
+                                    if (showEnvBadge)
+                                      Container(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: AppSpace.v7, vertical: AppSpace.v2),
                                       decoration: BoxDecoration(
@@ -218,7 +223,7 @@ class HomeScreen extends ConsumerWidget {
               // 2. Greeting + Chef AI Atelier Hero Card
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v6, AppSpace.v20, AppSpace.v16),
+                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0, AppSpace.screenH, AppSpace.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -253,10 +258,12 @@ class HomeScreen extends ConsumerWidget {
 
               // 3. Special Promotions Carousel
               SliverToBoxAdapter(
-                child: promotionsAsync.when(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpace.lg),
+                  child: promotionsAsync.when(
                   skipLoadingOnRefresh: true,
                   data: (promos) => SizedBox(
-                    height: AppSpace.v148,
+                    height: PromoCardMetrics.height,
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
                       scrollDirection: Axis.horizontal,
@@ -266,22 +273,22 @@ class HomeScreen extends ConsumerWidget {
                         final p = promos[index];
                         final bg = _parseHex(p.bgColorHex);
                         return InkWell(
-                          borderRadius: BorderRadius.circular(AppRadius.v22),
+                          borderRadius: BorderRadius.circular(PromoCardMetrics.borderRadius),
                           onTap: () => context.go(
                             '/search?category=${Uri.encodeComponent(p.targetCategory)}',
                           ),
                           child: Container(
                             width: PromoCardMetrics.width,
-                            padding: const EdgeInsets.all(AppSpace.lg),
+                            padding: const EdgeInsets.all(PromoCardMetrics.padding),
                             decoration: BoxDecoration(
                               gradient: bg.green > bg.red
                                   ? AppColors.promoGreen
                                   : AppColors.promoOrange,
-                              borderRadius: BorderRadius.circular(AppRadius.v22),
+                              borderRadius: BorderRadius.circular(PromoCardMetrics.borderRadius),
                             ),
                             child: Row(
                               children: [
-                                Expanded(
+                                Flexible(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -312,7 +319,7 @@ class HomeScreen extends ConsumerWidget {
                                       const SizedBox(height: AppSpace.v8),
                                       Text(
                                         p.title,
-                                        maxLines: 1,
+                                        maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                           color: AppColors.surface,
@@ -323,7 +330,7 @@ class HomeScreen extends ConsumerWidget {
                                       const SizedBox(height: AppSpace.v4),
                                       Text(
                                         p.subtitle,
-                                        maxLines: 1,
+                                        maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color: AppColors.surface,
@@ -335,12 +342,12 @@ class HomeScreen extends ConsumerWidget {
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: AppSpace.v10),
+                                const SizedBox(width: PromoCardMetrics.imageGap),
                                 DishImage(
                                   imageRef: p.imageKey,
-                                  width: AppSpace.v76,
-                                  height: AppSpace.v76,
-                                  borderRadius: AppRadius.v16,
+                                  width: PromoCardMetrics.imageSize,
+                                  height: PromoCardMetrics.imageSize,
+                                  borderRadius: PromoCardMetrics.imageRadius,
                                 ),
                               ],
                             ),
@@ -350,7 +357,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   loading: () => SizedBox(
-                    height: AppSpace.v148,
+                    height: PromoCardMetrics.height,
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
                       scrollDirection: Axis.horizontal,
@@ -360,13 +367,14 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                   error: (_, __) => const SizedBox.shrink(),
+                  ),
                 ),
               ),
 
               // 4. Daily Swahili Discovery + Trivia Challenge Card
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v18, AppSpace.v20, AppSpace.v10),
+                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0, AppSpace.screenH, AppSpace.lg),
                   child: discoveriesAsync.when(
                     skipLoadingOnRefresh: true,
                     data: (list) {
@@ -449,21 +457,38 @@ class HomeScreen extends ConsumerWidget {
               // 5. Signature Dishes Section Header
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v10, AppSpace.v20, AppSpace.v10),
+                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0, AppSpace.screenH, AppSpace.lg),
                   child: Row(
                     children: [
-                      Text(
-                        t.popularDishes,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
-                      ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: () => context.go('/search'),
+                      Flexible(
                         child: Text(
-                          t.isSw ? 'Ona Menyu Yote →' : 'Full Menu →',
-                          style: const TextStyle(fontWeight: FontWeight.w800),
+                          t.popularDishes,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpace.sm),
+                      Flexible(
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            minimumSize:
+                                const Size(AppSpace.huge, AppSpace.huge),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpace.sm,
+                            ),
+                          ),
+                          onPressed: () => context.go('/search'),
+                          child: Text(
+                            t.isSw ? 'Ona Menyu Yote →' : 'Full Menu →',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w800),
+                          ),
                         ),
                       ),
                     ],
@@ -484,7 +509,7 @@ class HomeScreen extends ConsumerWidget {
                     );
                   }
                   return SliverPadding(
-                    padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0, AppSpace.screenH, context.navClearance),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
                     sliver: SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -497,7 +522,9 @@ class HomeScreen extends ConsumerWidget {
                         (context, index) {
                           final dish = featured[index];
                           final isFav = favorites.contains(dish.id);
-                          return _SignatureDishCard(
+                          return KeyedSubtree(
+                            key: ValueKey('home-dish-${dish.id}'),
+                            child: _SignatureDishCard(
                             dish: dish,
                             isFavorite: isFav,
                             onTap: () => context.push('/dish/${dish.id}', extra: DishRouteArgs(item: dish, heroScope: DishHeroScopes.homeSignature)),
@@ -517,6 +544,7 @@ class HomeScreen extends ConsumerWidget {
                                 ),
                               );
                             },
+                            ),
                           );
                         },
                         childCount: featured.length,
@@ -532,8 +560,9 @@ class HomeScreen extends ConsumerWidget {
                         child: GridView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0,
-                              AppSpace.screenH, context.navClearance),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpace.screenH,
+                          ),
                           gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                             maxCrossAxisExtent: DishCardMetrics.cardMaxWidth,
                             mainAxisSpacing: DishCardMetrics.gap,
@@ -553,6 +582,9 @@ class HomeScreen extends ConsumerWidget {
                     onRetry: () => ref.invalidate(allMenuItemsProvider),
                   ),
                 ),
+              ),
+              SliverToBoxAdapter(
+                child: SizedBox(height: bottomClearance),
               ),
             ],
           ),
@@ -635,10 +667,21 @@ class _ChefAtelierCard extends StatelessWidget {
                               fontSize: 12, height: 1.45)),
                             const SizedBox(height: AppSpace.v18),
                             Row(mainAxisSize: MainAxisSize.min, children: [
-                              Text(action, style: const TextStyle(color: AppColors.heroLight,
-                                fontSize: 12, fontWeight: FontWeight.w700)),
+                              Flexible(
+                                child: Text(
+                                  action,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: AppColors.heroLight,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
                               const SizedBox(width: AppSpace.v7),
-                              const Icon(Icons.arrow_forward_rounded, color: AppColors.heroLight, size: 16),
+                              const Icon(Icons.arrow_forward_rounded,
+                                  color: AppColors.heroLight, size: 16),
                             ]),
                           ],
                         ),
@@ -729,7 +772,7 @@ class _SignatureDishCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpace.v10),
+              const SizedBox(height: AppSpace.sm),
               Row(
                 children: [
                   const Icon(Icons.star_rounded,
@@ -754,7 +797,7 @@ class _SignatureDishCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpace.v4),
+              const SizedBox(height: AppSpace.v2),
               Text(
                 dish.name,
                 maxLines: 1,
@@ -794,7 +837,7 @@ class _SignatureDishCard extends StatelessWidget {
                     onTap: onQuickAdd,
                     borderRadius: BorderRadius.circular(AppRadius.sm),
                     child: Container(
-                      padding: const EdgeInsets.all(AppSpace.v7),
+                      padding: const EdgeInsets.all(AppSpace.v6),
                       decoration: BoxDecoration(
                         color: AppColors.cta,
                         borderRadius: BorderRadius.circular(AppRadius.sm),

@@ -6,8 +6,10 @@ abstract final class AppSpace {
   static const double v42 = 42;
   static const double v52 = 52;
   static const double v55 = 55;
+  static const double v56 = 56;
   static const double v65 = 65;
   static const double v76 = 76;
+  static const double v80 = 80;
   static const double v92 = 92;
   static const double v118 = 118;
   static const double v148 = 148;
@@ -36,7 +38,11 @@ abstract final class AppSpace {
   static const double hairline = 1;
 
   static const double xxs = 2, xs = 4, sm = 8, md = 12, lg = 16, xl = 24, xxl = 32, huge = 48;
-  static const double screenH = 20, navClearance = 112, navHeight = 72, navMaxWidth = 500;
+  static const double screenH = 20;
+  static const double navHeight = 72;
+  static const double navBottomInset = md;
+  static const double navClearance = navHeight + lg;
+  static const double navMaxWidth = 500;
 }
 
 abstract final class AppRadius {
@@ -57,10 +63,18 @@ abstract final class AppRadius {
 
 abstract final class AppShadows {
   static const soft = <BoxShadow>[
-    BoxShadow(color: Color(0x142B1B12), blurRadius: 24, offset: Offset(0, 8)),
+    BoxShadow(
+      color: Color(0x142B1B12),
+      blurRadius: AppSpace.v24,
+      offset: Offset(AppSpace.v0, AppSpace.v8),
+    ),
   ];
   static const lifted = <BoxShadow>[
-    BoxShadow(color: Color(0x242B1B12), blurRadius: 36, offset: Offset(0, 16)),
+    BoxShadow(
+      color: Color(0x242B1B12),
+      blurRadius: AppSpace.v32 + AppSpace.v4,
+      offset: Offset(AppSpace.v0, AppSpace.v16),
+    ),
   ];
 }
 
@@ -78,18 +92,25 @@ abstract final class AppMotion {
   static const double staggerOffset = 18;
   static const double transitionScaleBegin = 0.98;
   static const double popScale = 1.18;
+  static const double floatMidpoint = 0.5;
 }
 
+/// Shared shell clearance: nav height + safe area + AppSpace.lg.
 extension NavClearance on BuildContext {
-  double get navClearance => AppSpace.navClearance + MediaQuery.paddingOf(this).bottom;
+  double get navClearance =>
+      AppSpace.navClearance + MediaQuery.paddingOf(this).bottom;
 }
 
 /// Shared card metrics so real widgets and their skeletons stay in sync
 /// with zero visual drift. All values come from AppRadius / AppSpace tokens.
 abstract final class PromoCardMetrics {
   static const double width = 285;
+  static const double height = AppSpace.v220;
   static const double padding = AppSpace.lg;
   static const double borderRadius = AppRadius.v22;
+  static const double imageSize = AppSpace.v76;
+  static const double imageRadius = AppRadius.v16;
+  static const double imageGap = AppSpace.v10;
 }
 
 abstract final class DiscoveryCardMetrics {
@@ -111,6 +132,7 @@ abstract final class DishDetailMetrics {
   static const double heroHeightFactor = 0.42;
   static const double heroMaxHeight = 380;
   static const double heroCircleSize = 260;
+  static const double heroCircleAlignmentY = 0.08;
   static const double heroImageSize = 240;
   static const double floatDistance = 6;
   static const double contactShadowWidth = 160;
@@ -119,5 +141,10 @@ abstract final class DishDetailMetrics {
   static const double stickyBarHeight = 80;
   static const int quantityMin = 1;
   static const int quantityMax = 20;
-  static const int staggerItems = 4;
+  static const int staggerItems = 8;
+  static const double sectionTop = AppSpace.v18;
+  static const double sectionBottom = AppSpace.v10;
+  static const double sectionGap = AppSpace.md;
+  static const double spicePillHeight = AppSpace.v10;
+  static const double addOnRowMinHeight = AppSpace.v56;
 }

@@ -10,6 +10,7 @@ import '../../core/theme/app_tokens.dart';
 import '../../core/widgets/async_skeleton.dart';
 import '../../core/widgets/dish_hero_image.dart';
 import '../../core/widgets/motion/stagger_in.dart';
+import '../../core/widgets/skeleton/skeleton_box.dart';
 import '../../core/widgets/skeleton/skeleton_detail_screen.dart';
 import '../../core/widgets/state_message.dart';
 import '../../data/models/models.dart';
@@ -18,8 +19,8 @@ import '../../state/cart_provider.dart';
 import '../../state/menu_provider.dart';
 import '../../state/settings_provider.dart';
 
-/// Full-screen dish detail route. Only sections 1-3 and the sticky bar are
-/// built; sections 4-9 are clearly marked `SizedBox.shrink` placeholders.
+/// Full-screen dish detail route. Sections 1-6 and the sticky bar are built;
+/// sections 7-9 are clearly marked `SizedBox.shrink` placeholders.
 class DishDetailScreen extends ConsumerStatefulWidget {
   const DishDetailScreen({super.key, required this.id, this.args});
 
@@ -40,6 +41,7 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
   int _quantity = DishDetailMetrics.quantityMin;
   bool _added = false;
   Timer? _addedTimer;
+  final Set<String> _selectedCustomizationIds = <String>{};
 
   AnimationController get entranceController => _entranceController;
 
@@ -79,16 +81,37 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
     setState(() => _quantity--);
   }
 
-  double _totalFor(MenuItemModel item, int quantity) {
-    // Prompt 4 owns add-on selection; for now the existing pricing function
-    // is used with an empty selection, exactly as the cart notifier does.
+  void _toggleCustomization(String id) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      if (_selectedCustomizationIds.contains(id)) {
+        _selectedCustomizationIds.remove(id);
+      } else {
+        _selectedCustomizationIds.add(id);
+      }
+    });
+  }
+
+  List<CustomizationOption> _selectedCustomizationsFor(MenuItemModel item) {
+    final options = ref.read(dishCustomizationsProvider(item.id)).valueOrNull ??
+        const <CustomizationOption>[];
+    return options
+        .where((option) => _selectedCustomizationIds.contains(option.id))
+        .toList(growable: false);
+  }
+
+  double _totalFor(
+    MenuItemModel item,
+    int quantity,
+    List<CustomizationOption> customizations,
+  ) {
     return CartItemModel(
       id: item.id,
       name: item.name,
       price: item.price,
       imageUrl: item.imageUrl,
       quantity: quantity,
-      customizations: const <CustomizationOption>[],
+      customizations: customizations,
     ).lineTotal;
   }
 
@@ -97,7 +120,7 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
     ref.read(cartProvider.notifier).addItem(
           dish: item,
           quantity: _quantity,
-          customizations: const <CustomizationOption>[],
+          customizations: _selectedCustomizationsFor(item),
         );
     _addedTimer?.cancel();
     setState(() => _added = true);
@@ -107,9 +130,10 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
   }
 
   Widget _buildStickyBar(MenuItemModel item) {
+    final customizations = _selectedCustomizationsFor(item);
     return _DishStickyBar(
       quantity: _quantity,
-      total: _totalFor(item, _quantity),
+      total: _totalFor(item, _quantity, customizations),
       added: _added,
       onIncrement: _incrementQuantity,
       onDecrement: _decrementQuantity,
@@ -117,8 +141,25 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
     );
   }
 
+  Widget _buildAddOnsSection(MenuItemModel item) {
+    final asyncOptions = ref.watch(dishCustomizationsProvider(item.id));
+    return AsyncSkeleton<List<CustomizationOption>>(
+      value: asyncOptions,
+      skeleton: const _AddOnSkeletonRows(),
+      isEmpty: (options) => options.isEmpty,
+      empty: const SizedBox.shrink(),
+      errorWidget: const SizedBox.shrink(),
+      data: (options) => _AddOnsSection(
+        options: options,
+        selectedIds: _selectedCustomizationIds,
+        onToggle: _toggleCustomization,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.watch(dishCustomizationsProvider(widget.id));
     final args = widget.args;
     final overlay = Theme.of(context).brightness == Brightness.dark
         ? SystemUiOverlayStyle.light
@@ -133,11 +174,13 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
                 heroScope: args.heroScope,
                 entrance: _entranceController,
                 stickyBarBuilder: _buildStickyBar,
+                addOnsBuilder: _buildAddOnsSection,
               )
             : _DeepLinkView(
                 id: widget.id,
                 entrance: _entranceController,
                 stickyBarBuilder: _buildStickyBar,
+                addOnsBuilder: _buildAddOnsSection,
               ),
       ),
     );
@@ -149,11 +192,13 @@ class _DeepLinkView extends ConsumerWidget {
     required this.id,
     required this.entrance,
     required this.stickyBarBuilder,
+    required this.addOnsBuilder,
   });
 
   final String id;
   final AnimationController entrance;
   final Widget Function(MenuItemModel item) stickyBarBuilder;
+  final Widget Function(MenuItemModel item) addOnsBuilder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -175,6 +220,7 @@ class _DeepLinkView extends ConsumerWidget {
         heroScope: DishHeroScopes.deepLink,
         entrance: entrance,
         stickyBarBuilder: stickyBarBuilder,
+        addOnsBuilder: addOnsBuilder,
       ),
     );
   }
@@ -186,12 +232,14 @@ class _DishDetailView extends ConsumerWidget {
     required this.heroScope,
     required this.entrance,
     required this.stickyBarBuilder,
+    required this.addOnsBuilder,
   });
 
   final MenuItemModel item;
   final String heroScope;
   final AnimationController entrance;
   final Widget Function(MenuItemModel item) stickyBarBuilder;
+  final Widget Function(MenuItemModel item) addOnsBuilder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -217,18 +265,51 @@ class _DishDetailView extends ConsumerWidget {
                   child: _DescriptionBlock(item: item),
                 ),
               ),
-              // SLOT 4: nutrition facts (Prompt 4).
-              const SliverToBoxAdapter(child: SizedBox.shrink()),
-              // SLOT 5: add-ons / customizations (Prompt 4).
-              const SliverToBoxAdapter(child: SizedBox.shrink()),
-              // SLOT 6: ingredients and allergens (Prompt 4).
-              const SliverToBoxAdapter(child: SizedBox.shrink()),
-              // SLOT 7: fun fact (Prompt 4).
-              const SliverToBoxAdapter(child: SizedBox.shrink()),
-              // SLOT 8: ratings and reviews (Prompt 4).
-              const SliverToBoxAdapter(child: SizedBox.shrink()),
-              // SLOT 9: related dishes (Prompt 4).
-              const SliverToBoxAdapter(child: SizedBox.shrink()),
+              SliverToBoxAdapter(
+                child: StaggerIn(
+                  animation: entrance,
+                  index: 2,
+                  child: _SpiceSection(item: item),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: StaggerIn(
+                  animation: entrance,
+                  index: 3,
+                  child: _IngredientsSection(item: item),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: StaggerIn(
+                  animation: entrance,
+                  index: 4,
+                  child: addOnsBuilder(item),
+                ),
+              ),
+              // SLOT 7: did-you-know card (Prompt 4, second commit).
+              SliverToBoxAdapter(
+                child: StaggerIn(
+                  animation: entrance,
+                  index: 5,
+                  child: const SizedBox.shrink(),
+                ),
+              ),
+              // SLOT 8: ratings and reviews (Prompt 4, second commit).
+              SliverToBoxAdapter(
+                child: StaggerIn(
+                  animation: entrance,
+                  index: 6,
+                  child: const SizedBox.shrink(),
+                ),
+              ),
+              // SLOT 9: related dishes (Prompt 4, second commit).
+              SliverToBoxAdapter(
+                child: StaggerIn(
+                  animation: entrance,
+                  index: 7,
+                  child: const SizedBox.shrink(),
+                ),
+              ),
               SliverPadding(
                 padding: EdgeInsets.only(
                   bottom: DishDetailMetrics.stickyBarHeight +
@@ -401,7 +482,7 @@ class _StepperButton extends StatelessWidget {
           width: AppSpace.huge,
           height: AppSpace.huge,
         ),
-        padding: EdgeInsets.zero,
+        padding: EdgeInsets.all(AppSpace.v0),
         onPressed: enabled ? onPressed : null,
         icon: Icon(icon, size: AppSpace.v24),
       ),
@@ -432,7 +513,7 @@ class DishHeroState extends State<DishHero> with SingleTickerProviderStateMixin 
     super.didChangeDependencies();
     if (MediaQuery.disableAnimationsOf(context)) {
       _floatController.stop();
-      _floatController.value = 0;
+      _floatController.value = AppSpace.v0;
     } else if (!_floatController.isAnimating) {
       _floatController.repeat(reverse: true);
     }
@@ -448,7 +529,7 @@ class DishHeroState extends State<DishHero> with SingleTickerProviderStateMixin 
   Widget build(BuildContext context) {
     final height = (MediaQuery.sizeOf(context).height *
             DishDetailMetrics.heroHeightFactor)
-        .clamp(0.0, DishDetailMetrics.heroMaxHeight)
+        .clamp(AppSpace.v0, DishDetailMetrics.heroMaxHeight)
         .toDouble();
     final scheme = Theme.of(context).colorScheme;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
@@ -475,7 +556,10 @@ class DishHeroState extends State<DishHero> with SingleTickerProviderStateMixin 
             ),
           ),
           Align(
-            alignment: const Alignment(0, 0.08),
+            alignment: Alignment(
+              AppSpace.v0,
+              DishDetailMetrics.heroCircleAlignmentY,
+            ),
             child: Container(
               width: DishDetailMetrics.heroCircleSize,
               height: DishDetailMetrics.heroCircleSize,
@@ -503,7 +587,7 @@ class DishHeroState extends State<DishHero> with SingleTickerProviderStateMixin 
                     BoxShadow(
                       color: AppColors.scrim.withOpacity(0.18),
                       blurRadius: DishDetailMetrics.contactShadowBlur,
-                      offset: const Offset(0, AppSpace.v6),
+                      offset: Offset(AppSpace.v0, AppSpace.v6),
                     ),
                   ],
                 ),
@@ -520,12 +604,12 @@ class DishHeroState extends State<DishHero> with SingleTickerProviderStateMixin 
                     curve: AppMotion.floatCurve,
                   );
                   final offset = reduceMotion
-                      ? 0.0
-                      : (curved.value - 0.5) *
+                      ? AppSpace.v0
+                      : (curved.value - AppMotion.floatMidpoint) *
                           2 *
                           DishDetailMetrics.floatDistance;
                   return Transform.translate(
-                    offset: Offset(0, offset),
+                    offset: Offset(AppSpace.v0, offset),
                     child: child,
                   );
                 },
@@ -591,7 +675,7 @@ class _HeroCircleButton extends StatelessWidget {
           shape: const CircleBorder(),
           clipBehavior: Clip.antiAlias,
           child: IconButton(
-            padding: EdgeInsets.zero,
+            padding: EdgeInsets.all(AppSpace.v0),
             onPressed: onPressed,
             icon: Icon(icon, color: Theme.of(context).colorScheme.onSurface),
           ),
@@ -776,6 +860,373 @@ class _DescriptionBlockState extends ConsumerState<_DescriptionBlock> {
             onPressed: () => setState(() => _expanded = !_expanded),
             child: Text(_expanded ? t.readLess : t.readMore),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionShell extends StatelessWidget {
+  const _SectionShell({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpace.screenH,
+        DishDetailMetrics.sectionTop,
+        AppSpace.screenH,
+        DishDetailMetrics.sectionBottom,
+      ),
+      child: child,
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: Theme.of(context)
+          .textTheme
+          .titleMedium
+          ?.copyWith(fontWeight: FontWeight.w800),
+    );
+  }
+}
+
+String _spiceIntensityLabel(AppStrings t, int level) {
+  if (level <= 1) return t.spiceMild;
+  if (level == 2) return t.spiceMedium;
+  if (level == 3) return t.spiceHot;
+  return t.spiceExtraHot;
+}
+
+class _SpiceSection extends ConsumerWidget {
+  const _SpiceSection({required this.item});
+
+  final MenuItemModel item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final level = item.spiceLevel;
+    if (level == null) return const SizedBox.shrink();
+    final t = ref.watch(appStringsProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final clamped = level < 0 ? 0 : (level > 5 ? 5 : level);
+    final selectedColor =
+        isDark ? AppColors.heroLight : AppColors.primaryDeep;
+    final emptyColor = isDark ? AppColors.darkCard : AppColors.surfaceWarm;
+
+    return _SectionShell(
+      key: const Key('dish-spice-section'),
+      child: Semantics(
+        label: t.spiceLevelSemantics(clamped),
+        child: ExcludeSemantics(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _SectionTitle(title: t.spice),
+                  ),
+                  const SizedBox(width: AppSpace.sm),
+                  Flexible(
+                    child: Text(
+                      _spiceIntensityLabel(t, clamped),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: selectedColor,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpace.md),
+              Row(
+                children: List<Widget>.generate(5, (index) {
+                  return Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: index == 4 ? AppSpace.v0 : AppSpace.sm,
+                      ),
+                      child: Container(
+                        height: DishDetailMetrics.spicePillHeight,
+                        decoration: BoxDecoration(
+                          color: index < clamped ? selectedColor : emptyColor,
+                          borderRadius:
+                              BorderRadius.circular(AppRadius.pill),
+                          border: Border.all(
+                            color: theme.colorScheme.outline,
+                            width: AppSpace.hairline,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _IngredientsSection extends ConsumerWidget {
+  const _IngredientsSection({required this.item});
+
+  final MenuItemModel item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (item.ingredients.isEmpty && item.allergens.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final t = ref.watch(appStringsProvider);
+    return _SectionShell(
+      key: const Key('dish-ingredients-section'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (item.ingredients.isNotEmpty) ...[
+            _SectionTitle(title: t.ingredients),
+            const SizedBox(height: AppSpace.md),
+            Wrap(
+              spacing: AppSpace.sm,
+              runSpacing: AppSpace.sm,
+              children: item.ingredients
+                  .map((ingredient) => _DetailChip(label: ingredient))
+                  .toList(),
+            ),
+          ],
+          if (item.allergens.isNotEmpty) ...[
+            SizedBox(
+              height: item.ingredients.isNotEmpty
+                  ? DishDetailMetrics.sectionGap
+                  : AppSpace.v0,
+            ),
+            _SectionTitle(title: t.contains),
+            const SizedBox(height: AppSpace.sm),
+            Wrap(
+              spacing: AppSpace.sm,
+              runSpacing: AppSpace.sm,
+              children: item.allergens
+                  .map(
+                    (allergen) =>
+                        _DetailChip(label: allergen, outlined: true),
+                  )
+                  .toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailChip extends StatelessWidget {
+  const _DetailChip({
+    required this.label,
+    this.outlined = false,
+  });
+
+  final String label;
+  final bool outlined;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final secondary =
+        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpace.md,
+        vertical: AppSpace.v6,
+      ),
+      decoration: BoxDecoration(
+        color: outlined
+            ? (isDark ? AppColors.darkSurface : AppColors.surface)
+            : (isDark ? AppColors.darkCard : AppColors.surfaceWarm),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        border: outlined
+            ? Border.all(
+                color: theme.colorScheme.outline,
+                width: AppSpace.hairline,
+              )
+            : null,
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.bodySmall?.copyWith(color: secondary),
+      ),
+    );
+  }
+}
+
+class _AddOnsSection extends ConsumerWidget {
+  const _AddOnsSection({
+    required this.options,
+    required this.selectedIds,
+    required this.onToggle,
+  });
+
+  final List<CustomizationOption> options;
+  final Set<String> selectedIds;
+  final ValueChanged<String> onToggle;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (options.isEmpty) return const SizedBox.shrink();
+    final t = ref.watch(appStringsProvider);
+    return _SectionShell(
+      key: const Key('dish-add-ons-section'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionTitle(title: t.addOns),
+          const SizedBox(height: AppSpace.md),
+          for (final option in options) ...[
+            _AddOnRow(
+              semanticKey: ValueKey<String>('dish-add-on-${option.id}'),
+              option: option,
+              selected: selectedIds.contains(option.id),
+              onTap: () => onToggle(option.id),
+            ),
+            if (option != options.last) const SizedBox(height: AppSpace.sm),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _AddOnRow extends StatelessWidget {
+  const _AddOnRow({
+    required this.semanticKey,
+    required this.option,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final Key semanticKey;
+  final CustomizationOption option;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final selectedColor =
+        isDark ? AppColors.heroLight : AppColors.primaryDeep;
+    return Semantics(
+      key: semanticKey,
+      checked: selected,
+      button: true,
+      label: '${option.name}, +${AppStrings.formatTzs(option.price)}',
+      child: ExcludeSemantics(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: DishDetailMetrics.addOnRowMinHeight,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    option.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                ),
+                const SizedBox(width: AppSpace.sm),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '+${AppStrings.formatTzs(option.price)}',
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: selectedColor,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpace.sm),
+                AnimatedSwitcher(
+                  duration: AppMotion.fast,
+                  switchInCurve: AppMotion.enter,
+                  child: Icon(
+                    selected
+                        ? Icons.check_circle_rounded
+                        : Icons.add_circle_outline_rounded,
+                    key: ValueKey<bool>(selected),
+                    size: AppSpace.v24,
+                    color: selected
+                        ? selectedColor
+                        : theme.colorScheme.outline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AddOnSkeletonRows extends StatelessWidget {
+  const _AddOnSkeletonRows();
+
+  @override
+  Widget build(BuildContext context) {
+    return _SectionShell(
+      key: const Key('dish-add-ons-loading'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SkeletonBox(
+            width: AppSpace.v148,
+            height: AppSpace.v24,
+            radius: AppRadius.sm,
+          ),
+          const SizedBox(height: AppSpace.md),
+          for (var index = 0; index < 2; index++) ...[
+            if (index > 0) const SizedBox(height: AppSpace.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: SkeletonBox(
+                    height: AppSpace.v24,
+                    radius: AppRadius.sm,
+                  ),
+                ),
+                const SizedBox(width: AppSpace.md),
+                SkeletonBox(
+                  width: AppSpace.v76,
+                  height: AppSpace.v24,
+                  radius: AppRadius.sm,
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

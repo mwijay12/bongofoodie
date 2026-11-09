@@ -120,16 +120,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     ];
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: AppColors.clear,
+      key: const ValueKey('onboarding-system-ui'),
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: AppColors.ember,
         systemNavigationBarColor: AppColors.clear,
+        systemNavigationBarIconBrightness:
+            Theme.of(context).brightness == Brightness.dark
+                ? Brightness.light
+                : Brightness.dark,
         systemNavigationBarContrastEnforced: false,
       ),
       child: Scaffold(
-      body: Container(
-        color: AppColors.cream,
-        child: SafeArea(
-          child: Padding(
+        backgroundColor: AppColors.ember,
+        body: SafeArea(
+          child: Container(
+            color: AppColors.cream,
+            child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpace.xl, vertical: AppSpace.v14),
             child: Column(
               children: [

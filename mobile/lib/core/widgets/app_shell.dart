@@ -23,7 +23,7 @@ class AppShell extends StatelessWidget {
           Positioned(
             left: AppSpace.lg,
             right: AppSpace.lg,
-            bottom: AppSpace.md + safeBottom,
+            bottom: AppSpace.navBottomInset + safeBottom,
             child: AnimatedSlide(
               offset: keyboardOpen ? const Offset(0, 2.5) : Offset.zero,
               duration: reduceMotion ? Duration.zero : AppMotion.base,
