@@ -31,10 +31,28 @@ import '../../router/dish_route_args.dart';
 /// Shared metrics for dish cards — kept in app_tokens.dart (DishCardMetrics)
 /// so the real card and its skeleton stay in sync.
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key, this.showEnvBadge = EnvConfig.showEnvBadge});
 
   final bool showEnvBadge;
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool _imagesWarmed = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_imagesWarmed) return;
+    _imagesWarmed = true;
+    for (final key in ['chipsiMayai', 'nyamaChoma', 'zanzibarPilau']) {
+      final asset = DishImage.resolveLocalAsset(key)!;
+      precacheImage(AssetImage(asset), context);
+    }
+  }
 
   Future<void> _openSpiceTriviaSheet(
     BuildContext context,
@@ -67,7 +85,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = ref.watch(appStringsProvider);
     final auth = ref.watch(authProvider);
     final address = ref.watch(deliveryAddressProvider);
@@ -119,9 +137,9 @@ class HomeScreen extends ConsumerWidget {
                                         letterSpacing: 1.0,
                                       ),
                                     ),
-                                    if (showEnvBadge)
+                                    if (widget.showEnvBadge)
                                       const SizedBox(width: AppSpace.v6),
-                                    if (showEnvBadge)
+                                    if (widget.showEnvBadge)
                                       Container(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: AppSpace.v7, vertical: AppSpace.v2),

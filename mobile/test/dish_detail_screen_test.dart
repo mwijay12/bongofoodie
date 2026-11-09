@@ -342,4 +342,41 @@ void main() {
     expect(tester.takeException(), isNull);
     await _disposeTree(tester);
   });
+
+  testWidgets('hero responds when reduced motion changes while mounted',
+      (tester) async {
+    final reducedMotion = ValueNotifier<bool>(false);
+    addTearDown(reducedMotion.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: _overrides(),
+        child: ValueListenableBuilder<bool>(
+          valueListenable: reducedMotion,
+          builder: (context, disabled, child) => _host(
+            brightness: Brightness.light,
+            disableAnimations: disabled,
+            home: const Scaffold(
+              body: DishHero(
+                item: _item,
+                heroScope: DishHeroScopes.homeSignature,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    final hero = tester.state<DishHeroState>(find.byType(DishHero));
+    expect(hero.floatController.isAnimating, isTrue);
+    reducedMotion.value = true;
+    await tester.pump();
+    expect(hero.floatController.isAnimating, isFalse);
+    expect(hero.floatController.value, 0);
+    reducedMotion.value = false;
+    await tester.pump();
+    expect(hero.floatController.isAnimating, isTrue);
+    expect(tester.takeException(), isNull);
+    await _disposeTree(tester);
+  });
+
 }

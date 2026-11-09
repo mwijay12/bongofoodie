@@ -57,12 +57,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final args = extra is DishRouteArgs ? extra : null;
           return CustomTransitionPage<void>(
             key: state.pageKey,
-            transitionDuration: AppMotion.slow,
-            reverseTransitionDuration: AppMotion.base,
-            transitionsBuilder: (_, animation, __, child) {
-              final curved = CurvedAnimation(
-                parent: animation,
-                curve: AppMotion.enter,
+            transitionDuration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : AppMotion.slow,
+            reverseTransitionDuration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : AppMotion.base,
+            transitionsBuilder: (context, animation, __, child) {
+              if (MediaQuery.disableAnimationsOf(context)) return child;
+              final curved = animation.drive(
+                CurveTween(curve: AppMotion.enter),
               );
               return FadeTransition(
                 opacity: curved,

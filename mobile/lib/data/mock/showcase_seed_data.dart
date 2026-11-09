@@ -153,10 +153,10 @@ class ShowcaseSeedData {
     ),
     MenuItemModel(
       id: 'menu-pilau-kuku',
-      name: 'Pilau ya Kuku',
+      name: 'Zanzibar Pilau',
       description:
-          'Fragrant Zanzibar spiced basmati rice slow-cooked with caramelized onions, whole cardamom, cloves, tender kuku kienyeji, and kachumbari.',
-      imageUrl: 'pilauYaKuku',
+          'Fragrant Zanzibar spiced basmati rice slow-cooked with caramelized onions, whole cardamom, cloves, tender beef, and kachumbari.',
+      imageUrl: 'zanzibarPilau',
       price: 10000,
       rating: 4.8,
       ratingCount: 97,
@@ -167,7 +167,7 @@ class ShowcaseSeedData {
       categoryName: 'Rice & Pilau',
       availableCustomizations: defaultSwahiliSides,
       spiceLevel: 3,
-      ingredients: ['basmati rice', 'chicken', 'onions', 'cardamom', 'cloves', 'tomatoes'],
+      ingredients: ['basmati rice', 'beef', 'onions', 'cardamom', 'cloves', 'tomatoes'],
       allergens: <String>[],
       funFactEn: 'Pilau is rice cooked with whole spices such as cardamom and cloves.',
       funFactSw: 'Pilau ni wali unaopikwa na viungo vizima kama iliki na karafuu.',

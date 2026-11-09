@@ -25,8 +25,9 @@ class DishImage extends StatelessWidget {
   }) : imageRef = imageRef ?? imageKeyOrUrl ?? 'salad';
 
   static const Map<String, String> _localAssetMap = {
-    'chipsiMayai': 'assets/images/chipsi-mayai.png',
-    'nyamaChoma': 'assets/images/nyama-choma.png',
+    'chipsiMayai': 'assets/dishes/chipsi_mayai.png',
+    'nyamaChoma': 'assets/dishes/nyama_choma_ugali.png',
+    'zanzibarPilau': 'assets/dishes/zanzibar_pilau.png',
     'pilauYaKuku': 'assets/images/pilau-ya-kuku.png',
     'samakiWaKupaka': 'assets/images/samaki-wa-kupaka.png',
     'mishkakiYaNgombe': 'assets/images/mishkaki-ya-ngombe.png',
