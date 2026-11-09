@@ -6,14 +6,15 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('cutouts resolve without replacing chicken or coconut rice artwork', () {
     expect(DishImage.resolveLocalAsset('chipsiMayai'),
-        'assets/dishes/chipsi_mayai.png');
+        'assets/dishes/menu-chipsi-mayai.png');
     expect(DishImage.resolveLocalAsset('nyamaChoma'),
-        'assets/dishes/nyama_choma_ugali.png');
+        'assets/dishes/menu-nyama-choma.png');
     expect(DishImage.resolveLocalAsset('zanzibarPilau'),
-        'assets/dishes/zanzibar_pilau.png');
+        'assets/dishes/menu-pilau-kuku.png');
     expect(DishImage.resolveLocalAsset('pilauYaKuku'),
         'assets/images/pilau-ya-kuku.png');
-    expect(DishImage.resolveLocalAsset('https://example.com/pilau.png'), isNull);
+    expect(
+        DishImage.resolveLocalAsset('https://example.com/pilau.png'), isNull);
   });
 
   testWidgets('stagger reaches final state and bypasses reduced motion',

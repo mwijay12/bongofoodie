@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../utils/dish_asset.dart';
+import '../utils/dish_image_cache.dart';
 import '../theme/app_tokens.dart';
 import '../theme/skeleton_colors.dart';
 
 class DishImage extends StatelessWidget {
   final String imageRef;
+  final String? dishId;
+  final String productName;
   final double? width;
   final double? height;
   final BoxFit fit;
   final double borderRadius;
   final bool clip;
   final bool transparentFallback;
+  final bool showCircle;
 
   const DishImage({
     super.key,
     String? imageRef,
+    this.dishId,
+    this.productName = '',
     String? imageKeyOrUrl,
     this.width,
     this.height,
@@ -22,15 +29,11 @@ class DishImage extends StatelessWidget {
     this.borderRadius = AppRadius.v16,
     this.clip = true,
     this.transparentFallback = false,
+    this.showCircle = true,
   }) : imageRef = imageRef ?? imageKeyOrUrl ?? 'salad';
 
   static const Map<String, String> _localAssetMap = {
-    'chipsiMayai': 'assets/dishes/chipsi_mayai.png',
-    'nyamaChoma': 'assets/dishes/nyama_choma_ugali.png',
-    'zanzibarPilau': 'assets/dishes/zanzibar_pilau.png',
     'pilauYaKuku': 'assets/images/pilau-ya-kuku.png',
-    'samakiWaKupaka': 'assets/images/samaki-wa-kupaka.png',
-    'mishkakiYaNgombe': 'assets/images/mishkaki-ya-ngombe.png',
     'burgerOne': 'assets/images/burger-one.png',
     'burgerTwo': 'assets/images/burger-two.png',
     'pizzaOne': 'assets/images/pizza-one.png',
@@ -53,6 +56,14 @@ class DishImage extends StatelessWidget {
   static String? resolveLocalAsset(String raw) {
     final trimmed = raw.trim();
     if (trimmed.isEmpty) return null;
+    if (dishAssetIds.contains(trimmed)) {
+      return resolveDishAsset(trimmed, fallback: trimmed);
+    }
+    for (final entry in dishImageKeys.entries) {
+      if (entry.key.toLowerCase() == trimmed.toLowerCase()) {
+        return resolveDishAsset(entry.value, fallback: trimmed);
+      }
+    }
     if (_localAssetMap.containsKey(trimmed)) {
       return _localAssetMap[trimmed];
     }
@@ -63,80 +74,100 @@ class DishImage extends StatelessWidget {
       if (entry.key.toLowerCase() == lower) return entry.value;
     }
 
-    if (!lower.startsWith('http://') && !lower.startsWith('https://')) {
-      if (lower.contains('chipsi') || lower.contains('mayai')) {
-        return _localAssetMap['chipsiMayai'];
-      }
-      if (lower.contains('nyama') || lower.contains('choma')) {
-        return _localAssetMap['nyamaChoma'];
-      }
-      if (lower.contains('pilau') || lower.contains('wali') || lower.contains('rice')) {
-        return _localAssetMap['pilauYaKuku'];
-      }
-      if (lower.contains('samaki') || lower.contains('kupaka') || lower.contains('fish')) {
-        return _localAssetMap['samakiWaKupaka'];
-      }
-      if (lower.contains('mishkaki') || lower.contains('skewer')) {
-        return _localAssetMap['mishkakiYaNgombe'];
-      }
-      if (lower.contains('burger')) return _localAssetMap['burgerOne'];
-      if (lower.contains('pizza')) return _localAssetMap['pizzaOne'];
-      if (lower.contains('juice') || lower.contains('drink') || lower.contains('soda')) {
-        return _localAssetMap['orangeJuiceIcon'];
-      }
-    }
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final localAsset = resolveLocalAsset(imageRef);
+    final source = resolveDishAsset(dishId ?? '',
+        fallback: imageRef, productName: productName);
+    final localAsset = resolveLocalAsset(source);
 
+    final cutout = localAsset != null &&
+        (localAsset.startsWith('assets/dishes/') ||
+            const {
+              'assets/images/burger-one.png',
+              'assets/images/burger-two.png',
+              'assets/images/pizza-one.png',
+              'assets/images/robot-chef.png',
+              'assets/images/login-graphic.png',
+            }.contains(localAsset));
+    final imageFit = cutout ? BoxFit.contain : fit;
     Widget child;
     if (localAsset != null) {
       child = Image.asset(
         localAsset,
         width: width,
         height: height,
-        fit: fit,
+        fit: imageFit,
+        cacheWidth: dishDecodeWidth(context, width),
+        frameBuilder: _frameBuilder,
         errorBuilder: (context, _, __) => _fallbackBox(context),
       );
-    } else if (imageRef.startsWith('http://') || imageRef.startsWith('https://')) {
+    } else if (source.startsWith('http://') || source.startsWith('https://')) {
       child = Image.network(
-        imageRef,
+        source,
         width: width,
         height: height,
         fit: fit,
-        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-          if (wasSynchronouslyLoaded || child is _DishImageFallback) return child;
-          final reducedMotion = MediaQuery.disableAnimationsOf(context);
-          final backdrop = transparentFallback
-              ? AppColors.clear
-              : SkeletonColors.of(context).base;
-          return Stack(
-            children: [
-              Positioned.fill(
-                child: ColoredBox(color: backdrop),
-              ),
-              AnimatedOpacity(
-                opacity: frame == null ? 0 : 1,
-                duration: reducedMotion ? Duration.zero : AppMotion.base,
-                curve: AppMotion.enter,
-                child: child,
-              ),
-            ],
-          );
-        },
+        cacheWidth: dishDecodeWidth(context, width),
+        frameBuilder: _frameBuilder,
         errorBuilder: (context, _, __) => _fallbackBox(context),
       );
     } else {
       child = _fallbackBox(context);
     }
 
+    if (cutout) {
+      if (!showCircle || !clip) return child;
+      return SizedBox(
+        width: width,
+        height: height,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: AppColors.primarySoft,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            child,
+          ],
+        ),
+      );
+    }
     if (!clip) return child;
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
       child: child,
+    );
+  }
+
+  Widget _frameBuilder(BuildContext context, Widget child, int? frame,
+      bool wasSynchronouslyLoaded) {
+    if (wasSynchronouslyLoaded) return child;
+    return Stack(
+      children: [
+        if (frame == null)
+          Positioned.fill(
+            child: ColoredBox(
+              color: transparentFallback
+                  ? AppColors.clear
+                  : SkeletonColors.of(context).base,
+            ),
+          ),
+        AnimatedOpacity(
+          opacity: frame == null ? 0 : 1,
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : AppMotion.base,
+          curve: AppMotion.enter,
+          child: child,
+        ),
+      ],
     );
   }
 

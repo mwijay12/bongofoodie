@@ -37,7 +37,14 @@ abstract final class AppSpace {
   static const double v40 = 40;
   static const double hairline = 1;
 
-  static const double xxs = 2, xs = 4, sm = 8, md = 12, lg = 16, xl = 24, xxl = 32, huge = 48;
+  static const double xxs = 2,
+      xs = 4,
+      sm = 8,
+      md = 12,
+      lg = 16,
+      xl = 24,
+      xxl = 32,
+      huge = 48;
   static const double screenH = 20;
   static const double navHeight = 72;
   static const double navBottomInset = md;
@@ -119,9 +126,9 @@ abstract final class DiscoveryCardMetrics {
 }
 
 abstract final class DishCardMetrics {
-  static const double cardHeight = 270;
+  static const double cardHeight = 298;
   static const double cardMaxWidth = 230;
-  static const double imageSize = 112;
+  static const double imageSize = 140;
   static const double gap = AppSpace.v14;
   static const double padding = AppSpace.md;
 }
@@ -133,7 +140,7 @@ abstract final class DishDetailMetrics {
   static const double heroMaxHeight = 380;
   static const double heroCircleSize = 260;
   static const double heroCircleAlignmentY = 0.08;
-  static const double heroImageSize = 240;
+  static const double heroImageSize = 300;
   static const double floatDistance = 6;
   static const double contactShadowWidth = 160;
   static const double contactShadowHeight = 24;
@@ -147,4 +154,17 @@ abstract final class DishDetailMetrics {
   static const double sectionGap = AppSpace.md;
   static const double spicePillHeight = AppSpace.v10;
   static const double addOnRowMinHeight = AppSpace.v56;
+}
+
+abstract final class MenuImageMetrics {
+  static const double gridImage = 128;
+  static const double listImage = AppSpace.v92;
+  static const double gridRatio = 0.64;
+  static const double cartImage = 68;
+}
+
+abstract final class OnboardingImageMetrics {
+  static const double size = 280;
+  static const double padding = AppSpace.v14;
+  static const double activeIndicatorWidth = 28;
 }
