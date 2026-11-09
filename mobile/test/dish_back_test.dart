@@ -36,8 +36,11 @@ void main() {
       addTearDown(router.dispose);
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       await tester.tap(find.text(source));
+      await tester.pump(Duration.zero);
       await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text('a'), findsOneWidget);
       await tester.tap(find.byType(BackButton));
+      await tester.pump(Duration.zero);
       await tester.pump(const Duration(milliseconds: 400));
       expect(router.routeInformationProvider.value.uri.path, source);
     });
@@ -55,8 +58,10 @@ void main() {
     addTearDown(router.dispose);
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     await tester.tap(find.text('a'));
+    await tester.pump(Duration.zero);
     await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.byType(BackButton).last);
+    await tester.pump(Duration.zero);
     await tester.pump(const Duration(milliseconds: 400));
     expect(router.routeInformationProvider.value.uri.path, '/dish/a');
   });

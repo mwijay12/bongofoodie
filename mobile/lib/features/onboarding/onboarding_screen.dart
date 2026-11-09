@@ -204,7 +204,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           child: Text(
                             settings.isSwahili ? 'SW' : 'EN',
                             style: const TextStyle(
-                              color: AppColors.surface,
+                              color: AppColors.ink,
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
                             ),
@@ -340,13 +340,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   // Primary CTA
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
+                    child: ElevatedButton(
                       onPressed: _instantExplore,
-                      icon: const Icon(Icons.auto_awesome_rounded, size: 20),
-                      label: Text(
-                        t.isSw
-                            ? 'Jaribu Showcase Demo Sasa'
-                            : 'Launch Instant Showcase Demo',
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.auto_awesome_rounded,
+                              size: AppSpace.v20),
+                          const SizedBox(width: AppSpace.sm),
+                          Flexible(
+                            child: Text(
+                              t.isSw
+                                  ? 'Jaribu Showcase Demo Sasa'
+                                  : 'Launch Instant Showcase Demo',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
