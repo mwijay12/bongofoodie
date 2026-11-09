@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/icons/app_icon_key.dart';
+import '../../core/widgets/app_icon.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/models.dart';
@@ -129,9 +131,47 @@ class _StaffDispatchScreenState extends ConsumerState<StaffDispatchScreen>
           controller: _tabController,
           indicatorColor: AppColors.primary,
           labelColor: AppColors.primary,
-          tabs: const [
-            Tab(text: '🛵 Live Orders'),
-            Tab(text: '💡 Daily Discoveries'),
+          tabs: [
+            Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const AppIcon(
+                    iconKey: AppIconKey.delivery,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: AppSpace.v4),
+                  Flexible(
+                    child: Text(
+                      'Live Orders',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const AppIcon(
+                    iconKey: AppIconKey.idea,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: AppSpace.v4),
+                  Flexible(
+                    child: Text(
+                      'Daily Discoveries',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -196,9 +236,22 @@ class _StaffDispatchScreenState extends ConsumerState<StaffDispatchScreen>
                   ),
                   Expanded(
                     child: filtered.isEmpty
-                        ? const Center(
-                            child: Text(
-                                'All active orders have been dispatched! 🎉'),
+                        ? Center(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                AppIcon(
+                                  iconKey: AppIconKey.celebration,
+                                  color: AppColors.primary,
+                                ),
+                                SizedBox(width: AppSpace.v8),
+                                Flexible(
+                                  child: Text(
+                                    'All active orders have been dispatched!',
+                                  ),
+                                ),
+                              ],
+                            ),
                           )
                         : ListView.separated(
                             padding:
@@ -256,17 +309,39 @@ class _StaffDispatchScreenState extends ConsumerState<StaffDispatchScreen>
                                       ],
                                     ),
                                     const SizedBox(height: 6),
-                                    Text(
-                                      '📍 ${order.deliveryAddress}',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 12),
+                                    Row(
+                                      children: [
+                                        const AppIcon(
+                                          iconKey: AppIconKey.location,
+                                          color: AppColors.primary,
+                                        ),
+                                        const SizedBox(width: AppSpace.v6),
+                                        Expanded(
+                                          child: Text(
+                                            order.deliveryAddress,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(fontSize: 12),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    Text(
-                                      '📞 ${order.customerPhone}',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 12),
+                                    Row(
+                                      children: [
+                                        const AppIcon(
+                                          iconKey: AppIconKey.phone,
+                                          color: AppColors.primary,
+                                        ),
+                                        const SizedBox(width: AppSpace.v6),
+                                        Expanded(
+                                          child: Text(
+                                            order.customerPhone,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(fontSize: 12),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                     const Divider(height: 18),
                                     ...order.items.map(

@@ -134,15 +134,15 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                     itemBuilder: (_) => const [
                       PopupMenuItem(
                         value: MenuSortOption.topRated,
-                        child: Text('⭐ Top Rated'),
+                        child: Text('Top Rated'),
                       ),
                       PopupMenuItem(
                         value: MenuSortOption.priceLowHigh,
-                        child: Text('💰 Lowest Price'),
+                        child: Text('Lowest Price'),
                       ),
                       PopupMenuItem(
                         value: MenuSortOption.fastestPrep,
-                        child: Text('⚡ Fastest Prep'),
+                        child: Text('Fastest Prep'),
                       ),
                     ],
                   ),
@@ -415,7 +415,7 @@ class _MenuGridTile extends StatelessWidget {
               ),
               const SizedBox(height: AppSpace.v2),
               Text(
-                '★ ${dish.rating.toStringAsFixed(1)} • ${dish.calories} kcal',
+                '${dish.rating.toStringAsFixed(1)} • ${dish.calories} kcal',
                 style: TextStyle(
                   fontSize: 11.5,
                   color: isDark
@@ -536,7 +536,7 @@ class _MenuListTile extends StatelessWidget {
                         ),
                         const SizedBox(width: AppSpace.v10),
                         Text(
-                          '★ ${dish.rating.toStringAsFixed(1)} • ${dish.prepTimeMins}m',
+                          '${dish.rating.toStringAsFixed(1)} • ${dish.prepTimeMins}m',
                           style: const TextStyle(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w700,

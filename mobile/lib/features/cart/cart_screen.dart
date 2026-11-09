@@ -77,7 +77,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
 
   void _showReceiptDialog(OrderModel order, BranchSettingsModel branch) {
     final receiptText = '''
-🧾 BONGOFOODIE OFFICIAL RECEIPT
+BONGOFOODIE OFFICIAL RECEIPT
 Order: #${order.id}
 Customer: ${order.customerName}
 Deliver to: ${order.deliveryAddress}
@@ -85,7 +85,7 @@ Items:
 ${order.items.map((i) => '• ${i.quantity}x ${i.name} (${AppStrings.formatTzs(i.lineTotal)})').join('\n')}
 Total Paid/Due: ${AppStrings.formatTzs(order.totalAmount)}
 Payment: ${order.paymentMethodType.label}${order.paymentMethodType == PaymentMethod.lipaNamba ? ' (Till ${branch.lipaNamba})' : ''}
-Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
+Asante kwa kuchagua BongoFoodie TZ!
 ''';
 
     showDialog<void>(
@@ -468,7 +468,7 @@ Asante kwa kuchagua BongoFoodie TZ! 🇹🇿
                       SnackBar(
                         content: Text(
                           ok
-                              ? '🎉 Promo applied! Discount unlocked.'
+                              ? 'Promo applied! Discount unlocked.'
                               : 'Invalid promo code. Play Daily Spice Trivia or try KARIBU2000!',
                         ),
                       ),

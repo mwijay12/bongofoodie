@@ -1,4 +1,6 @@
 import '../../core/widgets/app_sheet.dart';
+import '../../core/icons/app_icon_key.dart';
+import '../../core/widgets/app_icon.dart';
 import '../../core/widgets/state_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -113,37 +115,37 @@ class ProfileScreen extends ConsumerWidget {
 
     final achievements = [
       (
-        icon: '🔥',
+        icon: AppIconKey.fire,
         title: 'Mkaa Connoisseur',
         unlocked: orders.isNotEmpty,
         desc: 'Placed a Swahili order',
       ),
       (
-        icon: '🌶️',
+        icon: AppIconKey.fire,
         title: 'Pilipili Shujaa',
         unlocked: favorites.length >= 2,
         desc: 'Saved 2+ favorite dishes',
       ),
       (
-        icon: '👨‍🍳',
+        icon: AppIconKey.restaurant,
         title: 'Chef AI Co-Creator',
         unlocked: orders.any((o) => o.items.any((i) => i.isCustomAiDish)),
         desc: 'Ordered a Chef AI dish',
       ),
       (
-        icon: '🥥',
+        icon: AppIconKey.eco,
         title: 'Pwani Explorer',
         unlocked: true,
         desc: 'Explored coastal menu',
       ),
       (
-        icon: '🏆',
+        icon: AppIconKey.trophy,
         title: 'Spice Scholar',
         unlocked: true,
         desc: 'Daily Trivia participant',
       ),
       (
-        icon: '💎',
+        icon: AppIconKey.gem,
         title: 'Bongo VIP',
         unlocked: orders.length >= 3,
         desc: '3+ orders completed',
@@ -430,7 +432,12 @@ class ProfileScreen extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(badge.icon, style: const TextStyle(fontSize: 24)),
+                        AppIcon(
+                          iconKey: badge.icon,
+                          size: 24,
+                          color: AppColors.primary,
+                          tinted: true,
+                        ),
                         const SizedBox(height: AppSpace.v6),
                         Text(
                           badge.title,

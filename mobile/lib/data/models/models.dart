@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../core/icons/app_icon_key.dart';
 
 enum UserRole {
   customer,
@@ -664,6 +665,9 @@ class PromotionModel {
   final String imageKey;
   final bool isActive;
 
+  /// Optional icon key resolved through AppIconKey; never a database column.
+  final AppIconKey? iconKey;
+
   const PromotionModel({
     required this.id,
     required this.title,
@@ -673,6 +677,7 @@ class PromotionModel {
     this.bgHex = '#F6821F',
     this.imageKey = 'nyamaChoma',
     this.isActive = true,
+    this.iconKey,
   });
 
   String get bgColorHex => bgHex;
@@ -695,6 +700,7 @@ class PromotionModel {
         bgHex: (json['bg_hex'] ?? '#F6821F').toString(),
         imageKey: (json['image_key'] ?? 'nyamaChoma').toString(),
         isActive: json['is_active'] != false,
+        iconKey: appIconKeyFromJson(json['icon_key']),
       );
 }
 
@@ -703,10 +709,14 @@ class DiscoveryModel {
   final String title;
   final String description;
 
+  /// Optional icon key resolved through AppIconKey; never a database column.
+  final AppIconKey? iconKey;
+
   const DiscoveryModel({
     required this.id,
     required this.title,
     required this.description,
+    this.iconKey,
   });
 
   Map<String, dynamic> toJson() => {
@@ -719,6 +729,7 @@ class DiscoveryModel {
         id: (json['id'] ?? '').toString(),
         title: (json['title'] ?? '').toString(),
         description: (json['description'] ?? '').toString(),
+        iconKey: appIconKeyFromJson(json['icon_key']),
       );
 }
 

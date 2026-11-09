@@ -1,4 +1,6 @@
 import '../../core/widgets/app_sheet.dart';
+import '../../core/icons/app_icon_key.dart';
+import '../../core/widgets/app_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -228,7 +230,7 @@ class HomeScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${t.karibuTitle}, ${(auth.user?.name ?? 'Foodie').split(' ').first} 👋',
+                        '${t.karibuTitle}, ${(auth.user?.name ?? 'Foodie').split(' ').first}',
                         style:
                             Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.w800,
@@ -305,15 +307,31 @@ class HomeScreen extends ConsumerWidget {
                                             borderRadius:
                                                 BorderRadius.circular(AppRadius.pill),
                                           ),
-                                          child: Text(
-                                            p.badgeText,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: AppColors.surface,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w800,
-                                            ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              AppIcon(
+                                                iconKey: p.iconKey ??
+                                                    appIconKeyForText(
+                                                      '${p.title} ${p.badgeText}',
+                                                      fallback: AppIconKey.fire,
+                                                    ),
+                                                color: AppColors.surface,
+                                              ),
+                                              const SizedBox(width: AppSpace.v6),
+                                              Flexible(
+                                                child: Text(
+                                                  p.badgeText,
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    color: AppColors.surface,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       const SizedBox(height: AppSpace.v8),
@@ -395,8 +413,11 @@ class HomeScreen extends ConsumerWidget {
                           children: [
                             Row(
                               children: [
-                                const Icon(Icons.lightbulb_rounded,
-                                    color: AppColors.primary, size: 20),
+                                const AppIcon(
+                                  iconKey: AppIconKey.idea,
+                                  color: AppColors.primary,
+                                  tinted: true,
+                                ),
                                 const SizedBox(width: AppSpace.v8),
                                 Expanded(
                                   child: Text(
@@ -426,12 +447,27 @@ class HomeScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            Text(
-                              featured.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 15,
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                AppIcon(
+                                  iconKey: featured.iconKey ??
+                                      appIconKeyForText(featured.title),
+                                  color: AppColors.primary,
+                                ),
+                                const SizedBox(width: AppSpace.v8),
+                                Expanded(
+                                  child: Text(
+                                    featured.title,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: AppSpace.v4),
                             Text(
@@ -981,7 +1017,7 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
                 children: [
                   Text(
                     isCorrect
-                        ? 'Hongera! Reward Code Unlocked: KARIBU2000 🎉'
+                        ? 'Hongera! Reward Code Unlocked: KARIBU2000'
                         : 'Good try! ${widget.question.rewardNote}',
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/icons/app_icon_key.dart';
+import '../../core/widgets/app_icon.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
@@ -269,10 +271,40 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                   ),
                   tabs: [
                     Tab(
-                      text: t.isSw ? '💬 Ongea na Chef' : '💬 Chef Notes',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const AppIcon(iconKey: AppIconKey.chat),
+                          const SizedBox(width: AppSpace.v4),
+                          Flexible(
+                            child: Text(
+                              t.isSw ? 'Ongea na Chef' : 'Chef Notes',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     Tab(
-                      text: t.isSw ? '🍲 Buni Sahani' : '🍲 Dish Creator',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const AppIcon(iconKey: AppIconKey.soup),
+                          const SizedBox(width: AppSpace.v4),
+                          Flexible(
+                            child: Text(
+                              t.isSw ? 'Buni Sahani' : 'Dish Creator',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

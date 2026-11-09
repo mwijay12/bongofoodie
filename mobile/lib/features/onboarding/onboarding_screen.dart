@@ -180,7 +180,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ),
                         ),
                         child: Text(
-                          settings.isSwahili ? '🇹🇿 SW' : '🇬🇧 EN',
+                          settings.isSwahili ? 'SW' : 'EN',
                           style: const TextStyle(
                             color: AppColors.ink,
                             fontWeight: FontWeight.w700,
