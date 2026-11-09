@@ -43,6 +43,9 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Emoji guard (UI copy and showcase seed)
+        run: bash "$GITHUB_WORKSPACE/scripts/check_emoji.sh"
+
       - name: Record main analyzer baseline
         run: |
           git fetch origin main --depth=1

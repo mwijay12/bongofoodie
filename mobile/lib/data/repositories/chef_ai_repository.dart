@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../../core/config/env_config.dart';
+import '../../core/utils/emoji_sanitizer.dart';
 import '../models/models.dart';
 
 final chefAiRepositoryProvider = Provider<ChefAiRepository>((ref) {
@@ -37,7 +38,9 @@ class ChefAiRepository {
         if (res.statusCode == 200) {
           final data = jsonDecode(res.body) as Map<String, dynamic>;
           final reply = data['reply']?.toString();
-          if (reply != null && reply.trim().isNotEmpty) return reply.trim();
+          if (reply != null && reply.trim().isNotEmpty) {
+            return stripEmoji(reply.trim());
+          }
         }
       } catch (_) {}
     }
@@ -69,7 +72,9 @@ class ChefAiRepository {
         if (res.statusCode == 200) {
           final data = jsonDecode(res.body) as Map<String, dynamic>;
           final reply = data['reply']?.toString();
-          if (reply != null && reply.trim().isNotEmpty) return reply.trim();
+          if (reply != null && reply.trim().isNotEmpty) {
+            return stripEmoji(reply.trim());
+          }
         }
       } catch (_) {}
     }
@@ -102,12 +107,18 @@ class ChefAiRepository {
         if (res.statusCode == 200) {
           final data = jsonDecode(res.body) as Map<String, dynamic>;
           return GeneratedDishSpec(
-            name: (data['name'] ?? 'Sahani Maalum ya Chef').toString(),
-            description: (data['description'] ?? userConcept).toString(),
+            name: stripEmoji(
+              (data['name'] ?? 'Sahani Maalum ya Chef').toString(),
+            ),
+            description: stripEmoji(
+              (data['description'] ?? userConcept).toString(),
+            ),
             price: (data['price'] as num?)?.toDouble() ?? 9500,
             calories: (data['calories'] as num?)?.toInt() ?? 610,
             protein: (data['protein'] as num?)?.toInt() ?? 34,
-            category: (data['category'] ?? 'Swahili Bites').toString(),
+            category: stripEmoji(
+              (data['category'] ?? 'Swahili Bites').toString(),
+            ),
             customizations: (data['customizations'] is List)
                 ? (data['customizations'] as List).map((e) => e.toString()).toList()
                 : const ['Kachumbari Extra', 'Pili Pili Kali'],
@@ -135,12 +146,18 @@ class ChefAiRepository {
         if (res.statusCode == 200) {
           final data = jsonDecode(res.body) as Map<String, dynamic>;
           return GeneratedDishSpec(
-            name: (data['name'] ?? 'Sahani Maalum ya Chef').toString(),
-            description: (data['description'] ?? userConcept).toString(),
+            name: stripEmoji(
+              (data['name'] ?? 'Sahani Maalum ya Chef').toString(),
+            ),
+            description: stripEmoji(
+              (data['description'] ?? userConcept).toString(),
+            ),
             price: (data['price'] as num?)?.toDouble() ?? 9500,
             calories: (data['calories'] as num?)?.toInt() ?? 610,
             protein: (data['protein'] as num?)?.toInt() ?? 34,
-            category: (data['category'] ?? 'Swahili Bites').toString(),
+            category: stripEmoji(
+              (data['category'] ?? 'Swahili Bites').toString(),
+            ),
             customizations: (data['customizations'] is List)
                 ? (data['customizations'] as List).map((e) => e.toString()).toList()
                 : const ['Kachumbari Extra', 'Pili Pili Kali'],

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/icons/app_icon_key.dart';
+import '../../core/widgets/app_icon.dart';
+import '../../core/utils/emoji_sanitizer.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
@@ -40,8 +43,7 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
       ChefChatMessage(
         id: 'welcome-1',
         isUser: false,
-        content:
-            'Karibu kwenye BongoFoodie Chef Atelier! 👨‍🍳🇹🇿 Ask me anything in Kiswahili or English — spice pairings, what to eat tonight in Dar es Salaam, or switch to "Dish Creator" to invent your own Swahili plate!',
+        content: ref.read(appStringsProvider).chefAiWelcome,
         timestamp: DateTime.now(),
       ),
     ];
@@ -161,7 +163,21 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('✨ ${spec.name} added to Cart!'),
+        content: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const AppIcon(
+              iconKey: AppIconKey.sparkles,
+              color: AppColors.surface,
+            ),
+            const SizedBox(width: AppSpace.v8),
+            Flexible(
+              child: Text(
+                '${spec.name} ${ref.read(appStringsProvider).chefAiAddedToCart}',
+              ),
+            ),
+          ],
+        ),
         action: SnackBarAction(
           label: 'VIEW CART',
           onPressed: () => context.go('/cart'),
@@ -269,10 +285,40 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                   ),
                   tabs: [
                     Tab(
-                      text: t.isSw ? '💬 Ongea na Chef' : '💬 Chef Notes',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const AppIcon(iconKey: AppIconKey.chat),
+                          const SizedBox(width: AppSpace.v4),
+                          Flexible(
+                            child: Text(
+                              t.isSw ? 'Ongea na Chef' : 'Chef Notes',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     Tab(
-                      text: t.isSw ? '🍲 Buni Sahani' : '🍲 Dish Creator',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const AppIcon(iconKey: AppIconKey.soup),
+                          const SizedBox(width: AppSpace.v4),
+                          Flexible(
+                            child: Text(
+                              t.isSw ? 'Buni Sahani' : 'Dish Creator',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -375,7 +421,9 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                           ),
                   ),
                   child: Text(
-                    msg.content,
+                    // AI replies are remote/generated text; user messages are
+                    // deliberately left untouched.
+                    msg.isUser ? msg.content : stripEmoji(msg.content),
                     style: TextStyle(
                       color: msg.isUser ? AppColors.surface : null,
                       fontSize: 13.8,
@@ -523,13 +571,27 @@ class _ChefAiScreenState extends ConsumerState<ChefAiScreen>
                               color: AppColors.primary.withOpacity(0.14),
                               borderRadius: BorderRadius.circular(AppRadius.pill),
                             ),
-                            child: Text(
-                              '✨ CHEF BESPOKE • ${_generatedDish!.category}',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const AppIcon(
+                                  iconKey: AppIconKey.sparkles,
+                                  color: AppColors.primary,
+                                ),
+                                const SizedBox(width: AppSpace.v6),
+                                Flexible(
+                                  child: Text(
+                                    '${ref.read(appStringsProvider).chefAiBespoke} • ${_generatedDish!.category}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: AppSpace.v6),

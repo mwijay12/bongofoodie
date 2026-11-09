@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/supabase_service.dart';
+import '../../core/utils/emoji_sanitizer.dart';
 import '../../core/config/env_config.dart';
 import '../mock/showcase_seed_data.dart';
 import '../models/models.dart';
@@ -131,8 +132,8 @@ class MenuRepository {
 
             return MenuItemModel(
               id: (r['id'] ?? '').toString(),
-              name: (r['name'] ?? '').toString(),
-              description: (r['description'] ?? '').toString(),
+              name: stripEmoji((r['name'] ?? '').toString()),
+              description: stripEmoji((r['description'] ?? '').toString()),
               imageUrl: (r['image_url'] ?? 'salad').toString(),
               price: (r['price'] as num?)?.toDouble() ?? 0,
               rating: (r['rating'] as num?)?.toDouble() ?? 4.8,
@@ -257,10 +258,18 @@ class MenuRepository {
             .eq('is_active', true)
             .order('sort_order', ascending: true);
         if (rows.isNotEmpty) {
-          return rows
-              .map<PromotionModel>(
-                  (r) => PromotionModel.fromJson(Map<String, dynamic>.from(r)))
-              .toList();
+          return rows.map<PromotionModel>((r) {
+            final json = Map<String, dynamic>.from(r);
+            // Remote-only safety net: legacy live rows may still carry emoji.
+            for (final column in const [
+              'title',
+              'subtitle',
+              'discount_badge',
+            ]) {
+              json[column] = stripEmoji((json[column] ?? '').toString());
+            }
+            return PromotionModel.fromJson(json);
+          }).toList();
         }
       } catch (_) {}
     }
@@ -379,10 +388,15 @@ class MenuRepository {
             .eq('is_active', true)
             .order('created_at', ascending: false);
         if (rows.isNotEmpty) {
-          return rows
-              .map<DiscoveryModel>(
-                  (r) => DiscoveryModel.fromJson(Map<String, dynamic>.from(r)))
-              .toList();
+          return rows.map<DiscoveryModel>((r) {
+            final json = Map<String, dynamic>.from(r);
+            // Remote-only safety net; staff-authored local discoveries are
+            // user-typed text and are not passed through stripEmoji.
+            for (final column in const ['title', 'description']) {
+              json[column] = stripEmoji((json[column] ?? '').toString());
+            }
+            return DiscoveryModel.fromJson(json);
+          }).toList();
         }
       } catch (_) {}
     }

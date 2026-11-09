@@ -89,6 +89,15 @@ class AppStrings {
       : 'This dish is no longer available on the menu.';
   String get clearSearch => isSw ? 'Safisha Tafuta' : 'Clear Search';
 
+  // Chef AI (emoji-free copy, EN and natural SW)
+  String get chefAiWelcome => isSw
+      ? 'Karibu kwenye BongoFoodie Chef Atelier! Niulize chochote kwa Kiswahili au Kiingereza — kuhusu viungo, chakula cha leo Dar es Salaam, au badilisha kwenda "Buni Sahani" ili uunde sahani yako ya Kiswahili!'
+      : 'Welcome to the BongoFoodie Chef Atelier! Ask me anything in Kiswahili or English — spice pairings, what to eat tonight in Dar es Salaam, or switch to "Dish Creator" to invent your own Swahili plate!';
+  String get chefAiBespoke =>
+      isSw ? 'SAHANI MAALUM YA CHEF' : 'CHEF BESPOKE';
+  String get chefAiAddedToCart =>
+      isSw ? 'imeongezwa kwenye Kikapu!' : 'added to Cart!';
+
   // Cart & Checkout
   String get emptyCartTitle =>
       isSw ? 'Kikapu Chako Kiko Tupu' : 'Your Cart is Empty';

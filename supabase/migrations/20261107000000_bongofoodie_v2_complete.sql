@@ -458,7 +458,7 @@ create table if not exists public.settings (
   halo_till text default '112233',
   nmb_account text default '9900112233',
   crdb_account text default '8877665544',
-  logo text default '🔥',
+  logo text default '',
   delivery_fee numeric default 3000,
   promo_code text default 'KARIBU2000',
   promo_discount numeric default 2000,
@@ -493,7 +493,7 @@ insert into public.settings (
 values (
   'branch_settings', 'Bongo Foodie', 'Kijitonyama Branch, Dar es Salaam', '+255 712 345 678',
   '556677', '223344', '889900', '112233', '9900112233', '8877665544',
-  '🔥', 3000, 'KARIBU2000', 2000, true
+  '', 3000, 'KARIBU2000', 2000, true
 )
 on conflict (id) do nothing;
 
@@ -957,9 +957,9 @@ on conflict (menu_id, customization_id) do nothing;
 -- 13E. Promotional Campaigns
 insert into public.promotions (title, subtitle, discount_badge, promo_code, bg_hex, image_key, is_active, sort_order)
 values
-  ('KARIBU BONGO FEAST', 'Save TSh 2,000 on any Swahili main dish with code KARIBU2000', '🔥 TSh 2,000 OFF', 'KARIBU2000', '#F6821F', 'nyamaChoma', true, 1),
-  ('IJUMAA PILAU & JUICE', 'Zanzibar Pilau ya Kuku + Fresh Passion Mango Juice combo', '🍛 15% OFF', 'KARIBU2000', '#0F5132', 'pilauYaKuku', true, 2),
-  ('WEEKEND PIZZA & BURGER', 'Wood-fired Zanzibar Pizza & Smash Burger family deal', '🍕 20% OFF', 'KARIBU2000', '#181C2E', 'pizzaOne', true, 3)
+  ('KARIBU BONGO FEAST', 'Save TSh 2,000 on any Swahili main dish with code KARIBU2000', 'TSh 2,000 OFF', 'KARIBU2000', '#F6821F', 'nyamaChoma', true, 1),
+  ('IJUMAA PILAU & JUICE', 'Zanzibar Pilau ya Kuku + Fresh Passion Mango Juice combo', '15% OFF', 'KARIBU2000', '#0F5132', 'pilauYaKuku', true, 2),
+  ('WEEKEND PIZZA & BURGER', 'Wood-fired Zanzibar Pizza & Smash Burger family deal', '20% OFF', 'KARIBU2000', '#181C2E', 'pizzaOne', true, 3)
 on conflict (title) do update
 set
   subtitle = excluded.subtitle,
@@ -970,12 +970,12 @@ set
 
 -- 13F. Daily Discoveries
 insert into public.daily_discoveries (title, description) values
-  ('Zanzibar Spice Capital 🌴', 'Zanzibar (Unguja) is nicknamed the ''Spice Island'' because it remains one of the world''s top producers of aromatic Cloves (Karafuu), Cinnamon (Mdalasini), and Nutmeg (Kungumanga).'),
-  ('Bongo Foodie Sourcing 🧑‍🌾', 'We source 100% of our organic vegetables, Morogoro rice, and free-range poultry directly from Tanzanian smallholder farms.'),
-  ('National Street Icon 🍟', 'Chipsi Mayai started at Dar es Salaam roadside banda stalls and became Tanzania''s most beloved comfort meal — always paired with tangy kachumbari!'),
-  ('The Pilau Spice Path 🍛', 'Authentic Swahili Pilau toasts whole cumin, cardamom, black pepper, cloves, and cinnamon in deeply caramelized onions before simmering meat and rice together.'),
-  ('Coastal Coconut Magic 🥥', 'Tui la Nazi (freshly grated coconut milk) is the soul of coastal Swahili gastronomy, giving Samaki wa Kupaka and Wali wa Nazi their signature silkiness.'),
-  ('Kijitonyama Flagship Kitchen 📍', 'Our flagship Bongo Foodie kitchen in Kijitonyama, Dar es Salaam blends charcoal mkaa grilling heritage with AI-assisted recipe personalization.')
+  ('Zanzibar Spice Capital', 'Zanzibar (Unguja) is nicknamed the ''Spice Island'' because it remains one of the world''s top producers of aromatic Cloves (Karafuu), Cinnamon (Mdalasini), and Nutmeg (Kungumanga).'),
+  ('Bongo Foodie Sourcing', 'We source 100% of our organic vegetables, Morogoro rice, and free-range poultry directly from Tanzanian smallholder farms.'),
+  ('National Street Icon', 'Chipsi Mayai started at Dar es Salaam roadside banda stalls and became Tanzania''s most beloved comfort meal — always paired with tangy kachumbari!'),
+  ('The Pilau Spice Path', 'Authentic Swahili Pilau toasts whole cumin, cardamom, black pepper, cloves, and cinnamon in deeply caramelized onions before simmering meat and rice together.'),
+  ('Coastal Coconut Magic', 'Tui la Nazi (freshly grated coconut milk) is the soul of coastal Swahili gastronomy, giving Samaki wa Kupaka and Wali wa Nazi their signature silkiness.'),
+  ('Kijitonyama Flagship Kitchen', 'Our flagship Bongo Foodie kitchen in Kijitonyama, Dar es Salaam blends charcoal mkaa grilling heritage with AI-assisted recipe personalization.')
 on conflict (title) do nothing;
 
 -- 13G. Staff & Inventory Defaults

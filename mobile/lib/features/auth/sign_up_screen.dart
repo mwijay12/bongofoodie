@@ -71,8 +71,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             children: [
               Text(
                 t.isSw
-                    ? 'Jiunge na Familia ya BongoFoodie 🇹🇿'
-                    : 'Join the BongoFoodie Table 🇹🇿',
+                    ? 'Jiunge na Familia ya BongoFoodie'
+                    : 'Join the BongoFoodie Table',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
