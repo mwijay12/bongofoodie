@@ -20,6 +20,7 @@
 /// expressed as regex character classes built from numeric code points; this
 /// file therefore contains no literal emoji characters. Swahili diacritics,
 /// combining accents and ordinary punctuation are outside every range.
+library;
 
 /// BMP emoji ranges. Built from code points so the source stays emoji-free.
 final RegExp _emojiRanges = RegExp(
