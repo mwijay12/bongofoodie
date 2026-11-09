@@ -1,0 +1,106 @@
+.home {
+  --cream: #faf7f2;
+  --paper: #f4eee6;
+  --ink: #2b1b12;
+  --muted: #6f645d;
+  --line: #eadfd2;
+  --accent: #b04a05;
+  --green: #11543a;
+  --radius: 28px;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  color: var(--ink);
+  background: var(--cream);
+  border-radius: var(--radius);
+  padding: clamp(20px, 4vw, 48px);
+  margin: 0 auto;
+}
+.home a, .home button { -webkit-tap-highlight-color: transparent; }
+.home a:focus-visible, .home button:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; }
+.home h1, .home h2, .home h3, .home p { margin: 0; }
+.hero { display: grid; grid-template-columns: 1fr 1.1fr; align-items: center; gap: 24px; min-height: 650px; }
+.eyebrow { display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: .06em; }
+.hero h1 { font-size: clamp(52px, 6.7vw, 84px); letter-spacing: -.065em; line-height: 1.04; font-weight: 700; margin: 26px 0; }
+.hero h1 span { color: var(--accent); }
+.intro { max-width: 370px; color: var(--muted); font-size: 16px; line-height: 1.8; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 30px; }
+.primary, .secondary { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 48px; padding: 14px 20px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+.primary { background: var(--ink); color: var(--cream); }
+.primary:hover { background: var(--green); }
+.secondary { border: 1px solid var(--line); color: var(--ink); }
+.secondary:hover { border-color: var(--ink); }
+.downLink { display: inline-flex; align-items: center; min-height: 48px; gap: 10px; color: var(--muted); font-size: 12px; margin-top: 32px; }
+.heroVisual { position: relative; min-width: 0; padding-bottom: 22px; }
+.plateHalo { position: absolute; width: 90%; aspect-ratio: 1; border-radius: 50%; background: var(--paper); top: 0; left: 5%; }
+.plateStage { width: 100%; aspect-ratio: 1; position: relative; }
+.plate { position: absolute; inset: -4%; }
+.foodImage { object-fit: contain; filter: drop-shadow(0 16px 13px #2b1b1214); }
+.dishCaption { position: relative; text-align: center; min-height: 92px; }
+.dishCaption > span { color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .04em; }
+.dishCaption h2 { font-size: 25px; font-weight: 700; letter-spacing: -.04em; margin: 3px 0; }
+.dishCaption p { font-size: 12px; color: var(--muted); }
+.dishPicker { position: relative; display: flex; justify-content: center; gap: 2px; padding: 5px; border: 1px solid var(--line); border-radius: 999px; width: fit-content; max-width: 100%; margin: 6px auto 0; }
+.dishPicker button { position: relative; isolation: isolate; min-height: 48px; padding: 8px 14px; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 999px; }
+.dishPicker button[aria-pressed="true"] { color: var(--cream); }
+.pickerActive { position: absolute; inset: 0; background: var(--ink); border-radius: 999px; z-index: -1; }
+.pickerLabel { position: relative; }
+.table { border-top: 1px solid var(--line); padding-top: 44px; margin-top: 28px; scroll-margin-top: 100px; }
+.sectionHeading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
+.sectionHeading h2, .trivia h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -.055em; margin-top: 10px; line-height: 1.2; }
+.sectionHeading a { display: flex; align-items: center; gap: 12px; min-height: 48px; font-size: 13px; font-weight: 700; }
+.dishGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; margin-top: 28px; }
+.dishCard { min-width: 0; }
+.cardImage { position: relative; border-radius: 20px; background: var(--paper); aspect-ratio: 1.1; overflow: hidden; }
+.cardImage img { width: 100%; height: 100%; object-fit: contain; transition: transform 380ms var(--ease); }
+.cardNumber { position: absolute; top: 14px; left: 16px; font-size: 11px; font-weight: 700; color: var(--muted); }
+.cardTitle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 18px; }
+.cardTitle h3 { font-weight: 700; font-size: 18px; letter-spacing: -.04em; }
+.dishCard p { font-size: 12px; line-height: 1.7; color: var(--muted); margin-top: 6px; }
+.menuNote { font-size: 11px; line-height: 1.7; color: var(--muted); margin-top: 24px !important; }
+.chefNote { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; padding: 30px 0; margin-top: 48px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.chefMark { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--paper); color: var(--accent); }
+.chefNote h2 { font-size: 22px; font-weight: 700; letter-spacing: -.04em; line-height: 1.35; margin-top: 8px; }
+.chefNote p:not(.eyebrow) { color: var(--muted); font-size: 12px; line-height: 1.8; margin-top: 8px; }
+.trivia { display: grid; grid-template-columns: .8fr 1.2fr; gap: 48px; padding: 40px; margin-top: 48px; border-radius: 20px; background: var(--paper); }
+.trivia p:not(.eyebrow) { color: var(--muted); font-size: 13px; line-height: 1.7; margin-top: 14px; }
+.trivia h3 { font-size: 17px; font-weight: 700; margin-bottom: 18px; }
+.answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.answers button { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 48px; padding: 12px; background: var(--cream); border: 1px solid var(--line); border-radius: 10px; text-align: left; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.answers button:hover:not(:disabled) { border-color: var(--ink); }
+.answers button:disabled { cursor: default; }
+.answers button[data-result="correct"] { border-color: var(--green); color: var(--green); }
+.answers button[data-result="incorrect"] { border-color: var(--accent); color: var(--accent); }
+.quizResult { font-size: 13px; line-height: 1.8; margin-top: 16px; }
+.quizResult button { display: flex; align-items: center; gap: 8px; min-height: 48px; font-weight: 700; color: var(--accent); cursor: pointer; }
+.cartLink { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 16px; min-height: 64px; font-size: 13px; color: var(--muted); margin-top: 32px; }
+.cartLink strong { color: var(--ink); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) { .dishCard:hover img { transform: translateY(-5px) scale(1.035); } }
+@media (prefers-reduced-motion: no-preference) {
+  .heroCopy { animation: copy-entry 600ms var(--ease) both; }
+  @keyframes copy-entry { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+}
+@media (max-width: 1000px) {
+  .hero { min-height: 560px; }
+  .dishPicker button { padding-inline: 9px; font-size: 10px; }
+  .chefNote { grid-template-columns: auto 1fr; }
+  .chefNote > a { grid-column: 2; justify-self: start; }
+  .trivia { padding: 26px; gap: 24px; }
+}
+@media (max-width: 760px) {
+  .hero { grid-template-columns: 1fr; gap: 12px; min-height: auto; }
+  .heroCopy { padding-top: 12px; }
+  .hero h1 { font-size: clamp(48px, 12vw, 74px); margin-block: 22px; }
+  .intro { max-width: 440px; font-size: 15px; }
+  .actions { margin-top: 24px; }
+  .downLink { display: none; }
+  .heroVisual { max-width: 480px; width: 100%; margin: 20px auto 0; }
+  .dishPicker button { font-size: 10px; padding-inline: 10px; }
+  .table { margin-top: 12px; padding-top: 32px; }
+  .sectionHeading { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .dishGrid { grid-template-columns: 1fr; gap: 30px; }
+  .cardImage { aspect-ratio: 1.35; }
+  .chefNote { gap: 16px; margin-top: 32px; }
+  .chefNote h2 { font-size: 20px; }
+  .trivia { grid-template-columns: 1fr; margin-top: 32px; padding: 22px; }
+  .cartLink { justify-content: flex-start; font-size: 12px; }
+}
+@media (max-width: 380px) { .actions { align-items: stretch; flex-direction: column; } .dishPicker button { font-size: 9px; padding-inline: 9px; } .answers { grid-template-columns: 1fr; } }

@@ -24,8 +24,8 @@ const quicksand = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Bongo Foodie | Premium Swahili Gastronomy",
-  description: "Experience authentic East African culinary art with real-time AI assistance, custom dish creation, and prompt local delivery in Dar es Salaam.",
+  title: "Bongo Foodie | Swahili Food in Dar es Salaam",
+  description: "Explore Swahili dishes, find recipe advice with Chef AI, and order food in Dar es Salaam.",
 };
 
 import Link from 'next/link';
@@ -44,20 +44,20 @@ export default function RootLayout({
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-6 pb-20 md:pb-12">
           {children}
         </main>
-        
+
         {/* Premium Swahili Footer */}
         <footer className="w-full bg-card border-t border-border mt-auto">
           <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <span className="text-xl">🔥</span>
+
                 <span className="font-heading font-extrabold text-lg text-foreground-dark">BONGO FOODIE</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Authentic Swahili gastronomy paired with real-time culinary intelligence. Perfected by coastal recipes, cooked by gourmet chefs, delivered hot.
+                Swahili favourites, coastal recipes and a little help from Chef AI. Made for your table in Dar es Salaam.
               </p>
             </div>
-            
+
             <div className="space-y-3">
               <h4 className="font-heading font-bold text-xs uppercase tracking-wider text-primary">Sitemap</h4>
               <ul className="space-y-2 text-xs font-medium text-muted-foreground">
@@ -70,9 +70,9 @@ export default function RootLayout({
             </div>
 
             <div className="space-y-3">
-              <h4 className="font-heading font-bold text-xs uppercase tracking-wider text-primary">Gourmet Quote</h4>
+              <h4 className="font-heading font-bold text-xs uppercase tracking-wider text-primary">From the coast</h4>
               <p className="text-xs italic text-muted-foreground leading-relaxed">
-                "Kula vizuri, ishi vizuri. Chakula bora cha Waswahili kimeandaliwa kwa upendo na viungo asilia vya Kitanzania."
+                Kula vizuri, ishi vizuri. Chakula bora cha Waswahili kimeandaliwa kwa upendo na viungo asilia vya Kitanzania.
               </p>
             </div>
 
@@ -101,8 +101,8 @@ export default function RootLayout({
                 Built by <strong className="text-primary">Mwijay Davie</strong>
               </span>
               <span className="flex items-center gap-3">
-                <a href="tel:+255790942616" className="hover:text-primary transition-colors">📞 0790942616</a>
-                <a href="mailto:mwijaydavie@gmail.com" className="hover:text-primary transition-colors">✉️ mwijaydavie@gmail.com</a>
+                <a href="tel:+255790942616" className="hover:text-primary transition-colors">0790942616</a>
+                <a href="mailto:mwijaydavie@gmail.com" className="hover:text-primary transition-colors">mwijaydavie@gmail.com</a>
               </span>
             </div>
           </div>

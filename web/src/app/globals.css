@@ -1,11 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #F6821F;
+  --color-background-warm: #FAF7F2;
+  --color-foreground-dark: #2B1B12;
+  --color-primary: #B04A05;
   --color-primary-foreground: #ffffff;
   --color-secondary: #FBAD41;
   --color-secondary-foreground: #1D1D1D;
-  --color-background: #ffffff;
+  --color-background: #FAF7F2;
   --color-foreground: #1D1D1D;
   --color-card: #F8F8F8;
   --color-card-foreground: #1D1D1D;
@@ -34,7 +36,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: #ffffff;
+  --background: #FAF7F2;
   --foreground: #1D1D1D;
   --card: #F8F8F8;
   --card-foreground: #1D1D1D;
@@ -59,4 +61,12 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-in { animation: none; }
 }
