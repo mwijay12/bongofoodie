@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/icons/app_icon_key.dart';
+import '../../core/widgets/app_icon.dart';
 import '../../core/widgets/async_skeleton.dart';
 import '../../core/widgets/dish_hero_image.dart';
 import '../../core/widgets/motion/stagger_in.dart';
@@ -19,8 +21,8 @@ import '../../state/cart_provider.dart';
 import '../../state/menu_provider.dart';
 import '../../state/settings_provider.dart';
 
-/// Full-screen dish detail route. Sections 1-6 and the sticky bar are built;
-/// sections 7-9 are clearly marked `SizedBox.shrink` placeholders.
+/// Full-screen dish detail route. Sections 1-9 and the sticky bar are built;
+/// each optional section hides completely when its data is absent.
 class DishDetailScreen extends ConsumerStatefulWidget {
   const DishDetailScreen({super.key, required this.id, this.args});
 
@@ -286,28 +288,28 @@ class _DishDetailView extends ConsumerWidget {
                   child: addOnsBuilder(item),
                 ),
               ),
-              // SLOT 7: did-you-know card (Prompt 4, second commit).
+              // 7. Did-you-know card (locale-aware, hidden when no fact).
               SliverToBoxAdapter(
                 child: StaggerIn(
                   animation: entrance,
                   index: 5,
-                  child: const SizedBox.shrink(),
+                  child: _DidYouKnowSection(item: item),
                 ),
               ),
-              // SLOT 8: ratings and reviews (Prompt 4, second commit).
+              // 8. Ratings and reviews (hidden when there are none).
               SliverToBoxAdapter(
                 child: StaggerIn(
                   animation: entrance,
                   index: 6,
-                  child: const SizedBox.shrink(),
+                  child: _ReviewsSection(item: item),
                 ),
               ),
-              // SLOT 9: related dishes (Prompt 4, second commit).
+              // 9. Related dishes from the already-loaded menu provider.
               SliverToBoxAdapter(
                 child: StaggerIn(
                   animation: entrance,
                   index: 7,
-                  child: const SizedBox.shrink(),
+                  child: _RelatedSection(item: item),
                 ),
               ),
               SliverPadding(
@@ -1228,6 +1230,349 @@ class _AddOnSkeletonRows extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+
+// ---------------------------------------------------------------------------
+// Sections 7-9. Each returns SizedBox.shrink() when its data is missing, so a
+// dish with no fact, no reviews and no siblings renders no empty space.
+// ---------------------------------------------------------------------------
+
+/// Section 7: the locale-aware "Did you know?" card. It uses the same surface,
+/// radius, orange hairline border and header treatment as the Daily Swahili
+/// Discovery card on Home, with a real icon instead of an emoji.
+class _DidYouKnowSection extends ConsumerWidget {
+  const _DidYouKnowSection({required this.item});
+
+  final MenuItemModel item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = ref.watch(appStringsProvider);
+    final fact = (t.isSw
+            ? (item.funFactSw ?? item.funFactEn)
+            : (item.funFactEn ?? item.funFactSw))
+        ?.trim();
+    if (fact == null || fact.isEmpty) return const SizedBox.shrink();
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return _SectionShell(
+      key: const Key('dish-did-you-know-section'),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpace.lg),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkCard : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: AppColors.primary.withOpacity(0.28)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const AppIcon(
+                  iconKey: AppIconKey.idea,
+                  color: AppColors.primary,
+                  tinted: true,
+                ),
+                const SizedBox(width: AppSpace.v8),
+                Expanded(
+                  child: Text(
+                    t.didYouKnow,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13.5,
+                      color: isDark
+                          ? AppColors.heroLight
+                          : AppColors.primaryDeep,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpace.v8),
+            Text(
+              fact,
+              style: TextStyle(
+                fontSize: 12.8,
+                height: 1.4,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Section 8: rating summary plus the three most recent reviews. The provider
+/// fails silently to an empty section so a slow read never blocks the page.
+class _ReviewsSection extends ConsumerWidget {
+  const _ReviewsSection({required this.item});
+
+  final MenuItemModel item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reviewsAsync = ref.watch(dishReviewsProvider(item.id));
+    return AsyncSkeleton<List<MenuReviewModel>>(
+      value: reviewsAsync,
+      skeleton: const SizedBox.shrink(),
+      isEmpty: (reviews) => reviews.isEmpty,
+      empty: const SizedBox.shrink(),
+      errorWidget: const SizedBox.shrink(),
+      data: (reviews) => _ReviewsContent(item: item, reviews: reviews),
+    );
+  }
+}
+
+class _ReviewsContent extends ConsumerWidget {
+  const _ReviewsContent({required this.item, required this.reviews});
+
+  final MenuItemModel item;
+  final List<MenuReviewModel> reviews;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = ref.watch(appStringsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final latest = List<MenuReviewModel>.from(reviews)
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final shown = latest.take(3).toList(growable: false);
+
+    return _SectionShell(
+      key: const Key('dish-reviews-section'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: _SectionTitle(title: t.reviews)),
+              const SizedBox(width: AppSpace.sm),
+              Flexible(
+                child: Text(
+                  '${item.rating.toStringAsFixed(1)} • ${item.ratingCount}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: isDark
+                        ? AppColors.heroLight
+                        : AppColors.primaryDeep,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpace.md),
+          for (final review in shown) ...[
+            _ReviewRow(review: review),
+            if (review != shown.last) const SizedBox(height: AppSpace.sm),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewRow extends ConsumerWidget {
+  const _ReviewRow({required this.review});
+
+  final MenuReviewModel review;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = ref.watch(appStringsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(AppSpace.md),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.star_rounded,
+                  size: AppSpace.v16, color: AppColors.gold),
+              const SizedBox(width: AppSpace.v6),
+              Expanded(
+                child: Text(
+                  t.customer,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              Text(
+                '${review.rating}/5',
+                style: TextStyle(
+                  color: isDark
+                      ? AppColors.heroLight
+                      : AppColors.primaryDeep,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpace.v4),
+          Text(
+            review.comment.trim().isEmpty ? t.noReviews : review.comment,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Section 9: up to five same-category dishes from the already-loaded menu.
+/// Tapping replaces the current detail route with the "related" hero scope.
+class _RelatedSection extends ConsumerWidget {
+  const _RelatedSection({required this.item});
+
+  final MenuItemModel item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = ref.watch(appStringsProvider);
+    final menu = ref.watch(allMenuItemsProvider).valueOrNull ??
+        const <MenuItemModel>[];
+    final related = menu
+        .where((dish) =>
+            dish.id != item.id && dish.categoryId == item.categoryId)
+        .take(5)
+        .toList(growable: false);
+    if (related.isEmpty) return const SizedBox.shrink();
+
+    return _SectionShell(
+      key: const Key('dish-related-section'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionTitle(title: t.youMayAlsoLike),
+          const SizedBox(height: AppSpace.md),
+          SizedBox(
+            height: DishCardMetrics.cardHeight,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: related.length,
+              separatorBuilder: (_, __) => const SizedBox(width: AppSpace.md),
+              itemBuilder: (_, index) => _RelatedDishCard(
+                key: ValueKey<String>('dish-related-${related[index].id}'),
+                dish: related[index],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Compact version of the signature dish card, using the shared DishCardMetrics
+/// so the real card, its skeleton and this row stay in one geometry.
+class _RelatedDishCard extends StatelessWidget {
+  const _RelatedDishCard({super.key, required this.dish});
+
+  final MenuItemModel dish;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return SizedBox(
+      width: DishCardMetrics.cardMaxWidth,
+      child: Material(
+        color: isDark ? AppColors.darkCard : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.v22),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.v22),
+          onTap: () => context.pushReplacement(
+            '/dish/${Uri.encodeComponent(dish.id)}',
+            extra: DishRouteArgs(
+              item: dish,
+              heroScope: DishHeroScopes.related,
+            ),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(DishCardMetrics.padding),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.v22),
+              border: Border.all(
+                color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: DishHeroImage(
+                    item: dish,
+                    heroScope: DishHeroScopes.related,
+                    width: DishCardMetrics.imageSize,
+                    height: DishCardMetrics.imageSize,
+                    borderRadius: AppRadius.v18,
+                  ),
+                ),
+                const SizedBox(height: AppSpace.v10),
+                Text(
+                  dish.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: AppSpace.v4),
+                Text(
+                  '${dish.rating.toStringAsFixed(1)} • ${dish.calories} kcal',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  AppStrings.formatTzs(dish.price),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: isDark
+                        ? AppColors.heroLight
+                        : AppColors.primaryDeep,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
