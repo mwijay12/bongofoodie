@@ -355,13 +355,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     width: double.infinity,
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.ink,
+                        foregroundColor: AppColors.heroLight,
                         side: BorderSide(color: AppColors.outline),
                       ),
                       onPressed: () {
                         if (_pageIndex < slides.length - 1) {
                           _pageController.nextPage(
-                            duration: const Duration(milliseconds: 300),
+                            duration: MediaQuery.disableAnimationsOf(context)
+                                ? Duration.zero
+                                : AppMotion.base,
                             curve: Curves.easeOutCubic,
                           );
                         } else {

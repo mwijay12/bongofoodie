@@ -9,6 +9,9 @@ import 'package:bongo_foodie/core/widgets/dish_image.dart';
 import 'package:bongo_foodie/core/widgets/promo_dish_image.dart';
 import 'package:bongo_foodie/data/mock/showcase_seed_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:bongo_foodie/features/onboarding/onboarding_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -158,4 +161,39 @@ void main() {
     )));
     expect(width, 420);
   });
+
+  for (final size in [const Size(360, 640), const Size(430, 932)]) {
+    for (final dark in [false, true]) {
+      testWidgets('onboarding slides fit $size at 1.3 text, dark=$dark',
+          (tester) async {
+        SharedPreferences.setMockInitialValues({});
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        await tester.pumpWidget(ProviderScope(
+            child: MaterialApp(
+          theme: dark ? AppTheme.dark() : buildAppTheme(),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: const TextScaler.linear(1.3),
+              disableAnimations: true,
+            ),
+            child: child!,
+          ),
+          home: const OnboardingScreen(),
+        )));
+        await tester.pump(const Duration(milliseconds: 100));
+        for (var slide = 0; slide < 3; slide++) {
+          expect(tester.takeException(), isNull);
+          if (slide < 2) {
+            await tester.tap(find.byType(OutlinedButton));
+            await tester.pump(const Duration(milliseconds: 350));
+          }
+        }
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump(const Duration(milliseconds: 50));
+      });
+    }
+  }
 }
