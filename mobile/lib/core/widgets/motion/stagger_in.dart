@@ -23,17 +23,15 @@ class StaggerIn extends StatelessWidget {
     final safeTotal = total < 1 ? 1 : total;
     final start = (index / safeTotal * 0.5).clamp(0.0, 1.0);
     final end = (start + 0.5).clamp(0.0, 1.0);
+    final interval = Interval(start, end, curve: AppMotion.enter);
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-        final curved = CurvedAnimation(
-          parent: animation,
-          curve: Interval(start, end, curve: AppMotion.enter),
-        );
+        final progress = interval.transform(animation.value);
         return Opacity(
-          opacity: curved.value,
+          opacity: progress,
           child: Transform.translate(
-            offset: Offset(0, (1 - curved.value) * AppMotion.staggerOffset),
+            offset: Offset(0, (1 - progress) * AppMotion.staggerOffset),
             child: child,
           ),
         );

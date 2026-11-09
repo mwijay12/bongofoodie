@@ -400,7 +400,9 @@ class _DishStickyBar extends ConsumerWidget {
                         onPressed: onDecrement,
                       ),
                       AnimatedSwitcher(
-                        duration: AppMotion.fast,
+                        duration: MediaQuery.disableAnimationsOf(context)
+                            ? Duration.zero
+                            : AppMotion.fast,
                         child: Text(
                           '$quantity',
                           key: ValueKey<int>(quantity),
@@ -424,7 +426,9 @@ class _DishStickyBar extends ConsumerWidget {
               child: FilledButton.icon(
                 onPressed: onAdd,
                 icon: AnimatedSwitcher(
-                  duration: AppMotion.fast,
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : AppMotion.fast,
                   child: added
                       ? const Icon(
                           Icons.check_rounded,
@@ -436,7 +440,9 @@ class _DishStickyBar extends ConsumerWidget {
                         ),
                 ),
                 label: AnimatedSwitcher(
-                  duration: AppMotion.fast,
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : AppMotion.fast,
                   child: added
                       ? Text(
                           t.added,
@@ -601,13 +607,12 @@ class DishHeroState extends State<DishHero> with SingleTickerProviderStateMixin 
               child: AnimatedBuilder(
                 animation: _floatController,
                 builder: (context, child) {
-                  final curved = CurvedAnimation(
-                    parent: _floatController,
-                    curve: AppMotion.floatCurve,
+                  final progress = AppMotion.floatCurve.transform(
+                    _floatController.value,
                   );
                   final offset = reduceMotion
                       ? AppSpace.v0
-                      : (curved.value - AppMotion.floatMidpoint) *
+                      : (progress - AppMotion.floatMidpoint) *
                           2 *
                           DishDetailMetrics.floatDistance;
                   return Transform.translate(
@@ -709,6 +714,15 @@ class _FavoriteHeartState extends ConsumerState<_FavoriteHeart>
     super.dispose();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _pop.stop();
+      _pop.value = 0;
+    }
+  }
+
   void _toggle() {
     HapticFeedback.lightImpact();
     if (!MediaQuery.disableAnimationsOf(context)) {
@@ -729,7 +743,7 @@ class _FavoriteHeartState extends ConsumerState<_FavoriteHeart>
       child: ExcludeSemantics(
         child: ScaleTransition(
           scale: Tween<double>(begin: 1, end: AppMotion.popScale).animate(
-            CurvedAnimation(parent: _pop, curve: AppMotion.enter),
+            _pop.drive(CurveTween(curve: AppMotion.enter)),
           ),
           child: _HeroCircleButton(
             icon: isFav
@@ -1172,7 +1186,9 @@ class _AddOnRow extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpace.sm),
                 AnimatedSwitcher(
-                  duration: AppMotion.fast,
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : AppMotion.fast,
                   switchInCurve: AppMotion.enter,
                   child: Icon(
                     selected

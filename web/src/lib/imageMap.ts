@@ -1,6 +1,7 @@
 export const imageMap: Record<string, string> = {
-  chipsiMayai: '/assets/chipsi-mayai.png',
-  nyamaChoma: '/assets/nyama-choma.png',
+  chipsiMayai: '/assets/dishes/chipsi_mayai.png',
+  nyamaChoma: '/assets/dishes/nyama_choma_ugali.png',
+  zanzibarPilau: '/assets/dishes/zanzibar_pilau.png',
   pilauYaKuku: '/assets/pilau-ya-kuku.png',
   samakiWaKupaka: '/assets/samaki-wa-kupaka.png',
   mishkakiYaNgombe: '/assets/mishkaki-ya-ngombe.png',
