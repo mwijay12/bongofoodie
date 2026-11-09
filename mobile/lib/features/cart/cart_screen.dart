@@ -8,6 +8,7 @@ import '../../core/theme/app_tokens.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
+import '../../core/widgets/skeleton/skeleton_box.dart';
 import '../../core/widgets/tanzania_location_sheet.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/location_repository.dart';
@@ -217,13 +218,13 @@ Asante kwa kuchagua BongoFoodie TZ!
     final t = ref.watch(appStringsProvider);
     final cart = ref.watch(cartProvider);
     final address = ref.watch(deliveryAddressProvider);
-    final branch = ref.watch(branchSettingsProvider).valueOrNull ??
-        const BranchSettingsModel();
+    final branchAsync = ref.watch(branchSettingsProvider);
+    final branch = branchAsync.valueOrNull ?? const BranchSettingsModel();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Sync live delivery fee from settings
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && !_placingOrder) {
+      if (mounted && !_placingOrder && branchAsync.hasValue) {
         ref.read(cartProvider.notifier).syncDeliveryFee(branch.deliveryFee);
       }
     });
@@ -303,7 +304,14 @@ Asante kwa kuchagua BongoFoodie TZ!
               width: double.infinity,
               child: ElevatedButton(
                 key: const ValueKey('place-order'),
-                onPressed: _placingOrder
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryDeep,
+                  foregroundColor: AppColors.surface,
+                  minimumSize: const Size(AppSpace.huge, AppSpace.v56),
+                ),
+                onPressed: _placingOrder ||
+                        !branchAsync.hasValue ||
+                        branchAsync.hasError
                     ? null
                     : () => _submitOrder(cart, branch, address),
                 child: Text(
@@ -325,6 +333,19 @@ Asante kwa kuchagua BongoFoodie TZ!
             padding: EdgeInsets.fromLTRB(
                 AppSpace.screenH, AppSpace.md, AppSpace.screenH, AppSpace.xl),
             children: [
+              if (branchAsync.isLoading) ...[
+                const SkeletonBox(height: AppSpace.huge),
+                const SizedBox(height: AppSpace.md),
+              ],
+              if (branchAsync.hasError) ...[
+                Text(t.isSw
+                    ? 'Gharama za usafirishaji hazijapakiwa.'
+                    : 'Delivery charges could not be loaded.'),
+                TextButton(
+                  onPressed: () => ref.invalidate(branchSettingsProvider),
+                  child: Text(t.isSw ? 'Jaribu tena' : 'Retry'),
+                ),
+              ],
               Row(
                 children: [
                   Expanded(
@@ -407,7 +428,9 @@ Asante kwa kuchagua BongoFoodie TZ!
                                 Text(
                                   '${AppStrings.formatTzs(item.unitPrice)} × ${item.quantity} = ${AppStrings.formatTzs(item.lineTotal)}',
                                   style: const TextStyle(
-                                    color: AppColors.primary,
+                                    color: isDark
+                                        ? AppColors.heroLight
+                                        : AppColors.primaryDeep,
                                     fontWeight: FontWeight.w800,
                                     fontSize: 13.5,
                                   ),
@@ -733,7 +756,8 @@ Asante kwa kuchagua BongoFoodie TZ!
                       label: t.total,
                       value: AppStrings.formatTzs(cart.grandTotal),
                       isBold: true,
-                      valueColor: AppColors.primary,
+                      valueColor:
+                          isDark ? AppColors.heroLight : AppColors.primaryDeep,
                     ),
                   ],
                 ),
