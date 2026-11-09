@@ -876,7 +876,6 @@ class _SectionShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      key: key,
       padding: const EdgeInsets.fromLTRB(
         AppSpace.screenH,
         DishDetailMetrics.sectionTop,
@@ -1261,8 +1260,8 @@ class _DidYouKnowSection extends ConsumerWidget {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return _SectionShell(
-      key: const Key('dish-did-you-know-section'),
       child: Container(
+        key: const Key('dish-did-you-know-section'),
         padding: const EdgeInsets.all(AppSpace.lg),
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkCard : AppColors.surface,
@@ -1348,8 +1347,8 @@ class _ReviewsContent extends ConsumerWidget {
     final shown = latest.take(3).toList(growable: false);
 
     return _SectionShell(
-      key: const Key('dish-reviews-section'),
       child: Column(
+        key: const Key('dish-reviews-section'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -1469,8 +1468,8 @@ class _RelatedSection extends ConsumerWidget {
     if (related.isEmpty) return const SizedBox.shrink();
 
     return _SectionShell(
-      key: const Key('dish-related-section'),
       child: Column(
+        key: const Key('dish-related-section'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _SectionTitle(title: t.youMayAlsoLike),
@@ -1480,7 +1479,8 @@ class _RelatedSection extends ConsumerWidget {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: related.length,
-              separatorBuilder: (_, __) => const SizedBox(width: AppSpace.md),
+              separatorBuilder: (_, __) =>
+                  const SizedBox(width: AppSpace.md),
               itemBuilder: (_, index) => _RelatedDishCard(
                 key: ValueKey<String>('dish-related-${related[index].id}'),
                 dish: related[index],
