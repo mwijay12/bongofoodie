@@ -49,7 +49,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
 
     final user = ref.read(authProvider).user;
     final now = DateTime.now();
-    final shortCode = (now.millisecondsSinceEpoch % 100000).toString().padLeft(5, '0');
+    final shortCode =
+        (now.millisecondsSinceEpoch % 100000).toString().padLeft(5, '0');
     final order = OrderModel(
       id: 'BF-$shortCode',
       profileId: user?.id,
@@ -92,7 +93,8 @@ Asante kwa kuchagua BongoFoodie TZ!
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.v24)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.v24)),
         title: Row(
           children: [
             const Icon(Icons.verified_rounded,
@@ -174,8 +176,8 @@ Asante kwa kuchagua BongoFoodie TZ!
     final t = ref.watch(appStringsProvider);
     final cart = ref.watch(cartProvider);
     final address = ref.watch(deliveryAddressProvider);
-    final branch =
-        ref.watch(branchSettingsProvider).valueOrNull ?? const BranchSettingsModel();
+    final branch = ref.watch(branchSettingsProvider).valueOrNull ??
+        const BranchSettingsModel();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Sync live delivery fee from settings
@@ -239,7 +241,8 @@ Asante kwa kuchagua BongoFoodie TZ!
       body: SafeArea(
         bottom: false,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.md, AppSpace.screenH, context.navClearance),
+          padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.md,
+              AppSpace.screenH, context.navClearance),
           children: [
             Row(
               children: [
@@ -272,7 +275,8 @@ Asante kwa kuchagua BongoFoodie TZ!
                   color: isDark ? AppColors.darkCard : AppColors.surface,
                   borderRadius: BorderRadius.circular(AppRadius.md),
                   border: Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                    color:
+                        isDark ? AppColors.darkBorder : AppColors.lightBorder,
                   ),
                 ),
                 child: Column(
@@ -283,8 +287,8 @@ Asante kwa kuchagua BongoFoodie TZ!
                         DishImage(
                           imageRef: item.imageUrl,
                           dishId: item.id,
-                          width: 68,
-                          height: 68,
+                          width: MenuImageMetrics.cartImage,
+                          height: MenuImageMetrics.cartImage,
                           borderRadius: AppRadius.v14,
                         ),
                         const SizedBox(width: AppSpace.v12),
@@ -296,7 +300,8 @@ Asante kwa kuchagua BongoFoodie TZ!
                                 children: [
                                   if (item.isCustomAiDish)
                                     const Padding(
-                                      padding: EdgeInsets.only(right: AppSpace.v4),
+                                      padding:
+                                          EdgeInsets.only(right: AppSpace.v4),
                                       child: Icon(
                                         Icons.auto_awesome_rounded,
                                         size: 14,
@@ -305,7 +310,8 @@ Asante kwa kuchagua BongoFoodie TZ!
                                     ),
                                   Expanded(
                                     child: Text(
-                                      dishName(item.id, item.name, isSw: t.isSw),
+                                      dishName(item.id, item.name,
+                                          isSw: t.isSw),
                                       style: const TextStyle(
                                         fontWeight: FontWeight.w800,
                                         fontSize: 14.5,
@@ -366,10 +372,12 @@ Asante kwa kuchagua BongoFoodie TZ!
                             .map(
                               (c) => Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSpace.sm, vertical: AppSpace.v3),
+                                    horizontal: AppSpace.sm,
+                                    vertical: AppSpace.v3),
                                 decoration: BoxDecoration(
                                   color: AppColors.primary.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                                  borderRadius:
+                                      BorderRadius.circular(AppRadius.pill),
                                 ),
                                 child: Text(
                                   '+ ${c.name} (${AppStrings.formatTzs(c.price)})',
@@ -393,8 +401,8 @@ Asante kwa kuchagua BongoFoodie TZ!
 
             // 2. Delivery Location Card
             ListTile(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: AppSpace.lg, vertical: AppSpace.xs),
+              contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpace.lg, vertical: AppSpace.xs),
               tileColor: isDark ? AppColors.darkCard : AppColors.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.v18),
@@ -404,12 +412,13 @@ Asante kwa kuchagua BongoFoodie TZ!
               ),
               leading: const CircleAvatar(
                 backgroundColor: AppColors.primarySoft,
-                child: Icon(Icons.location_on_rounded, color: AppColors.primary),
+                child:
+                    Icon(Icons.location_on_rounded, color: AppColors.primary),
               ),
               title: Text(
                 t.deliverTo,
-                style: const TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w700),
+                style:
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
               ),
               subtitle: Text(
                 address,
@@ -428,8 +437,9 @@ Asante kwa kuchagua BongoFoodie TZ!
               controller: _phoneCtrl,
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
-                labelText:
-                    t.isSw ? 'Namba ya Simu ya Mpokeaji' : 'Delivery Phone (TZ)',
+                labelText: t.isSw
+                    ? 'Namba ya Simu ya Mpokeaji'
+                    : 'Delivery Phone (TZ)',
                 prefixIcon: const Icon(Icons.phone_rounded),
               ),
             ),
@@ -496,8 +506,8 @@ Asante kwa kuchagua BongoFoodie TZ!
                     icon: Icons.phonelink_ring_rounded,
                     title: 'Lipa Namba',
                     subtitle: 'M-Pesa / Mixx / Airtel',
-                    onTap: () =>
-                        setState(() => _paymentMethod = PaymentMethod.lipaNamba),
+                    onTap: () => setState(
+                        () => _paymentMethod = PaymentMethod.lipaNamba),
                   ),
                 ),
                 const SizedBox(width: AppSpace.v10),
@@ -589,7 +599,8 @@ Asante kwa kuchagua BongoFoodie TZ!
                     const SizedBox(height: AppSpace.v8),
                     _SummaryRow(
                       label: 'Promo (${cart.appliedPromoCode})',
-                      value: '- ${AppStrings.formatTzs(cart.effectiveDiscount)}',
+                      value:
+                          '- ${AppStrings.formatTzs(cart.effectiveDiscount)}',
                       valueColor: AppColors.success,
                     ),
                   ],
@@ -665,7 +676,8 @@ class _PaymentChoiceCard extends StatelessWidget {
         child: Row(
           children: [
             Icon(icon,
-                color: selected ? AppColors.primary : AppColors.inkMuted, size: 22),
+                color: selected ? AppColors.primary : AppColors.inkMuted,
+                size: 22),
             const SizedBox(width: AppSpace.v10),
             Expanded(
               child: Column(

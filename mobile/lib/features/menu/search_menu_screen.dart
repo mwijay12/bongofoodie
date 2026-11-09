@@ -17,11 +17,10 @@ import '../../state/cart_provider.dart';
 import '../../state/menu_provider.dart';
 import '../../state/settings_provider.dart';
 
-
 abstract final class _MenuMetrics {
-  static const gridImage = 128.0;
-  static const listImage = AppSpace.v92;
-  static const gridRatio = 0.64;
+  static const gridImage = MenuImageMetrics.gridImage;
+  static const listImage = MenuImageMetrics.listImage;
+  static const gridRatio = MenuImageMetrics.gridRatio;
   static const gap = AppSpace.v14;
   static const padding = AppSpace.md;
 }
@@ -117,7 +116,8 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v14, AppSpace.v20, AppSpace.v10),
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpace.v20, AppSpace.v14, AppSpace.v20, AppSpace.v10),
                 child: Row(
                   children: [
                     Expanded(
@@ -129,168 +129,212 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                                 ),
                       ),
                     ),
-                  PopupMenuButton<MenuSortOption>(
-                    tooltip: 'Sort dishes',
-                    initialValue: _sortBy,
-                    onSelected: (val) => setState(() => _sortBy = val),
-                    icon: const Icon(Icons.tune_rounded),
-                    itemBuilder: (_) => const [
-                      PopupMenuItem(
-                        value: MenuSortOption.topRated,
-                        child: Text('Top Rated'),
-                      ),
-                      PopupMenuItem(
-                        value: MenuSortOption.priceLowHigh,
-                        child: Text('Lowest Price'),
-                      ),
-                      PopupMenuItem(
-                        value: MenuSortOption.fastestPrep,
-                        child: Text('Fastest Prep'),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    tooltip: _gridMode ? 'Switch to List' : 'Switch to Grid',
-                    onPressed: () => setState(() => _gridMode = !_gridMode),
-                    icon: Icon(
-                      _gridMode
-                          ? Icons.view_agenda_outlined
-                          : Icons.grid_view_rounded,
+                    PopupMenuButton<MenuSortOption>(
+                      tooltip: 'Sort dishes',
+                      initialValue: _sortBy,
+                      onSelected: (val) => setState(() => _sortBy = val),
+                      icon: const Icon(Icons.tune_rounded),
+                      itemBuilder: (_) => const [
+                        PopupMenuItem(
+                          value: MenuSortOption.topRated,
+                          child: Text('Top Rated'),
+                        ),
+                        PopupMenuItem(
+                          value: MenuSortOption.priceLowHigh,
+                          child: Text('Lowest Price'),
+                        ),
+                        PopupMenuItem(
+                          value: MenuSortOption.fastestPrep,
+                          child: Text('Fastest Prep'),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
-              child: TextField(
-                controller: _searchCtrl,
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(
-                  hintText: t.searchPlaceholder,
-                  prefixIcon: const Icon(Icons.search_rounded),
-                  suffixIcon: _searchCtrl.text.isNotEmpty
-                      ? IconButton(
-                          onPressed: () {
-                            _searchCtrl.clear();
-                            setState(() {});
-                          },
-                          icon: const Icon(Icons.close_rounded),
-                        )
-                      : null,
+                    IconButton(
+                      tooltip: _gridMode ? 'Switch to List' : 'Switch to Grid',
+                      onPressed: () => setState(() => _gridMode = !_gridMode),
+                      icon: Icon(
+                        _gridMode
+                            ? Icons.view_agenda_outlined
+                            : Icons.grid_view_rounded,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpace.v12),
 
-            // Category Filter Chips
-            SizedBox(
-              height: AppSpace.v42,
-              child: categoriesAsync.when(
-                skipLoadingOnRefresh: true,
-                data: (cats) {
-                  final names = ['All', ...cats.map((c) => c.name)];
-                  return ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: names.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: AppSpace.v8),
-                    itemBuilder: (context, index) {
-                      final catName = names[index];
-                      final selected = _selectedCategory.toLowerCase() ==
-                          catName.toLowerCase();
-                      return ChoiceChip(
-                        selected: selected,
-                        selectedColor: AppColors.primary,
-                        label: Text(
-                          catName == 'All' ? t.allCategories : catName,
-                          style: TextStyle(
-                            color: selected ? AppColors.surface : null,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 12.5,
+              // Search Bar
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    hintText: t.searchPlaceholder,
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    suffixIcon: _searchCtrl.text.isNotEmpty
+                        ? IconButton(
+                            onPressed: () {
+                              _searchCtrl.clear();
+                              setState(() {});
+                            },
+                            icon: const Icon(Icons.close_rounded),
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpace.v12),
+
+              // Category Filter Chips
+              SizedBox(
+                height: AppSpace.v42,
+                child: categoriesAsync.when(
+                  skipLoadingOnRefresh: true,
+                  data: (cats) {
+                    final names = ['All', ...cats.map((c) => c.name)];
+                    return ListView.separated(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpace.screenH),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: names.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(width: AppSpace.v8),
+                      itemBuilder: (context, index) {
+                        final catName = names[index];
+                        final selected = _selectedCategory.toLowerCase() ==
+                            catName.toLowerCase();
+                        return ChoiceChip(
+                          selected: selected,
+                          selectedColor: AppColors.primary,
+                          label: Text(
+                            catName == 'All' ? t.allCategories : catName,
+                            style: TextStyle(
+                              color: selected ? AppColors.surface : null,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                          onSelected: (_) =>
+                              setState(() => _selectedCategory = catName),
+                        );
+                      },
+                    );
+                  },
+                  loading: () => const SkeletonChipRow(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+              ),
+              const SizedBox(height: AppSpace.v12),
+
+              // Filtered Results
+              Expanded(
+                child: menuAsync.when(
+                  skipLoadingOnRefresh: true,
+                  data: (allItems) {
+                    if (allItems.isEmpty) {
+                      return StateMessage.empty(
+                        title: t.emptyMenuTitle,
+                        body: t.emptyMenuBody,
+                      );
+                    }
+                    final items = _applyFilters(allItems);
+                    if (items.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpace.xxl),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.search_off_rounded,
+                                  size: 54, color: AppColors.primary),
+                              const SizedBox(height: AppSpace.v12),
+                              Text(
+                                t.isSw
+                                    ? 'Hakuna chakula kilichopatikana'
+                                    : 'No matching dishes found',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpace.v8),
+                              TextButton(
+                                onPressed: () {
+                                  _searchCtrl.clear();
+                                  setState(() => _selectedCategory = 'All');
+                                },
+                                child: Text(t.clearSearch),
+                              ),
+                            ],
                           ),
                         ),
-                        onSelected: (_) =>
-                            setState(() => _selectedCategory = catName),
                       );
-                    },
-                  );
-                },
-                loading: () => const SkeletonChipRow(),
-                error: (_, __) => const SizedBox.shrink(),
-              ),
-            ),
-            const SizedBox(height: AppSpace.v12),
+                    }
 
-            // Filtered Results
-            Expanded(
-              child: menuAsync.when(
-                skipLoadingOnRefresh: true,
-                data: (allItems) {
-                  if (allItems.isEmpty) {
-                    return StateMessage.empty(
-                      title: t.emptyMenuTitle,
-                      body: t.emptyMenuBody,
-                    );
-                  }
-                  final items = _applyFilters(allItems);
-                  if (items.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(AppSpace.xxl),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.search_off_rounded,
-                                size: 54, color: AppColors.primary),
-                            const SizedBox(height: AppSpace.v12),
-                            Text(
-                              t.isSw
-                                  ? 'Hakuna chakula kilichopatikana'
-                                  : 'No matching dishes found',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpace.v8),
-                            TextButton(
-                              onPressed: () {
-                                _searchCtrl.clear();
-                                setState(() => _selectedCategory = 'All');
-                              },
-                              child: Text(t.clearSearch),
-                            ),
-                          ],
+                    if (_gridMode) {
+                      return GridView.builder(
+                        padding: EdgeInsets.fromLTRB(
+                            AppSpace.screenH,
+                            AppSpace.xs,
+                            AppSpace.screenH,
+                            context.navClearance),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: _MenuMetrics.gap,
+                          crossAxisSpacing: _MenuMetrics.gap,
+                          childAspectRatio: _MenuMetrics.gridRatio,
                         ),
-                      ),
-                    );
-                  }
+                        itemCount: items.length,
+                        itemBuilder: (ctx, i) {
+                          final dish = items[i];
+                          return _MenuGridTile(
+                            dish: dish,
+                            isDark: isDark,
+                            onOpen: () => context.push('/dish/${dish.id}',
+                                extra: DishRouteArgs(
+                                    item: dish,
+                                    heroScope: DishHeroScopes.menuList)),
+                            onAdd: () {
+                              ref
+                                  .read(cartProvider.notifier)
+                                  .addItem(dish: dish);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      '${dishName(dish.id, dish.name, isSw: t.isSw)}: ${t.added}'),
+                                  duration: const Duration(seconds: 1),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    }
 
-                  if (_gridMode) {
-                    return GridView.builder(
-                      padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.xs, AppSpace.screenH, context.navClearance),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: _MenuMetrics.gap,
-                        crossAxisSpacing: _MenuMetrics.gap,
-                        childAspectRatio: _MenuMetrics.gridRatio,
-                      ),
+                    return ListView.separated(
+                      padding: EdgeInsets.fromLTRB(AppSpace.screenH,
+                          AppSpace.xs, AppSpace.screenH, context.navClearance),
                       itemCount: items.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: AppSpace.v12),
                       itemBuilder: (ctx, i) {
                         final dish = items[i];
-                        return _MenuGridTile(
+                        return _MenuListTile(
                           dish: dish,
                           isDark: isDark,
-                          onOpen: () => context.push('/dish/${dish.id}', extra: DishRouteArgs(item: dish, heroScope: DishHeroScopes.menuList)),
+                          onOpen: () => context.push('/dish/${dish.id}',
+                              extra: DishRouteArgs(
+                                  item: dish,
+                                  heroScope: DishHeroScopes.menuList)),
                           onAdd: () {
                             ref.read(cartProvider.notifier).addItem(dish: dish);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('${dishName(dish.id, dish.name, isSw: t.isSw)}: ${t.added}'),
+                                content: Text(
+                                    '${dishName(dish.id, dish.name, isSw: t.isSw)}: ${t.added}'),
                                 duration: const Duration(seconds: 1),
                                 behavior: SnackBarBehavior.floating,
                               ),
@@ -299,68 +343,52 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
                         );
                       },
                     );
-                  }
-
-                  return ListView.separated(
-                    padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.xs, AppSpace.screenH, context.navClearance),
-                    itemCount: items.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: AppSpace.v12),
-                    itemBuilder: (ctx, i) {
-                      final dish = items[i];
-                      return _MenuListTile(
-                        dish: dish,
-                        isDark: isDark,
-                        onOpen: () => context.push('/dish/${dish.id}', extra: DishRouteArgs(item: dish, heroScope: DishHeroScopes.menuList)),
-                        onAdd: () {
-                          ref.read(cartProvider.notifier).addItem(dish: dish);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${dishName(dish.id, dish.name, isSw: t.isSw)}: ${t.added}'),
-                              duration: const Duration(seconds: 1),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-                loading: () => Semantics(
-                  label: t.loading,
-                  child: ExcludeSemantics(
-                    child: Shimmer(
-                      child: _gridMode
-                          ? GridView.builder(
-                              padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.xs,
-                                  AppSpace.screenH, context.navClearance),
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: _MenuMetrics.gap,
-                                crossAxisSpacing: _MenuMetrics.gap,
-                                childAspectRatio: _MenuMetrics.gridRatio,
+                  },
+                  loading: () => Semantics(
+                    label: t.loading,
+                    child: ExcludeSemantics(
+                      child: Shimmer(
+                        child: _gridMode
+                            ? GridView.builder(
+                                padding: EdgeInsets.fromLTRB(
+                                    AppSpace.screenH,
+                                    AppSpace.xs,
+                                    AppSpace.screenH,
+                                    context.navClearance),
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: _MenuMetrics.gap,
+                                  crossAxisSpacing: _MenuMetrics.gap,
+                                  childAspectRatio: _MenuMetrics.gridRatio,
+                                ),
+                                itemCount: 6,
+                                itemBuilder: (_, __) =>
+                                    const SkeletonDishCard(),
+                              )
+                            : ListView.separated(
+                                padding: EdgeInsets.fromLTRB(
+                                    AppSpace.screenH,
+                                    AppSpace.xs,
+                                    AppSpace.screenH,
+                                    context.navClearance),
+                                itemCount: 6,
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(height: AppSpace.v12),
+                                itemBuilder: (_, __) => const SkeletonMenuRow(),
                               ),
-                              itemCount: 6,
-                              itemBuilder: (_, __) => const SkeletonDishCard(),
-                            )
-                          : ListView.separated(
-                              padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.xs,
-                                  AppSpace.screenH, context.navClearance),
-                              itemCount: 6,
-                              separatorBuilder: (_, __) => const SizedBox(height: AppSpace.v12),
-                              itemBuilder: (_, __) => const SkeletonMenuRow(),
-                            ),
+                      ),
                     ),
                   ),
-                ),
-                error: (_, __) => StateMessage.error(
-                  onRetry: () => ref.invalidate(allMenuItemsProvider),
+                  error: (_, __) => StateMessage.error(
+                    onRetry: () => ref.invalidate(allMenuItemsProvider),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 }
@@ -408,7 +436,8 @@ class _MenuGridTile extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpace.v10),
               Text(
-                dishName(dish.id, dish.name, isSw: ref.watch(appStringsProvider).isSw),
+                dishName(dish.id, dish.name,
+                    isSw: ref.watch(appStringsProvider).isSw),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -509,7 +538,8 @@ class _MenuListTile extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      dishName(dish.id, dish.name, isSw: ref.watch(appStringsProvider).isSw),
+                      dishName(dish.id, dish.name,
+                          isSw: ref.watch(appStringsProvider).isSw),
                       style: const TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 15,

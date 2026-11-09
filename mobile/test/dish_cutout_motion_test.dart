@@ -13,7 +13,8 @@ void main() {
         'assets/dishes/menu-pilau-kuku.png');
     expect(DishImage.resolveLocalAsset('pilauYaKuku'),
         'assets/images/pilau-ya-kuku.png');
-    expect(DishImage.resolveLocalAsset('https://example.com/pilau.png'), isNull);
+    expect(
+        DishImage.resolveLocalAsset('https://example.com/pilau.png'), isNull);
   });
 
   testWidgets('stagger reaches final state and bypasses reduced motion',

@@ -125,10 +125,19 @@ class ShowcaseSeedData {
       categoryName: 'Swahili Bites',
       availableCustomizations: defaultSwahiliSides,
       spiceLevel: 2,
-      ingredients: ['French fries', 'eggs', 'tomatoes', 'onions', 'tamarind', 'chili'],
+      ingredients: [
+        'French fries',
+        'eggs',
+        'tomatoes',
+        'onions',
+        'tamarind',
+        'chili'
+      ],
       allergens: ['egg'],
-      funFactEn: 'Chipsi mayai combines fried potatoes with eggs in one omelette.',
-      funFactSw: 'Chipsi mayai huchanganya viazi vya kukaanga na mayai katika omeleti moja.',
+      funFactEn:
+          'Chipsi mayai combines fried potatoes with eggs in one omelette.',
+      funFactSw:
+          'Chipsi mayai huchanganya viazi vya kukaanga na mayai katika omeleti moja.',
     ),
     MenuItemModel(
       id: 'menu-nyama-choma',
@@ -146,10 +155,21 @@ class ShowcaseSeedData {
       categoryName: 'Nyama Choma',
       availableCustomizations: defaultSwahiliSides,
       spiceLevel: 2,
-      ingredients: ['beef', 'maize flour', 'spinach', 'coconut milk', 'tomatoes', 'onions', 'ginger', 'lime'],
+      ingredients: [
+        'beef',
+        'maize flour',
+        'spinach',
+        'coconut milk',
+        'tomatoes',
+        'onions',
+        'ginger',
+        'lime'
+      ],
       allergens: ['coconut'],
-      funFactEn: 'Ugali is a firm maize-meal porridge often served with grilled meat.',
-      funFactSw: 'Ugali ni uji mzito wa unga wa mahindi unaotolewa mara nyingi na nyama ya kuchoma.',
+      funFactEn:
+          'Ugali is a firm maize-meal porridge often served with grilled meat.',
+      funFactSw:
+          'Ugali ni uji mzito wa unga wa mahindi unaotolewa mara nyingi na nyama ya kuchoma.',
     ),
     MenuItemModel(
       id: 'menu-pilau-kuku',
@@ -167,10 +187,19 @@ class ShowcaseSeedData {
       categoryName: 'Rice & Pilau',
       availableCustomizations: defaultSwahiliSides,
       spiceLevel: 3,
-      ingredients: ['basmati rice', 'beef', 'onions', 'cardamom', 'cloves', 'tomatoes'],
+      ingredients: [
+        'basmati rice',
+        'beef',
+        'onions',
+        'cardamom',
+        'cloves',
+        'tomatoes'
+      ],
       allergens: <String>[],
-      funFactEn: 'Pilau is rice cooked with whole spices such as cardamom and cloves.',
-      funFactSw: 'Pilau ni wali unaopikwa na viungo vizima kama iliki na karafuu.',
+      funFactEn:
+          'Pilau is rice cooked with whole spices such as cardamom and cloves.',
+      funFactSw:
+          'Pilau ni wali unaopikwa na viungo vizima kama iliki na karafuu.',
     ),
     MenuItemModel(
       id: 'menu-samaki-kupaka',
@@ -188,9 +217,17 @@ class ShowcaseSeedData {
       categoryName: 'Traditional Stews',
       availableCustomizations: defaultSwahiliSides,
       spiceLevel: 2,
-      ingredients: ['snapper', 'coconut cream', 'turmeric', 'garlic', 'mango', 'tamarind'],
+      ingredients: [
+        'snapper',
+        'coconut cream',
+        'turmeric',
+        'garlic',
+        'mango',
+        'tamarind'
+      ],
       allergens: ['fish', 'coconut'],
-      funFactEn: 'Samaki wa kupaka is fish simmered in coconut cream or coconut milk.',
+      funFactEn:
+          'Samaki wa kupaka is fish simmered in coconut cream or coconut milk.',
       funFactSw: 'Samaki wa kupaka hupikwa kwa tui la nazi au maziwa ya nazi.',
     ),
     MenuItemModel(
@@ -212,7 +249,8 @@ class ShowcaseSeedData {
       ingredients: ['beef', 'papaya', 'ginger', 'garlic', 'black pepper'],
       allergens: <String>[],
       funFactEn: 'Mishkaki are small pieces of meat grilled on skewers.',
-      funFactSw: 'Mishkaki ni vipande vidogo vya nyama vinavyochomwa kwenye vijiti.',
+      funFactSw:
+          'Mishkaki ni vipande vidogo vya nyama vinavyochomwa kwenye vijiti.',
     ),
     MenuItemModel(
       id: 'menu-wali-nazi',
@@ -254,7 +292,8 @@ class ShowcaseSeedData {
       ingredients: ['chicken', 'coconut milk', 'wheat flour', 'ghee', 'spices'],
       allergens: ['gluten', 'milk'],
       funFactEn: 'Chapati is a layered flatbread cooked on a hot pan.',
-      funFactSw: 'Chapati ni mkate bapa wenye tabaka unaopikwa kwenye sufuria moto.',
+      funFactSw:
+          'Chapati ni mkate bapa wenye tabaka unaopikwa kwenye sufuria moto.',
     ),
     MenuItemModel(
       id: 'menu-ndizi-mzuzu',
@@ -293,10 +332,19 @@ class ShowcaseSeedData {
       categoryName: 'Gourmet Specials',
       availableCustomizations: defaultSwahiliSides,
       spiceLevel: 3,
-      ingredients: ['beef', 'cheddar', 'aioli', 'avocado', 'onions', 'brioche bun'],
+      ingredients: [
+        'beef',
+        'cheddar',
+        'aioli',
+        'avocado',
+        'onions',
+        'brioche bun'
+      ],
       allergens: ['gluten', 'egg', 'milk'],
-      funFactEn: 'A smash burger is made by pressing the patty flat on a hot surface.',
-      funFactSw: 'Smash burger hutengenezwa kwa kubana nyama iliyo bapa kwenye uso moto.',
+      funFactEn:
+          'A smash burger is made by pressing the patty flat on a hot surface.',
+      funFactSw:
+          'Smash burger hutengenezwa kwa kubana nyama iliyo bapa kwenye uso moto.',
     ),
     MenuItemModel(
       id: 'menu-zanzibar-pizza',
@@ -314,10 +362,19 @@ class ShowcaseSeedData {
       categoryName: 'Gourmet Specials',
       availableCustomizations: defaultSwahiliSides,
       spiceLevel: 2,
-      ingredients: ['sourdough crust', 'beef', 'mozzarella', 'sweet peppers', 'red onions', 'coriander'],
+      ingredients: [
+        'sourdough crust',
+        'beef',
+        'mozzarella',
+        'sweet peppers',
+        'red onions',
+        'coriander'
+      ],
       allergens: ['gluten', 'milk'],
-      funFactEn: 'Sourdough crust is made with a fermented flour-and-water starter.',
-      funFactSw: 'Ukoko wa sourdough hutengenezwa kwa chachu ya unga na maji iliyochachuka.',
+      funFactEn:
+          'Sourdough crust is made with a fermented flour-and-water starter.',
+      funFactSw:
+          'Ukoko wa sourdough hutengenezwa kwa chachu ya unga na maji iliyochachuka.',
     ),
     MenuItemModel(
       id: 'menu-passion-juice',
@@ -359,7 +416,8 @@ class ShowcaseSeedData {
       ingredients: ['ginger soda'],
       allergens: <String>[],
       funFactEn: 'Ginger soda gets its sharp taste from ginger.',
-      funFactSw: 'Soda ya tangawizi hupata ladha yake kali kutoka kwa tangawizi.',
+      funFactSw:
+          'Soda ya tangawizi hupata ladha yake kali kutoka kwa tangawizi.',
     ),
   ];
 
@@ -482,14 +540,20 @@ class ShowcaseSeedData {
     TriviaQuestion(
       id: 2,
       question: "What does 'Tui la Nazi' mean in coastal Swahili cuisine?",
-      options: ['Coconut Milk', 'Clarified Ghee', 'Tamarind Glaze', 'Mango Nectar'],
+      options: [
+        'Coconut Milk',
+        'Clarified Ghee',
+        'Tamarind Glaze',
+        'Mango Nectar'
+      ],
       correctIndex: 0,
       explainer:
           'Tui la Nazi is freshly squeezed Coconut Milk — the creamy foundation of Samaki wa Kupaka and Maharage ya Nazi.',
     ),
     TriviaQuestion(
       id: 3,
-      question: 'Which Tanzanian dish consists of marinated charcoal-grilled skewers?',
+      question:
+          'Which Tanzanian dish consists of marinated charcoal-grilled skewers?',
       options: ['Vitumbua', 'Mishkaki', 'Kachumbari', 'Mandazi'],
       correctIndex: 1,
       explainer:
@@ -539,7 +603,8 @@ class ShowcaseSeedData {
     // Kinondoni
     TzWard(code: 70101, name: 'Kijitonyama', districtCode: 701),
     TzWard(code: 70102, name: 'Mikocheni', districtCode: 701),
-    TzWard(code: 70103, name: 'Msasani (Masaki / Oysterbay)', districtCode: 701),
+    TzWard(
+        code: 70103, name: 'Msasani (Masaki / Oysterbay)', districtCode: 701),
     TzWard(code: 70104, name: 'Makumbusho', districtCode: 701),
     TzWard(code: 70105, name: 'Mwananyamala', districtCode: 701),
     TzWard(code: 70107, name: 'Kawe', districtCode: 701),

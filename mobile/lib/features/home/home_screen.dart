@@ -104,7 +104,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-          child: RefreshIndicator.adaptive(
+        child: RefreshIndicator.adaptive(
           color: AppColors.primary,
           onRefresh: () async {
             ref.invalidate(promotionsProvider);
@@ -119,7 +119,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // 1. Top Location + Role/Mode Header
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.md, AppSpace.screenH, AppSpace.lg),
+                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH,
+                      AppSpace.md, AppSpace.screenH, AppSpace.lg),
                   child: Row(
                     children: [
                       Expanded(
@@ -127,7 +128,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           borderRadius: BorderRadius.circular(AppRadius.v14),
                           onTap: () => showTanzaniaLocationPicker(context),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: AppSpace.xs),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: AppSpace.xs),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -146,30 +148,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       const SizedBox(width: AppSpace.v6),
                                     if (widget.showEnvBadge)
                                       Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: AppSpace.v7, vertical: AppSpace.v2),
-                                      decoration: BoxDecoration(
-                                        color: (EnvConfig.hasSupabaseCredentials
-                                                ? AppColors.success
-                                                : AppColors.primary)
-                                            .withOpacity(0.14),
-                                        borderRadius:
-                                            BorderRadius.circular(AppRadius.pill),
-                                      ),
-                                      child: Text(
-                                        EnvConfig.hasSupabaseCredentials
-                                            ? t.liveMode
-                                            : t.showcaseMode,
-                                        style: TextStyle(
-                                          fontSize: 9.5,
-                                          fontWeight: FontWeight.w800,
-                                          color: EnvConfig
-                                                  .hasSupabaseCredentials
-                                              ? AppColors.success
-                                              : AppColors.primaryDark,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: AppSpace.v7,
+                                            vertical: AppSpace.v2),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              (EnvConfig.hasSupabaseCredentials
+                                                      ? AppColors.success
+                                                      : AppColors.primary)
+                                                  .withOpacity(0.14),
+                                          borderRadius: BorderRadius.circular(
+                                              AppRadius.pill),
+                                        ),
+                                        child: Text(
+                                          EnvConfig.hasSupabaseCredentials
+                                              ? t.liveMode
+                                              : t.showcaseMode,
+                                          style: TextStyle(
+                                            fontSize: 9.5,
+                                            fontWeight: FontWeight.w800,
+                                            color:
+                                                EnvConfig.hasSupabaseCredentials
+                                                    ? AppColors.success
+                                                    : AppColors.primaryDark,
+                                          ),
                                         ),
                                       ),
-                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: AppSpace.v3),
@@ -226,8 +230,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       IconButton.filledTonal(
                         tooltip: 'Switch Language (EN / SW)',
                         style: IconButton.styleFrom(
-                          backgroundColor:
-                              AppColors.primary.withOpacity(0.14),
+                          backgroundColor: AppColors.primary.withOpacity(0.14),
                         ),
                         onPressed: () => ref
                             .read(appSettingsProvider.notifier)
@@ -249,7 +252,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // 2. Greeting + Chef AI Atelier Hero Card
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0, AppSpace.screenH, AppSpace.lg),
+                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH,
+                      AppSpace.v0, AppSpace.screenH, AppSpace.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -270,7 +274,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                       ),
                       const SizedBox(height: AppSpace.v16),
-
                       _ChefAtelierCard(
                         title: t.chefAiBannerTitle,
                         subtitle: t.chefAiBannerSub,
@@ -287,123 +290,138 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: AppSpace.lg),
                   child: promotionsAsync.when(
-                  skipLoadingOnRefresh: true,
-                  data: (promos) => SizedBox(
-                    height: PromoCardMetrics.height,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: promos.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: AppSpace.v14),
-                      itemBuilder: (context, index) {
-                        final p = promos[index];
-                        final bg = _parseHex(p.bgColorHex);
-                        return InkWell(
-                          borderRadius: BorderRadius.circular(PromoCardMetrics.borderRadius),
-                          onTap: () => context.go(
-                            '/search?category=${Uri.encodeComponent(p.targetCategory)}',
-                          ),
-                          child: Container(
-                            width: PromoCardMetrics.width,
-                            padding: const EdgeInsets.all(PromoCardMetrics.padding),
-                            decoration: BoxDecoration(
-                              gradient: bg.green > bg.red
-                                  ? AppColors.promoGreen
-                                  : AppColors.promoOrange,
-                              borderRadius: BorderRadius.circular(PromoCardMetrics.borderRadius),
+                    skipLoadingOnRefresh: true,
+                    data: (promos) => SizedBox(
+                      height: PromoCardMetrics.height,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpace.screenH),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: promos.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(width: AppSpace.v14),
+                        itemBuilder: (context, index) {
+                          final p = promos[index];
+                          final bg = _parseHex(p.bgColorHex);
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(
+                                PromoCardMetrics.borderRadius),
+                            onTap: () => context.go(
+                              '/search?category=${Uri.encodeComponent(p.targetCategory)}',
                             ),
-                            child: Row(
-                              children: [
-                                Flexible(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (p.badgeText.isNotEmpty)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: AppSpace.sm, vertical: AppSpace.v2),
-                                          decoration: BoxDecoration(
-                                            color:
-                                                AppColors.scrim.withOpacity(0.22),
-                                            borderRadius:
-                                                BorderRadius.circular(AppRadius.pill),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              AppIcon(
-                                                iconKey: p.iconKey ??
-                                                    appIconKeyForText(
-                                                      '${p.title} ${p.badgeText}',
-                                                      fallback: AppIconKey.fire,
+                            child: Container(
+                              width: PromoCardMetrics.width,
+                              padding: const EdgeInsets.all(
+                                  PromoCardMetrics.padding),
+                              decoration: BoxDecoration(
+                                gradient: bg.green > bg.red
+                                    ? AppColors.promoGreen
+                                    : AppColors.promoOrange,
+                                borderRadius: BorderRadius.circular(
+                                    PromoCardMetrics.borderRadius),
+                              ),
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (p.badgeText.isNotEmpty)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: AppSpace.sm,
+                                                vertical: AppSpace.v2),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.scrim
+                                                  .withOpacity(0.22),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      AppRadius.pill),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                AppIcon(
+                                                  iconKey: p.iconKey ??
+                                                      appIconKeyForText(
+                                                        '${p.title} ${p.badgeText}',
+                                                        fallback:
+                                                            AppIconKey.fire,
+                                                      ),
+                                                  color: AppColors.surface,
+                                                ),
+                                                const SizedBox(
+                                                    width: AppSpace.v6),
+                                                Flexible(
+                                                  child: Text(
+                                                    stripEmoji(p.badgeText),
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      color: AppColors.surface,
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w800,
                                                     ),
-                                                color: AppColors.surface,
-                                              ),
-                                              const SizedBox(width: AppSpace.v6),
-                                              Flexible(
-                                                child: Text(
-                                                  stripEmoji(p.badgeText),
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: const TextStyle(
-                                                    color: AppColors.surface,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w800,
                                                   ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
+                                          ),
+                                        const SizedBox(height: AppSpace.v8),
+                                        Text(
+                                          stripEmoji(p.title),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            color: AppColors.surface,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 17,
                                           ),
                                         ),
-                                      const SizedBox(height: AppSpace.v8),
-                                      Text(
-                                        stripEmoji(p.title),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: AppColors.surface,
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 17,
+                                        const SizedBox(height: AppSpace.v4),
+                                        Text(
+                                          stripEmoji(p.subtitle),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: AppColors.surface,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            height: 1.3,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: AppSpace.v4),
-                                      Text(
-                                        stripEmoji(p.subtitle),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: AppColors.surface,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w700,
-                                          height: 1.3,
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: PromoCardMetrics.imageGap),
-                                PromoDishImage(imageRef: p.imageKey),
-                              ],
+                                  const SizedBox(
+                                      width: PromoCardMetrics.imageGap),
+                                  PromoDishImage(imageRef: p.imageKey),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  loading: () => SizedBox(
-                    height: PromoCardMetrics.height,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 2,
-                      separatorBuilder: (_, __) => const SizedBox(width: AppSpace.v14),
-                      itemBuilder: (_, __) => const SkeletonPromoCard(),
+                    loading: () => SizedBox(
+                      height: PromoCardMetrics.height,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpace.screenH),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 2,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(width: AppSpace.v14),
+                        itemBuilder: (_, __) => const SkeletonPromoCard(),
+                      ),
                     ),
-                  ),
-                  error: (_, __) => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
                   ),
                 ),
               ),
@@ -411,7 +429,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // 4. Daily Swahili Discovery + Trivia Challenge Card
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0, AppSpace.screenH, AppSpace.lg),
+                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH,
+                      AppSpace.v0, AppSpace.screenH, AppSpace.lg),
                   child: discoveriesAsync.when(
                     skipLoadingOnRefresh: true,
                     data: (list) {
@@ -421,7 +440,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       return Container(
                         padding: const EdgeInsets.all(AppSpace.lg),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkCard : AppColors.surface,
+                          color:
+                              isDark ? AppColors.darkCard : AppColors.surface,
                           borderRadius: BorderRadius.circular(AppRadius.md),
                           border: Border.all(
                             color: AppColors.primary.withOpacity(0.28),
@@ -444,7 +464,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.w800,
                                       fontSize: 13.5,
-                                      color: isDark ? AppColors.heroLight : AppColors.primaryDeep,
+                                      color: isDark
+                                          ? AppColors.heroLight
+                                          : AppColors.primaryDeep,
                                     ),
                                   ),
                                 ),
@@ -512,7 +534,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // 5. Signature Dishes Section Header
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.v0, AppSpace.screenH, AppSpace.lg),
+                  padding: const EdgeInsets.fromLTRB(AppSpace.screenH,
+                      AppSpace.v0, AppSpace.screenH, AppSpace.lg),
                   child: Row(
                     children: [
                       Flexible(
@@ -541,8 +564,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             t.isSw ? 'Ona Menyu Yote →' : 'Full Menu →',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style:
-                                const TextStyle(fontWeight: FontWeight.w800),
+                            style: const TextStyle(fontWeight: FontWeight.w800),
                           ),
                         ),
                       ),
@@ -559,12 +581,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   if (featured.isEmpty) {
                     return SliverToBoxAdapter(
                       child: StateMessage.empty(
-                        title: t.emptyMenuTitle, body: t.emptyMenuBody,
+                        title: t.emptyMenuTitle,
+                        body: t.emptyMenuBody,
                       ),
                     );
                   }
                   return SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpace.screenH),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpace.screenH),
                     sliver: SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -580,25 +604,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           return KeyedSubtree(
                             key: ValueKey('home-dish-${dish.id}'),
                             child: _SignatureDishCard(
-                            dish: dish,
-                            isFavorite: isFav,
-                            onTap: () => context.push('/dish/${dish.id}', extra: DishRouteArgs(item: dish, heroScope: DishHeroScopes.homeSignature)),
-                            onToggleFavorite: () => ref
-                                .read(favoritesProvider.notifier)
-                                .toggle(dish.id),
-                            onQuickAdd: () {
-                              ref
-                                  .read(cartProvider.notifier)
-                                  .addItem(dish: dish);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content:
-                                      Text('${dishName(dish.id, dish.name, isSw: t.isSw)}: ${t.added}'),
-                                  duration: const Duration(seconds: 1),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            },
+                              dish: dish,
+                              isFavorite: isFav,
+                              onTap: () => context.push('/dish/${dish.id}',
+                                  extra: DishRouteArgs(
+                                      item: dish,
+                                      heroScope: DishHeroScopes.homeSignature)),
+                              onToggleFavorite: () => ref
+                                  .read(favoritesProvider.notifier)
+                                  .toggle(dish.id),
+                              onQuickAdd: () {
+                                ref
+                                    .read(cartProvider.notifier)
+                                    .addItem(dish: dish);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        '${dishName(dish.id, dish.name, isSw: t.isSw)}: ${t.added}'),
+                                    duration: const Duration(seconds: 1),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              },
                             ),
                           );
                         },
@@ -618,7 +645,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           padding: const EdgeInsets.symmetric(
                             horizontal: AppSpace.screenH,
                           ),
-                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                          gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
                             maxCrossAxisExtent: DishCardMetrics.cardMaxWidth,
                             mainAxisSpacing: DishCardMetrics.gap,
                             crossAxisSpacing: DishCardMetrics.gap,
@@ -668,11 +696,13 @@ class _ChefAtelierCard extends StatelessWidget {
     final reduceMotion = MediaQuery.of(context).disableAnimations;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: reduceMotion ? 1 : 0, end: 1),
-      duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 650),
+      duration:
+          reduceMotion ? Duration.zero : const Duration(milliseconds: 650),
       curve: Curves.easeOutCubic,
       builder: (context, value, child) => Opacity(
         opacity: value,
-        child: Transform.translate(offset: Offset(0, 12 * (1 - value)), child: child),
+        child: Transform.translate(
+            offset: Offset(0, 12 * (1 - value)), child: child),
       ),
       child: Material(
         color: AppColors.ember,
@@ -698,7 +728,9 @@ class _ChefAtelierCard extends StatelessWidget {
                     height: AppSpace.v190,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.surface.withOpacity(.08), width: AppSpace.v30),
+                      border: Border.all(
+                          color: AppColors.surface.withOpacity(.08),
+                          width: AppSpace.v30),
                     ),
                   ),
                 ),
@@ -711,15 +743,25 @@ class _ChefAtelierCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text('BONGO FOODIE  /  CHEF AI',
-                              style: TextStyle(color: AppColors.heroMuted, fontSize: 9,
-                                letterSpacing: 1.4, fontWeight: FontWeight.w700)),
+                                style: TextStyle(
+                                    color: AppColors.heroMuted,
+                                    fontSize: 9,
+                                    letterSpacing: 1.4,
+                                    fontWeight: FontWeight.w700)),
                             const SizedBox(height: AppSpace.v14),
-                            Text(title, style: const TextStyle(color: AppColors.surface,
-                              fontSize: 22, height: 1.15, fontWeight: FontWeight.w700,
-                              letterSpacing: -.5)),
+                            Text(title,
+                                style: const TextStyle(
+                                    color: AppColors.surface,
+                                    fontSize: 22,
+                                    height: 1.15,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -.5)),
                             const SizedBox(height: AppSpace.v8),
-                            Text(subtitle, style: TextStyle(color: AppColors.surface.withOpacity(.72),
-                              fontSize: 12, height: 1.45)),
+                            Text(subtitle,
+                                style: TextStyle(
+                                    color: AppColors.surface.withOpacity(.72),
+                                    fontSize: 12,
+                                    height: 1.45)),
                             const SizedBox(height: AppSpace.v18),
                             Row(mainAxisSize: MainAxisSize.min, children: [
                               Flexible(
@@ -742,7 +784,13 @@ class _ChefAtelierCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: AppSpace.v12),
-                      const DishImage(imageRef: 'robotChef', clip: false, transparentFallback: true, width: AppSpace.v92, height: AppSpace.v118, borderRadius: AppRadius.v22),
+                      const DishImage(
+                          imageRef: 'robotChef',
+                          clip: false,
+                          transparentFallback: true,
+                          width: AppSpace.v92,
+                          height: AppSpace.v118,
+                          borderRadius: AppRadius.v22),
                     ],
                   ),
                 ),
@@ -820,7 +868,8 @@ class _SignatureDishCard extends ConsumerWidget {
                               ? Icons.favorite_rounded
                               : Icons.favorite_border_rounded,
                           size: 16,
-                          color: isFavorite ? AppColors.error : AppColors.inkMuted,
+                          color:
+                              isFavorite ? AppColors.error : AppColors.inkMuted,
                         ),
                       ),
                     ),
@@ -854,7 +903,8 @@ class _SignatureDishCard extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpace.v2),
               Text(
-                dishName(dish.id, dish.name, isSw: ref.watch(appStringsProvider).isSw),
+                dishName(dish.id, dish.name,
+                    isSw: ref.watch(appStringsProvider).isSw),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -887,22 +937,23 @@ class _SignatureDishCard extends ConsumerWidget {
                     ),
                   ),
                   Tooltip(
-                    message: '${ref.watch(appStringsProvider).addToCart}: ${dishName(dish.id, dish.name, isSw: ref.watch(appStringsProvider).isSw)}',
+                    message:
+                        '${ref.watch(appStringsProvider).addToCart}: ${dishName(dish.id, dish.name, isSw: ref.watch(appStringsProvider).isSw)}',
                     child: InkWell(
-                    onTap: onQuickAdd,
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                    child: Container(
-                      padding: const EdgeInsets.all(AppSpace.v6),
-                      decoration: BoxDecoration(
-                        color: AppColors.cta,
-                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                      onTap: onQuickAdd,
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      child: Container(
+                        padding: const EdgeInsets.all(AppSpace.v6),
+                        decoration: BoxDecoration(
+                          color: AppColors.cta,
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                        ),
+                        child: const Icon(
+                          Icons.add_rounded,
+                          color: AppColors.surface,
+                          size: 18,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.add_rounded,
-                        color: AppColors.surface,
-                        size: 18,
-                      ),
-                    ),
                     ),
                   ),
                 ],
@@ -951,7 +1002,8 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
     final isCorrect = _pickedIndex == widget.question.correctIndex;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpace.v22, AppSpace.v6, AppSpace.v22, AppSpace.v30),
+      padding: const EdgeInsets.fromLTRB(
+          AppSpace.v22, AppSpace.v6, AppSpace.v22, AppSpace.v30),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

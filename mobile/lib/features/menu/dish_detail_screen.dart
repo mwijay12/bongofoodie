@@ -172,21 +172,21 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
       value: overlay,
       child: DishBackScope(
         child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: args != null && args.item.id == widget.id
-            ? _DishDetailView(
-                item: args.item,
-                heroScope: args.heroScope,
-                entrance: _entranceController,
-                stickyBarBuilder: _buildStickyBar,
-                addOnsBuilder: _buildAddOnsSection,
-              )
-            : _DeepLinkView(
-                id: widget.id,
-                entrance: _entranceController,
-                stickyBarBuilder: _buildStickyBar,
-                addOnsBuilder: _buildAddOnsSection,
-              ),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: args != null && args.item.id == widget.id
+              ? _DishDetailView(
+                  item: args.item,
+                  heroScope: args.heroScope,
+                  entrance: _entranceController,
+                  stickyBarBuilder: _buildStickyBar,
+                  addOnsBuilder: _buildAddOnsSection,
+                )
+              : _DeepLinkView(
+                  id: widget.id,
+                  entrance: _entranceController,
+                  stickyBarBuilder: _buildStickyBar,
+                  addOnsBuilder: _buildAddOnsSection,
+                ),
         ),
       ),
     );
@@ -214,23 +214,23 @@ class _DeepLinkView extends ConsumerWidget {
       fit: StackFit.expand,
       children: [
         AsyncSkeleton<MenuItemModel?>(
-      value: asyncItem,
-      skeleton: const SkeletonDetailScreen(),
-      onRetry: () => ref.invalidate(menuItemByIdProvider(id)),
-      isEmpty: (item) => item == null,
-      empty: StateMessage.empty(
-        title: t.dishNotFoundTitle,
-        body: t.dishNotFoundBody,
-        actionLabel: t.backToMenu,
-        onAction: () => context.go('/search'),
-      ),
-      data: (item) => _DishDetailView(
-        item: item!,
-        heroScope: DishHeroScopes.deepLink,
-        entrance: entrance,
-        stickyBarBuilder: stickyBarBuilder,
-        addOnsBuilder: addOnsBuilder,
-      ),
+          value: asyncItem,
+          skeleton: const SkeletonDetailScreen(),
+          onRetry: () => ref.invalidate(menuItemByIdProvider(id)),
+          isEmpty: (item) => item == null,
+          empty: StateMessage.empty(
+            title: t.dishNotFoundTitle,
+            body: t.dishNotFoundBody,
+            actionLabel: t.backToMenu,
+            onAction: () => context.go('/search'),
+          ),
+          data: (item) => _DishDetailView(
+            item: item!,
+            heroScope: DishHeroScopes.deepLink,
+            entrance: entrance,
+            stickyBarBuilder: stickyBarBuilder,
+            addOnsBuilder: addOnsBuilder,
+          ),
         ),
         if (asyncItem.valueOrNull == null)
           Positioned(
@@ -523,7 +523,8 @@ class DishHero extends StatefulWidget {
   State<DishHero> createState() => DishHeroState();
 }
 
-class DishHeroState extends State<DishHero> with SingleTickerProviderStateMixin {
+class DishHeroState extends State<DishHero>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _floatController = AnimationController(
     vsync: this,
     duration: AppMotion.float,
@@ -550,10 +551,10 @@ class DishHeroState extends State<DishHero> with SingleTickerProviderStateMixin 
 
   @override
   Widget build(BuildContext context) {
-    final height = (MediaQuery.sizeOf(context).height *
-            DishDetailMetrics.heroHeightFactor)
-        .clamp(AppSpace.v0, DishDetailMetrics.heroMaxHeight)
-        .toDouble();
+    final height =
+        (MediaQuery.sizeOf(context).height * DishDetailMetrics.heroHeightFactor)
+            .clamp(AppSpace.v0, DishDetailMetrics.heroMaxHeight)
+            .toDouble();
     final scheme = Theme.of(context).colorScheme;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final topInset = MediaQuery.paddingOf(context).top + AppSpace.sm;
@@ -755,9 +756,8 @@ class _FavoriteHeartState extends ConsumerState<_FavoriteHeart>
             _pop.drive(CurveTween(curve: AppMotion.enter)),
           ),
           child: _HeroCircleButton(
-            icon: isFav
-                ? Icons.favorite_rounded
-                : Icons.favorite_border_rounded,
+            icon:
+                isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
             tooltip: t.favorite,
             onPressed: _toggle,
           ),
@@ -784,7 +784,8 @@ class _TitleBlock extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(dishName(item.id, item.name, isSw: t.isSw), style: theme.textTheme.headlineMedium),
+          Text(dishName(item.id, item.name, isSw: t.isSw),
+              style: theme.textTheme.headlineMedium),
           const SizedBox(height: AppSpace.v4),
           if (dishOtherName(item.id, isSw: t.isSw).isNotEmpty)
             Text(dishOtherName(item.id, isSw: t.isSw),
@@ -874,7 +875,8 @@ class _DescriptionBlockState extends ConsumerState<_DescriptionBlock> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            dishDescription(widget.item.id, widget.item.description, isSw: t.isSw),
+            dishDescription(widget.item.id, widget.item.description,
+                isSw: t.isSw),
             maxLines: _expanded ? null : 3,
             overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyLarge,
@@ -949,8 +951,7 @@ class _SpiceSection extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final clamped = level < 0 ? 0 : (level > 5 ? 5 : level);
-    final selectedColor =
-        isDark ? AppColors.heroLight : AppColors.primaryDeep;
+    final selectedColor = isDark ? AppColors.heroLight : AppColors.primaryDeep;
     final emptyColor = isDark ? AppColors.darkCard : AppColors.surfaceWarm;
 
     return _SectionShell(
@@ -992,8 +993,7 @@ class _SpiceSection extends ConsumerWidget {
                         height: DishDetailMetrics.spicePillHeight,
                         decoration: BoxDecoration(
                           color: index < clamped ? selectedColor : emptyColor,
-                          borderRadius:
-                              BorderRadius.circular(AppRadius.pill),
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
                           border: Border.all(
                             color: theme.colorScheme.outline,
                             width: AppSpace.hairline,
@@ -1052,8 +1052,7 @@ class _IngredientsSection extends ConsumerWidget {
               runSpacing: AppSpace.sm,
               children: item.allergens
                   .map(
-                    (allergen) =>
-                        _DetailChip(label: allergen, outlined: true),
+                    (allergen) => _DetailChip(label: allergen, outlined: true),
                   )
                   .toList(),
             ),
@@ -1158,8 +1157,7 @@ class _AddOnRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final selectedColor =
-        isDark ? AppColors.heroLight : AppColors.primaryDeep;
+    final selectedColor = isDark ? AppColors.heroLight : AppColors.primaryDeep;
     return Semantics(
       key: semanticKey,
       checked: selected,
@@ -1207,9 +1205,7 @@ class _AddOnRow extends StatelessWidget {
                         : Icons.add_circle_outline_rounded,
                     key: ValueKey<bool>(selected),
                     size: AppSpace.v24,
-                    color: selected
-                        ? selectedColor
-                        : theme.colorScheme.outline,
+                    color: selected ? selectedColor : theme.colorScheme.outline,
                   ),
                 ),
               ],
@@ -1262,7 +1258,6 @@ class _AddOnSkeletonRows extends StatelessWidget {
   }
 }
 
-
 // ---------------------------------------------------------------------------
 // Sections 7-9. Each returns SizedBox.shrink() when its data is missing, so a
 // dish with no fact, no reviews and no siblings renders no empty space.
@@ -1312,9 +1307,8 @@ class _DidYouKnowSection extends ConsumerWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 13.5,
-                      color: isDark
-                          ? AppColors.heroLight
-                          : AppColors.primaryDeep,
+                      color:
+                          isDark ? AppColors.heroLight : AppColors.primaryDeep,
                     ),
                   ),
                 ),
@@ -1388,9 +1382,7 @@ class _ReviewsContent extends ConsumerWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: isDark
-                        ? AppColors.heroLight
-                        : AppColors.primaryDeep,
+                    color: isDark ? AppColors.heroLight : AppColors.primaryDeep,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -1448,9 +1440,7 @@ class _ReviewRow extends ConsumerWidget {
               Text(
                 '${review.rating}/5',
                 style: TextStyle(
-                  color: isDark
-                      ? AppColors.heroLight
-                      : AppColors.primaryDeep,
+                  color: isDark ? AppColors.heroLight : AppColors.primaryDeep,
                   fontWeight: FontWeight.w800,
                   fontSize: 12,
                 ),
@@ -1485,11 +1475,11 @@ class _RelatedSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(appStringsProvider);
-    final menu = ref.watch(allMenuItemsProvider).valueOrNull ??
-        const <MenuItemModel>[];
+    final menu =
+        ref.watch(allMenuItemsProvider).valueOrNull ?? const <MenuItemModel>[];
     final related = menu
-        .where((dish) =>
-            dish.id != item.id && dish.categoryId == item.categoryId)
+        .where(
+            (dish) => dish.id != item.id && dish.categoryId == item.categoryId)
         .take(5)
         .toList(growable: false);
     if (related.isEmpty) return const SizedBox.shrink();
@@ -1506,8 +1496,7 @@ class _RelatedSection extends ConsumerWidget {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: related.length,
-              separatorBuilder: (_, __) =>
-                  const SizedBox(width: AppSpace.md),
+              separatorBuilder: (_, __) => const SizedBox(width: AppSpace.md),
               itemBuilder: (_, index) => _RelatedDishCard(
                 key: ValueKey<String>('dish-related-${related[index].id}'),
                 dish: related[index],
@@ -1566,7 +1555,8 @@ class _RelatedDishCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpace.v10),
                 Text(
-                  dishName(dish.id, dish.name, isSw: ref.watch(appStringsProvider).isSw),
+                  dishName(dish.id, dish.name,
+                      isSw: ref.watch(appStringsProvider).isSw),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -1590,9 +1580,7 @@ class _RelatedDishCard extends ConsumerWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: isDark
-                        ? AppColors.heroLight
-                        : AppColors.primaryDeep,
+                    color: isDark ? AppColors.heroLight : AppColors.primaryDeep,
                     fontWeight: FontWeight.w800,
                     fontSize: 13,
                   ),

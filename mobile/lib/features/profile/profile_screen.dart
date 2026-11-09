@@ -17,7 +17,6 @@ import '../../state/menu_provider.dart';
 import '../../state/orders_provider.dart';
 import '../../state/settings_provider.dart';
 
-
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -35,7 +34,8 @@ class ProfileScreen extends ConsumerWidget {
         initialChildSize: 0.65,
         maxChildSize: 0.9,
         builder: (_, controller) => Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpace.v20, AppSpace.v4, AppSpace.v20, AppSpace.v24),
+          padding: const EdgeInsets.fromLTRB(
+              AppSpace.v20, AppSpace.v4, AppSpace.v20, AppSpace.v24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -63,12 +63,14 @@ class ProfileScreen extends ConsumerWidget {
                     : ListView.separated(
                         controller: controller,
                         itemCount: favDishes.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: AppSpace.v10),
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: AppSpace.v10),
                         itemBuilder: (_, idx) {
                           final dish = favDishes[idx];
                           return ListTile(
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.v16),
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.v16),
                             ),
                             leading: DishHeroImage(
                               item: dish,
@@ -78,7 +80,8 @@ class ProfileScreen extends ConsumerWidget {
                               borderRadius: AppRadius.v12,
                             ),
                             title: Text(
-                              dishName(dish.id, dish.name, isSw: ref.watch(appStringsProvider).isSw),
+                              dishName(dish.id, dish.name,
+                                  isSw: ref.watch(appStringsProvider).isSw),
                               style:
                                   const TextStyle(fontWeight: FontWeight.w800),
                             ),
@@ -86,7 +89,10 @@ class ProfileScreen extends ConsumerWidget {
                             trailing: const Icon(Icons.chevron_right_rounded),
                             onTap: () {
                               Navigator.pop(ctx);
-                              context.push('/dish/${dish.id}', extra: DishRouteArgs(item: dish, heroScope: DishHeroScopes.favorites));
+                              context.push('/dish/${dish.id}',
+                                  extra: DishRouteArgs(
+                                      item: dish,
+                                      heroScope: DishHeroScopes.favorites));
                             },
                           );
                         },
@@ -157,7 +163,8 @@ class ProfileScreen extends ConsumerWidget {
       body: SafeArea(
         bottom: false,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.md, AppSpace.screenH, context.navClearance),
+          padding: EdgeInsets.fromLTRB(AppSpace.screenH, AppSpace.md,
+              AppSpace.screenH, context.navClearance),
           children: [
             // 1. User Identity Card
             Container(
@@ -206,10 +213,12 @@ class ProfileScreen extends ConsumerWidget {
                                 const SizedBox(width: AppSpace.v8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: AppSpace.sm, vertical: AppSpace.v2),
+                                      horizontal: AppSpace.sm,
+                                      vertical: AppSpace.v2),
                                   decoration: BoxDecoration(
                                     color: AppColors.primary.withOpacity(0.28),
-                                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.pill),
                                   ),
                                   child: Text(
                                     (user?.role.value ?? 'guest').toUpperCase(),
@@ -323,10 +332,11 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     value: settings.isDark,
                     activeColor: AppColors.primary,
-                    onChanged: (v) =>
-                        ref.read(appSettingsProvider.notifier).toggleDarkMode(v),
+                    onChanged: (v) => ref
+                        .read(appSettingsProvider.notifier)
+                        .toggleDarkMode(v),
                   ),
-                  const Divider(height: 1),
+                  const Divider(height: AppSpace.hairline),
                   ListTile(
                     leading: const Icon(Icons.translate_rounded,
                         color: AppColors.primary),
@@ -500,7 +510,8 @@ class _StatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.v18),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: AppSpace.v14, horizontal: AppSpace.v10),
+          padding: const EdgeInsets.symmetric(
+              vertical: AppSpace.v14, horizontal: AppSpace.v10),
           decoration: BoxDecoration(
             color: isDark ? AppColors.darkCard : AppColors.surface,
             borderRadius: BorderRadius.circular(AppRadius.v18),
@@ -605,7 +616,8 @@ class _LiveOrderCard extends StatelessWidget {
                     children: [
                       Container(
                         height: AppSpace.v5,
-                        margin: const EdgeInsets.symmetric(horizontal: AppSpace.v2),
+                        margin:
+                            const EdgeInsets.symmetric(horizontal: AppSpace.v2),
                         decoration: BoxDecoration(
                           color: done
                               ? AppColors.success
@@ -618,8 +630,7 @@ class _LiveOrderCard extends StatelessWidget {
                         steps[i],
                         style: TextStyle(
                           fontSize: 10,
-                          fontWeight:
-                              done ? FontWeight.w800 : FontWeight.w500,
+                          fontWeight: done ? FontWeight.w800 : FontWeight.w500,
                           color: done ? AppColors.success : AppColors.inkMuted,
                         ),
                       ),

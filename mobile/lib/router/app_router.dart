@@ -103,8 +103,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/search',
                 builder: (context, state) {
-                  final cat =
-                      state.uri.queryParameters['category'] ?? 'All';
+                  final cat = state.uri.queryParameters['category'] ?? 'All';
                   return SearchMenuScreen(initialCategory: cat);
                 },
               ),
@@ -158,24 +157,24 @@ class _CustomerMainShell extends ConsumerWidget {
         }
       },
       child: AppShell(
-      body: navigationShell,
-      nav: BongoGlassNavBar(
-        currentIndex: navigationShell.currentIndex,
-        cartCount: cartCount,
-        labels: [
-          t.navHome,
-          t.navSearch,
-          t.navChefAi,
-          t.navCart,
-          t.navProfile,
-        ],
-        onTap: (idx) {
-          navigationShell.goBranch(
-            idx,
-            initialLocation: idx == navigationShell.currentIndex,
-          );
-        },
-      ),
+        body: navigationShell,
+        nav: BongoGlassNavBar(
+          currentIndex: navigationShell.currentIndex,
+          cartCount: cartCount,
+          labels: [
+            t.navHome,
+            t.navSearch,
+            t.navChefAi,
+            t.navCart,
+            t.navProfile,
+          ],
+          onTap: (idx) {
+            navigationShell.goBranch(
+              idx,
+              initialLocation: idx == navigationShell.currentIndex,
+            );
+          },
+        ),
       ),
     );
   }

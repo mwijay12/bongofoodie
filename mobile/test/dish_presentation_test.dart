@@ -24,10 +24,11 @@ void main() {
       final rgba = (await image.toByteData())!.buffer.asUint8List();
       expect(rgba[3], 0, reason: '$id top-left corner');
       expect(rgba[rgba.length - 1], 0, reason: '$id bottom-right corner');
-      expect([for (var i = 3; i < rgba.length; i += 4) rgba[i]],
-          contains(255), reason: '$id must not be entirely transparent');
-      expect([for (var i = 0; i < rgba.length; i += 4) rgba[i]],
-          contains(greaterThan(30)), reason: '$id must retain food colours');
+      expect([for (var i = 3; i < rgba.length; i += 4) rgba[i]], contains(255),
+          reason: '$id must not be entirely transparent');
+      expect([
+        for (var i = 0; i < rgba.length; i += 4) rgba[i]
+      ], contains(greaterThan(30)), reason: '$id must retain food colours');
       image.dispose();
       codec.dispose();
       // PNG IHDR dimensions: 1600 = 0x00000640, colour type 6 = RGBA.
@@ -36,20 +37,32 @@ void main() {
     }
   });
 
-  test('wrong product substitutions are not shown and prices stay unchanged', () {
-    for (final id in ['menu-wali-nazi', 'menu-kuku-chapati',
-      'menu-ndizi-mzuzu', 'menu-passion-juice', 'menu-stoney']) {
-      final item = ShowcaseSeedData.menuItems.firstWhere((item) => item.id == id);
+  test('wrong product substitutions are not shown and prices stay unchanged',
+      () {
+    for (final id in [
+      'menu-wali-nazi',
+      'menu-kuku-chapati',
+      'menu-ndizi-mzuzu',
+      'menu-passion-juice',
+      'menu-stoney'
+    ]) {
+      final item =
+          ShowcaseSeedData.menuItems.firstWhere((item) => item.id == id);
       expect(item.imageUrl, isEmpty, reason: '$id needs its own photograph');
     }
     expect(dishName('menu-ndizi-mzuzu', '', isSw: true), 'Ndizi za Kukaanga');
     expect(dishName('menu-ndizi-mzuzu', '', isSw: false), 'Fried Plantains');
     expect(dishDescription('menu-passion-juice', '', isSw: false),
         contains('passion fruit and mango'));
-    expect(dishName('live-uuid', 'Kitchen special', isSw: true), 'Kitchen special');
+    expect(dishName('live-uuid', 'Kitchen special', isSw: true),
+        'Kitchen special');
     expect(dishDescription('live-uuid', 'From the kitchen', isSw: true),
         'From the kitchen');
-    expect(ShowcaseSeedData.menuItems.firstWhere((d) => d.id == 'menu-passion-juice').price, 3500);
+    expect(
+        ShowcaseSeedData.menuItems
+            .firstWhere((d) => d.id == 'menu-passion-juice')
+            .price,
+        3500);
   });
 
   for (final dark in [false, true]) {
@@ -64,13 +77,19 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         theme: dark ? AppTheme.dark() : buildAppTheme(),
         home: MediaQuery(
-          data: const MediaQueryData(textScaler: TextScaler.linear(1.3), devicePixelRatio: 2),
-          child: Scaffold(body: Column(children: [
+          data: const MediaQueryData(
+              textScaler: TextScaler.linear(1.3), devicePixelRatio: 2),
+          child: Scaffold(
+              body: Column(children: [
             DishHeroImage(
               key: heroKey,
               item: ShowcaseSeedData.menuItems.first,
-              heroScope: 'test-hero', width: 300, height: 300,
-              fit: BoxFit.contain, clip: false, transparentFallback: true,
+              heroScope: 'test-hero',
+              width: 300,
+              height: 300,
+              fit: BoxFit.contain,
+              clip: false,
+              transparentFallback: true,
             ),
             const PromoDishImage(key: promoKey, imageRef: 'mishkakiYaNgombe'),
           ])),
@@ -79,11 +98,15 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       for (final key in [heroKey, promoKey]) {
         final scope = find.byKey(key);
-        expect(find.descendant(of: scope, matching: find.byType(ClipRRect)), findsNothing);
+        expect(find.descendant(of: scope, matching: find.byType(ClipRRect)),
+            findsNothing);
         final boxes = tester.widgetList<DecoratedBox>(
             find.descendant(of: scope, matching: find.byType(DecoratedBox)));
-        expect(boxes.where((box) => box.decoration is BoxDecoration &&
-            (box.decoration as BoxDecoration).color == Colors.white), isEmpty);
+        expect(
+            boxes.where((box) =>
+                box.decoration is BoxDecoration &&
+                (box.decoration as BoxDecoration).color == Colors.white),
+            isEmpty);
       }
       final image = tester.widgetList<Image>(find.byType(Image)).first;
       expect(image.fit, BoxFit.contain);
@@ -93,20 +116,39 @@ void main() {
     });
   }
 
-  testWidgets('cutout cards use a circle without clipping; opaque images stay rounded', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: Row(children: [
-      DishImage(key: Key('cutout'), dishId: 'menu-chipsi-mayai', imageRef: '', width: 140, height: 140),
-      DishImage(key: Key('opaque'), imageRef: 'pilauYaKuku', width: 140, height: 140),
+  testWidgets(
+      'cutout cards use a circle without clipping; opaque images stay rounded',
+      (tester) async {
+    await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(
+            body: Row(children: [
+      DishImage(
+          key: Key('cutout'),
+          dishId: 'menu-chipsi-mayai',
+          imageRef: '',
+          width: 140,
+          height: 140),
+      DishImage(
+          key: Key('opaque'), imageRef: 'pilauYaKuku', width: 140, height: 140),
     ]))));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(find.descendant(of: find.byKey(const Key('cutout')), matching: find.byType(ClipRRect)), findsNothing);
-    expect(find.descendant(of: find.byKey(const Key('opaque')), matching: find.byType(ClipRRect)), findsOneWidget);
+    expect(
+        find.descendant(
+            of: find.byKey(const Key('cutout')),
+            matching: find.byType(ClipRRect)),
+        findsNothing);
+    expect(
+        find.descendant(
+            of: find.byKey(const Key('opaque')),
+            matching: find.byType(ClipRRect)),
+        findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('precache sizing uses logical width times DPR', (tester) async {
     int? width;
-    await tester.pumpWidget(MaterialApp(home: MediaQuery(
+    await tester.pumpWidget(MaterialApp(
+        home: MediaQuery(
       data: const MediaQueryData(devicePixelRatio: 3),
       child: Builder(builder: (context) {
         width = dishDecodeWidth(context, 140);

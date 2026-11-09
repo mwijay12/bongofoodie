@@ -4,20 +4,30 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 GoRouter routerFor(String location) => GoRouter(
-  initialLocation: location,
-  routes: [
-    for (final path in ['/home', '/search'])
-      GoRoute(path: path, builder: (context, state) => Scaffold(
-        body: TextButton(onPressed: () => context.push('/dish/a'), child: Text(path)),
-      )),
-    GoRoute(path: '/dish/:id', builder: (context, state) => DishBackScope(
-      child: Scaffold(
-        appBar: AppBar(leading: BackButton(onPressed: () => backFromDish(context))),
-        body: TextButton(onPressed: () => context.push('/dish/b'), child: Text(state.pathParameters['id']!)),
-      ),
-    )),
-  ],
-);
+      initialLocation: location,
+      routes: [
+        for (final path in ['/home', '/search'])
+          GoRoute(
+              path: path,
+              builder: (context, state) => Scaffold(
+                    body: TextButton(
+                        onPressed: () => context.push('/dish/a'),
+                        child: Text(path)),
+                  )),
+        GoRoute(
+            path: '/dish/:id',
+            builder: (context, state) => DishBackScope(
+                  child: Scaffold(
+                    appBar: AppBar(
+                        leading:
+                            BackButton(onPressed: () => backFromDish(context))),
+                    body: TextButton(
+                        onPressed: () => context.push('/dish/b'),
+                        child: Text(state.pathParameters['id']!)),
+                  ),
+                )),
+      ],
+    );
 
 void main() {
   for (final source in ['/home', '/search']) {
