@@ -432,7 +432,7 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
                                 const SizedBox(height: AppSpace.v4),
                                 Text(
                                   '${AppStrings.formatTzs(item.unitPrice)} × ${item.quantity} = ${AppStrings.formatTzs(item.lineTotal)}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: isDark
                                         ? AppColors.heroLight
                                         : AppColors.primaryDeep,
