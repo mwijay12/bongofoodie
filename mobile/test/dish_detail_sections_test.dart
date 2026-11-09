@@ -219,9 +219,31 @@ Future<ProviderContainer> _pump(
 }
 
 Future<void> _scrollToBottom(WidgetTester tester) async {
-  final scrollView = find.byType(CustomScrollView).first;
-  for (var i = 0; i < 10; i++) {
-    await tester.drag(scrollView, const Offset(0, -180));
+  final scrollable = find.byType(Scrollable).first;
+  for (var i = 0; i < 28; i++) {
+    await tester.drag(scrollable, const Offset(0, -220));
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
+/// CustomScrollView only builds slivers near its viewport. Drag in bounded
+/// steps until the finder exists AND its centre is above the sticky bar.
+Future<void> _revealFinder(
+  WidgetTester tester,
+  Finder finder, {
+  Size size = _screen,
+}) async {
+  final scrollable = find.byType(Scrollable).first;
+  final safeBottom = size.height - DishDetailMetrics.stickyBarHeight - 16;
+  for (var i = 0; i < 40; i++) {
+    if (finder.evaluate().isNotEmpty) {
+      final centre = tester.getCenter(finder);
+      if (centre.dy >= 0 && centre.dy <= safeBottom) return;
+      final delta = centre.dy > safeBottom ? -120.0 : 120.0;
+      await tester.drag(scrollable, Offset(0, delta));
+    } else {
+      await tester.drag(scrollable, const Offset(0, -220));
+    }
     await tester.pump(const Duration(milliseconds: 100));
   }
 }
@@ -248,6 +270,7 @@ void main() {
   group('section 7: did you know', () {
     testWidgets('hides completely when both facts are null', (tester) async {
       await _pump(tester, item: _plainItem, repo: _repo(item: _plainItem));
+      await _scrollToBottom(tester);
       expect(find.byKey(_factKey), findsNothing);
       expect(find.text(_en.didYouKnow), findsNothing);
       expect(tester.takeException(), isNull);
@@ -256,6 +279,7 @@ void main() {
 
     testWidgets('shows the English fact by locale', (tester) async {
       await _pump(tester, item: _richItem, repo: _repo());
+      await _revealFinder(tester, find.byKey(_factKey));
       expect(find.byKey(_factKey), findsOneWidget);
       expect(find.text(_factEn), findsOneWidget);
       expect(find.text(_factSw), findsNothing);
@@ -270,6 +294,7 @@ void main() {
         repo: _repo(),
         strings: _sw,
       );
+      await _revealFinder(tester, find.byKey(_factKey));
       expect(find.byKey(_factKey), findsOneWidget);
       expect(find.text(_factSw), findsOneWidget);
       expect(find.text(_factEn), findsNothing);
@@ -281,6 +306,7 @@ void main() {
   group('section 8: reviews', () {
     testWidgets('hides completely when there are no reviews', (tester) async {
       await _pump(tester, item: _richItem, repo: _repo());
+      await _scrollToBottom(tester);
       expect(find.byKey(_reviewsKey), findsNothing);
       expect(find.text(_en.reviews), findsNothing);
       expect(tester.takeException(), isNull);
@@ -294,6 +320,7 @@ void main() {
         item: _richItem,
         repo: _repo(reviews: _reviews),
       );
+      await _revealFinder(tester, find.byKey(_reviewsKey));
       expect(find.byKey(_reviewsKey), findsOneWidget);
       expect(find.text(_en.reviews), findsOneWidget);
       expect(find.text('4.6 • 33'), findsOneWidget);
@@ -310,6 +337,7 @@ void main() {
   group('section 9: related dishes', () {
     testWidgets('hides completely when there are no siblings', (tester) async {
       await _pump(tester, item: _richItem, repo: _repo());
+      await _scrollToBottom(tester);
       expect(find.byKey(_relatedKey), findsNothing);
       expect(find.text(_en.youMayAlsoLike), findsNothing);
       expect(tester.takeException(), isNull);
@@ -325,6 +353,7 @@ void main() {
           menu: <MenuItemModel>[_richItem, ..._sixSiblings],
         ),
       );
+      await _revealFinder(tester, find.byKey(_relatedKey));
       expect(find.byKey(_relatedKey), findsOneWidget);
       expect(find.text(_en.youMayAlsoLike), findsOneWidget);
       expect(
@@ -345,6 +374,10 @@ void main() {
     testWidgets('selecting an add-on updates the sticky total and multiplies',
         (tester) async {
       await _pump(tester, item: _richItem, repo: _repo(options: _options));
+      await _revealFinder(
+        tester,
+        find.byKey(const ValueKey<String>('dish-add-on-side-1')),
+      );
       expect(
         find.text('${_en.addToCart}  ${AppStrings.formatTzs(7500)}'),
         findsOneWidget,
@@ -380,6 +413,10 @@ void main() {
         tester,
         item: _richItem,
         repo: _repo(options: _options),
+      );
+      await _revealFinder(
+        tester,
+        find.byKey(const ValueKey<String>('dish-add-on-side-1')),
       );
       await tester.tap(find.byKey(const ValueKey<String>('dish-add-on-side-1')));
       await tester.pump(AppMotion.fast);
@@ -450,6 +487,7 @@ void main() {
     await tester.pump(AppMotion.base);
 
     final card = find.byKey(const ValueKey<String>('dish-related-r1'));
+    await _revealFinder(tester, card, size: const Size(800, 1200));
     expect(card, findsOneWidget);
 
     await tester.tap(card);
@@ -476,6 +514,7 @@ void main() {
           ),
           brightness: brightness,
         );
+        await _revealFinder(tester, find.byKey(_relatedKey));
         await _scrollToBottom(tester);
         expect(tester.takeException(), isNull);
         await _disposeTree(tester);
