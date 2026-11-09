@@ -70,7 +70,7 @@ class CartNotifier extends StateNotifier<CartState> {
       name: dish.name,
       price: dish.price,
       imageUrl: dish.imageUrl,
-      quantity: quantity,
+      quantity: quantity.clamp(1, 20),
       customizations: customizations,
       isAiCreated: isCustomAiDish,
     );
@@ -81,8 +81,8 @@ class CartNotifier extends StateNotifier<CartState> {
     if (existingIdx >= 0) {
       final updated = List<CartItemModel>.from(state.items);
       final current = updated[existingIdx];
-      updated[existingIdx] =
-          current.copyWith(quantity: current.quantity + quantity);
+      updated[existingIdx] = current.copyWith(
+          quantity: (current.quantity + quantity).clamp(1, 20));
       state = state.copyWith(items: updated);
     } else {
       state = state.copyWith(items: [...state.items, candidate]);
@@ -92,7 +92,7 @@ class CartNotifier extends StateNotifier<CartState> {
   void incrementQuantity(String signatureKey) {
     final updated = state.items.map((item) {
       if (item.signatureKey == signatureKey) {
-        return item.copyWith(quantity: item.quantity + 1);
+        return item.copyWith(quantity: (item.quantity + 1).clamp(1, 20));
       }
       return item;
     }).toList();
@@ -104,8 +104,8 @@ class CartNotifier extends StateNotifier<CartState> {
     for (final item in state.items) {
       if (item.signatureKey != signatureKey) {
         updated.add(item);
-      } else if (item.quantity > 1) {
-        updated.add(item.copyWith(quantity: item.quantity - 1));
+      } else {
+        updated.add(item.copyWith(quantity: (item.quantity - 1).clamp(1, 20)));
       }
     }
     state = state.copyWith(
@@ -123,6 +123,21 @@ class CartNotifier extends StateNotifier<CartState> {
       appliedPromoCode: updated.isEmpty ? '' : state.appliedPromoCode,
       promoDiscount: updated.isEmpty ? 0 : state.promoDiscount,
     );
+  }
+
+  /// Restore one removed line without discarding subsequent cart edits.
+  void restoreItem(CartItemModel item, {required int index}) {
+    final updated = List<CartItemModel>.from(state.items);
+    final existing =
+        updated.indexWhere((i) => i.signatureKey == item.signatureKey);
+    if (existing >= 0) {
+      updated[existing] = updated[existing].copyWith(
+        quantity: (updated[existing].quantity + item.quantity).clamp(1, 20),
+      );
+    } else {
+      updated.insert(index.clamp(0, updated.length), item);
+    }
+    state = state.copyWith(items: updated);
   }
 
   bool applyPromoCode({
