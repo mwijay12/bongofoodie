@@ -66,10 +66,11 @@ class OrderRepository {
 
   Future<void> _saveLocalOrders(List<OrderModel> orders) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
+    final saved = await prefs.setString(
       _ordersPrefKey,
       jsonEncode(orders.map((o) => o.toLocalJson()).toList()),
     );
+    if (!saved) throw StateError('demo_order_save_failed');
     if (!_ordersStreamController.isClosed) {
       _ordersStreamController.add(orders);
     }
