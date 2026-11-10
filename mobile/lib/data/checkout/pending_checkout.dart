@@ -124,8 +124,9 @@ class PendingCheckoutCoordinator {
               : pending.responseJson != null)) {
         throw const FormatException();
       }
-      if (pending.phase == CheckoutPhase.confirmed)
+      if (pending.phase == CheckoutPhase.confirmed) {
         _validateResponse(pending, pending.response!);
+      }
       return pending;
     } catch (_) {
       throw StateError('checkout_journal_corrupt');
