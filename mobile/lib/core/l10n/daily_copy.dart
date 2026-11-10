@@ -62,7 +62,9 @@ abstract final class DailyCopy {
       final original = discoveries[i];
       if (source.id == original.id &&
           source.title == original.title &&
-          source.description == original.description) return discoveriesSw[i];
+          source.description == original.description) {
+        return discoveriesSw[i];
+      }
     }
     return source;
   }

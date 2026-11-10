@@ -50,7 +50,10 @@ void main() {
           final copy = sw ? DailyCopy.discoveriesSw : DailyCopy.discoveries;
           expect(copy.any((d) => find.text(d.title).evaluate().isNotEmpty),
               isTrue);
+          await tester.ensureVisible(find.text(strings.playSpiceTrivia));
+          await tester.pumpAndSettle();
           await tester.tap(find.text(strings.playSpiceTrivia));
+          await tester.pump(const Duration(milliseconds: 100));
           await tester.pumpAndSettle();
           expect(
               find.text(sw ? 'Swali la leo kuhusu chakula' : 'Daily food quiz'),
