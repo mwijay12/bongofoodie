@@ -157,6 +157,21 @@ void main() {
     expect(container.read(cartProvider).items, isNotEmpty);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+  testWidgets('cart changes while review is open prevent submission',
+      (tester) async {
+    final orders = _Orders();
+    final container = await _pump(tester, orders: orders);
+    await _fillDetails(tester, container);
+    await tester.tap(find.byKey(const ValueKey('place-order')));
+    await tester.pumpAndSettle();
+    container.read(cartProvider.notifier).incrementQuantity(
+        container.read(cartProvider).items.single.signatureKey);
+    await tester.tap(find.byKey(const Key('confirm-demo-order')));
+    await tester.pumpAndSettle();
+    expect(orders.writes, 0);
+    expect(container.read(cartProvider).totalItems, 2);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
   testWidgets(
       'pending write rejects double tap; failure retains cart; retry clears only on success',
       (tester) async {

@@ -88,6 +88,12 @@ jobs:
           }
           cat /tmp/flutter-tests.log
 
+      - name: Verify configured live checkout fails closed
+        run: >-
+          flutter test test/live_checkout_gate_test.dart
+          --dart-define=SUPABASE_URL=https://checkout-test.supabase.co
+          --dart-define=SUPABASE_PUBLISHABLE_KEY=test-only-non-secret-publishable
+
       - name: Build Release Android APK
         run: |
           flutter build apk --release \
