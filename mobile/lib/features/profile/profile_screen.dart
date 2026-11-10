@@ -515,7 +515,10 @@ class _LiveOrderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
+            spacing: AppSpace.sm,
+            runSpacing: AppSpace.xs,
+            alignment: WrapAlignment.spaceBetween,
             children: [
               Text(
                 '#${order.id}',
@@ -524,11 +527,10 @@ class _LiveOrderCard extends StatelessWidget {
                   fontSize: 14.5,
                 ),
               ),
-              const Spacer(),
               Text(
                 AppStrings.formatTzs(order.totalAmount),
-                style: const TextStyle(
-                  color: AppColors.primary,
+                style: TextStyle(
+                  color: isDark ? AppColors.heroLight : AppColors.primaryDeep,
                   fontWeight: FontWeight.w800,
                 ),
               ),
