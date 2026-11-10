@@ -1,4 +1,5 @@
 import '../models/models.dart';
+import '../../core/l10n/daily_copy.dart';
 
 class ShowcaseSeedData {
   ShowcaseSeedData._();
@@ -490,76 +491,8 @@ class ShowcaseSeedData {
     ),
   ];
 
-  static const List<DiscoveryModel> discoveries = [
-    DiscoveryModel(
-      id: 'disc-1',
-      title: 'Zanzibar Spice Capital',
-      description:
-          "Zanzibar (Unguja) is nicknamed the 'Spice Island' because it remains one of the world's top producers of Cloves (Karafuu), Cinnamon (Mdalasini), and Nutmeg.",
-    ),
-    DiscoveryModel(
-      id: 'disc-2',
-      title: 'National Street Icon',
-      description:
-          'Chipsi Mayai started at Dar es Salaam roadside banda stalls and evolved into Tanzania’s most iconic comfort meal — best enjoyed with fresh kachumbari!',
-    ),
-    DiscoveryModel(
-      id: 'disc-3',
-      title: 'The Pilau Spice Path',
-      description:
-          'Authentic Swahili Pilau roasts whole cumin, cardamom, cloves, and cinnamon in caramelized onions before simmering meat and Morogoro rice together.',
-    ),
-    DiscoveryModel(
-      id: 'disc-4',
-      title: 'Coastal Coconut Magic',
-      description:
-          'Tui la Nazi (freshly pressed coconut milk) is the soul of coastal cooking, lending velvety richness to Samaki wa Kupaka and Wali wa Nazi.',
-    ),
-    DiscoveryModel(
-      id: 'disc-5',
-      title: 'Kijitonyama Flagship Kitchen',
-      description:
-          'Our flagship Bongo Foodie kitchen in Kijitonyama, Dar es Salaam unites traditional mkaa charcoal grilling with Chef AI recipe personalization.',
-    ),
-  ];
-
-  static const List<TriviaQuestion> triviaQuestions = [
-    TriviaQuestion(
-      id: 1,
-      question: "Which aromatic spice is called 'Mdalasini' in Kiswahili?",
-      options: [
-        'Clove (Karafuu)',
-        'Cinnamon',
-        'Cardamom (Iliki)',
-        'Ginger (Tangawizi)',
-      ],
-      correctIndex: 1,
-      explainer:
-          'Mdalasini is Cinnamon! Harvested from tree bark in Zanzibar and Tanga, it perfumes Swahili Chai and Pilau.',
-    ),
-    TriviaQuestion(
-      id: 2,
-      question: "What does 'Tui la Nazi' mean in coastal Swahili cuisine?",
-      options: [
-        'Coconut Milk',
-        'Clarified Ghee',
-        'Tamarind Glaze',
-        'Mango Nectar'
-      ],
-      correctIndex: 0,
-      explainer:
-          'Tui la Nazi is freshly squeezed Coconut Milk — the creamy foundation of Samaki wa Kupaka and Maharage ya Nazi.',
-    ),
-    TriviaQuestion(
-      id: 3,
-      question:
-          'Which Tanzanian dish consists of marinated charcoal-grilled skewers?',
-      options: ['Vitumbua', 'Mishkaki', 'Kachumbari', 'Mandazi'],
-      correctIndex: 1,
-      explainer:
-          'Mishkaki are tender beef or goat skewers marinated in papaya, ginger, garlic, and lime, grilled over hot charcoal.',
-    ),
-  ];
+  static const List<DiscoveryModel> discoveries = DailyCopy.discoveries;
+  static const List<TriviaQuestion> triviaQuestions = DailyCopy.trivia;
 
   static const List<TzRegion> regions = [
     TzRegion(code: 7, name: 'Dar es Salaam'),

@@ -1,3 +1,5 @@
+import '../../core/l10n/daily_copy.dart';
+import '../../core/utils/daily_selection.dart';
 import '../../core/widgets/catalog_cache_notice.dart';
 import '../../core/widgets/promo_offer_card.dart';
 import '../../core/utils/dish_image_cache.dart';
@@ -69,9 +71,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final alreadyPlayed = await repo.hasAttemptedTriviaToday(user?.id);
     if (!context.mounted) return;
 
-    final daySeed = DateTime.now().day;
-    final question = ShowcaseSeedData
-        .triviaQuestions[daySeed % ShowcaseSeedData.triviaQuestions.length];
+    final question = selectDaily(ShowcaseSeedData.triviaQuestions,
+        DateTime.now(), (q) => q.id.toString())!;
 
     showAppSheet<void>(
       context,
@@ -352,9 +353,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: discoveriesAsync.when(
                     skipLoadingOnRefresh: true,
                     data: (list) {
-                      final featured = list.isNotEmpty
-                          ? list.first
-                          : ShowcaseSeedData.discoveries.first;
+                      final selected =
+                          selectDaily(list, DateTime.now(), (d) => d.id);
+                      if (selected == null) {
+                        return StateMessage.empty(
+                          compact: true,
+                          title: t.isSw
+                              ? 'Hakuna dokezo la leo'
+                              : 'No discovery today',
+                          body: t.isSw
+                              ? 'Rudi baadaye kwa dokezo jipya.'
+                              : 'Check back later for another food story.',
+                        );
+                      }
+                      final featured =
+                          DailyCopy.discovery(selected, isSw: t.isSw);
                       return Container(
                         padding: const EdgeInsets.all(AppSpace.lg),
                         decoration: BoxDecoration(
@@ -390,7 +403,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                                 TextButton.icon(
                                   style: TextButton.styleFrom(
-                                    visualDensity: VisualDensity.compact,
+                                    minimumSize: const Size(
+                                        AppSpace.huge, AppSpace.huge),
                                   ),
                                   onPressed: () =>
                                       _openSpiceTriviaSheet(context, ref),
@@ -444,7 +458,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       );
                     },
                     loading: () => SkeletonDiscoveryCard(),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error: (_, __) => StateMessage.error(
+                        compact: true,
+                        onRetry: () => ref
+                            .read(dailyDiscoveriesProvider.notifier)
+                            .refresh()),
                   ),
                 ),
               ),
@@ -917,12 +935,15 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final sw = ref.watch(appStringsProvider).isSw;
+    final question = DailyCopy.question(widget.question, isSw: sw);
     final isCorrect = _pickedIndex == widget.question.correctIndex;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
           AppSpace.v22, AppSpace.v6, AppSpace.v22, AppSpace.v30),
-      child: Column(
+      child: SingleChildScrollView(
+          child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -930,32 +951,37 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
             children: [
               const Icon(Icons.emoji_events_rounded, color: AppColors.primary),
               const SizedBox(width: AppSpace.v8),
-              Text(
-                'Daily Swahili Spice Trivia',
+              Expanded(
+                  child: Text(
+                sw ? 'Swali la leo kuhusu chakula' : 'Daily food quiz',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: AppSpace.v6),
           Text(
             widget.alreadyPlayed && !_submitted
-                ? 'You already unlocked today’s reward — feel free to practice again or copy code KARIBU2000!'
-                : 'Answer right to unlock code KARIBU2000 (TSh 2,000 OFF at checkout)!',
+                ? (sw
+                    ? 'Umeshajibu leo. Unaweza kujaribu tena kwa mazoezi.'
+                    : 'You have answered today. You can try again for practice.')
+                : (sw
+                    ? 'Chagua jibu moja, kisha soma maelezo yake.'
+                    : 'Choose an answer, then read the explanation.'),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: AppSpace.v16),
           Text(
-            widget.question.question,
+            question.question,
             style: const TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 16,
             ),
           ),
           const SizedBox(height: AppSpace.v14),
-          ...List.generate(widget.question.options.length, (i) {
-            final option = widget.question.options[i];
+          ...List.generate(question.options.length, (i) {
+            final option = question.options[i];
             final isAnswer = i == widget.question.correctIndex;
             final isPicked = i == _pickedIndex;
 
@@ -1006,8 +1032,12 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
                 children: [
                   Text(
                     isCorrect
-                        ? 'Hongera! Reward Code Unlocked: KARIBU2000'
-                        : 'Good try! ${widget.question.rewardNote}',
+                        ? (sw
+                            ? 'Sahihi! ${question.explainer}'
+                            : 'Correct! ${question.explainer}')
+                        : (sw
+                            ? 'Si jibu sahihi. ${question.explainer}'
+                            : 'Not quite. ${question.explainer}'),
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: AppSpace.v8),
@@ -1019,21 +1049,24 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
                         );
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content:
-                                Text('Promo code KARIBU2000 copied for Cart!'),
+                          SnackBar(
+                            content: Text(sw
+                                ? 'Msimbo KARIBU2000 umenakiliwa.'
+                                : 'Code KARIBU2000 copied.'),
                           ),
                         );
                       },
                       icon: const Icon(Icons.copy_rounded, size: 16),
-                      label: const Text('Copy Code KARIBU2000'),
+                      label: Text(sw
+                          ? 'Nakili msimbo KARIBU2000'
+                          : 'Copy code KARIBU2000'),
                     ),
                 ],
               ),
             ),
           ],
         ],
-      ),
+      )),
     );
   }
 }
