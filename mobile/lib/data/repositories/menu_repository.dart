@@ -563,8 +563,9 @@ class MenuRepository {
   Future<bool> submitTriviaAnswer(int questionId, int answerIndex) async {
     if (EnvConfig.hasSupabaseCredentials) {
       final sb = SupabaseService.client;
-      if (sb?.auth.currentUser == null)
+      if (sb?.auth.currentUser == null) {
         return false; // Guest practice, no entitlement.
+      }
       return await sb.rpc('submit_reward_quiz', params: {
         'p_question_id': questionId,
         'p_answer_index': answerIndex,

@@ -158,7 +158,8 @@ class CartNotifier extends StateNotifier<CartState> {
       }).catchError((Object _) {});
     }
     if (wasGuest && next != 'guest' && state.items.isNotEmpty) {
-      state = state; // Preserve the current guest cart on optional sign-in.
+      state = state.copyWith(appliedPromoCode: '', promoDiscount: 0);
+      // Preserve guest selections, never a guest/demo entitlement.
     } else {
       super.state = CartState(restoring: _persist);
       if (_persist) {
@@ -288,7 +289,9 @@ class CartNotifier extends StateNotifier<CartState> {
     if (!mounted ||
         revision != _revision ||
         owner != _owner ||
-        !identical(snapshot, state)) return false;
+        !identical(snapshot, state)) {
+      return false;
+    }
     if (quote.code != code.trim().toUpperCase() ||
         !quote.discount.isFinite ||
         quote.discount <= 0 ||

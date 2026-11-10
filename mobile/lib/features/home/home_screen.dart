@@ -981,6 +981,10 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
       _pickedIndex = idx;
     });
     try {
+      if (EnvConfig.hasSupabaseCredentials &&
+          ref.read(authProvider).user?.id != widget.userId) {
+        throw StateError('reward_owner_changed');
+      }
       final correct = await ref
           .read(menuRepositoryProvider)
           .submitTriviaAnswer(widget.question.id, idx);

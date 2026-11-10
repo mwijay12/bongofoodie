@@ -661,6 +661,10 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
                   ),
                   const SizedBox(width: AppSpace.v10),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryDeep,
+                        foregroundColor: AppColors.surface,
+                        minimumSize: const Size(AppSpace.huge, AppSpace.huge)),
                     onPressed: _checkingPromo || _placingOrder
                         ? null
                         : () => _applyPromo(branch),
