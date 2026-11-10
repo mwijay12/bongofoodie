@@ -23,7 +23,7 @@ class PermissionsTests(unittest.TestCase):
             apply(root)
             self.assertEqual(snapshot, [p.read_bytes() for p in [manifest, info, podfile]])
             names = [p.get(f'{{{ANDROID}}}name') for p in ET.parse(manifest).getroot().findall('uses-permission')]
-            self.assertEqual(set(names), {'android.permission.ACCESS_COARSE_LOCATION', 'android.permission.ACCESS_FINE_LOCATION'})
+            self.assertEqual(set(names), {'android.permission.INTERNET', 'android.permission.ACCESS_COARSE_LOCATION', 'android.permission.ACCESS_FINE_LOCATION'})
             data = plistlib.loads(info.read_bytes())
             self.assertIn('NSLocationWhenInUseUsageDescription', data)
             self.assertNotIn('NSLocationAlwaysAndWhenInUseUsageDescription', data)

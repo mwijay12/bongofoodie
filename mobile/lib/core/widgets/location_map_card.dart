@@ -8,6 +8,10 @@ import '../theme/app_tokens.dart';
 import '../utils/map_links.dart';
 import 'skeleton/skeleton_box.dart';
 
+final mapTileProviderFactoryProvider = Provider<TileProvider Function()>(
+    (ref) => () => NetworkTileProvider(
+        cachingProvider: BuiltInMapCachingProvider.getOrCreateInstance()));
+
 final externalMapLauncherProvider = Provider<Future<bool> Function(Uri)>(
     (ref) => (uri) => launchUrl(uri,
         mode: LaunchMode.externalApplication, webOnlyWindowName: '_blank'));
@@ -25,6 +29,7 @@ class _LocationMapCardState extends ConsumerState<LocationMapCard> {
   bool _loaded = false;
   bool _tileError = false;
   int _revision = 0;
+  TileProvider? _tileProvider;
   static const _tileUrl = String.fromEnvironment('MAP_TILE_URL',
       defaultValue: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png');
   static const _attribution = String.fromEnvironment('MAP_ATTRIBUTION',
@@ -111,9 +116,8 @@ class _LocationMapCardState extends ConsumerState<LocationMapCard> {
                             userAgentPackageName:
                                 'tz.co.bongofoodie (github.com/mwijay12/bongofoodie)',
                             panBuffer: 0,
-                            tileProvider: NetworkTileProvider(
-                                cachingProvider: BuiltInMapCachingProvider
-                                    .getOrCreateInstance()),
+                            tileProvider: _tileProvider ??=
+                                ref.read(mapTileProviderFactoryProvider)(),
                             tileDisplay: const TileDisplay.instantaneous(),
                             errorTileCallback: (_, __, ___) {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -125,7 +129,7 @@ class _LocationMapCardState extends ConsumerState<LocationMapCard> {
                             },
                             tileBuilder: (context, tile, image) =>
                                 image.loadFinished == null
-                                    ? const SkeletonBox()
+                                    ? const SkeletonBox(height: AppSpace.v220)
                                     : tile),
                         if (target.hasCoordinates)
                           MarkerLayer(markers: [
@@ -155,6 +159,7 @@ class _LocationMapCardState extends ConsumerState<LocationMapCard> {
               key: const Key('retry-location-map'),
               onPressed: () => setState(() {
                     _revision++;
+                    _tileProvider = null;
                     _tileError = false;
                   }),
               style: buttonStyle,

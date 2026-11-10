@@ -12,7 +12,7 @@ def apply(root: Path) -> None:
         ET.register_namespace('android', ANDROID)
         tree = ET.parse(manifest)
         node = tree.getroot()
-        for permission in ('ACCESS_COARSE_LOCATION', 'ACCESS_FINE_LOCATION'):
+        for permission in ('INTERNET', 'ACCESS_COARSE_LOCATION', 'ACCESS_FINE_LOCATION'):
             name = f'android.permission.{permission}'
             if not any(p.get(f'{{{ANDROID}}}name') == name for p in node.findall('uses-permission')):
                 ET.SubElement(node, 'uses-permission', {f'{{{ANDROID}}}name': name})
