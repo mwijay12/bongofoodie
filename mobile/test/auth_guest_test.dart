@@ -39,7 +39,7 @@ class _Auth extends AuthRepository {
   }
 }
 
-Future<ProviderContainer> pumpAuth(WidgetTester tester, Widget home,
+Future<ProviderContainer> _pumpAuth(WidgetTester tester, Widget home,
     {required _Auth repo,
     Size size = const Size(360, 640),
     bool dark = false,
@@ -104,7 +104,7 @@ void main() {
         '${entry.key} guest does not create a demo identity or lose cart',
         (tester) async {
       final repo = _Auth();
-      final container = await pumpAuth(tester, entry.value, repo: repo);
+      final container = await _pumpAuth(tester, entry.value, repo: repo);
       container.read(cartProvider.notifier).addItem(
           dish: const MenuItemModel(
               id: 'dish',
@@ -131,7 +131,7 @@ void main() {
         for (final signup in [false, true]) {
           testWidgets('auth signup=$signup $size dark=$dark $language text1.3',
               (tester) async {
-            await pumpAuth(
+            await _pumpAuth(
                 tester, signup ? const SignUpScreen() : const SignInScreen(),
                 repo: _Auth(), size: size, dark: dark, language: language);
             expect(tester.takeException(), isNull);
@@ -154,7 +154,7 @@ void main() {
   testWidgets('signup validates then remains signed out for email confirmation',
       (tester) async {
     final repo = _Auth()..confirmation = true;
-    final container = await pumpAuth(tester, const SignUpScreen(), repo: repo);
+    final container = await _pumpAuth(tester, const SignUpScreen(), repo: repo);
     for (final pair in [
       ('auth-name', 'Amina Hassan'),
       ('auth-phone', '0712345678'),

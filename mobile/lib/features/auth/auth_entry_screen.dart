@@ -51,8 +51,9 @@ class _AuthEntryScreenState extends ConsumerState<AuthEntryScreen> {
   }
 
   Future<void> _submit() async {
-    if (ref.read(authProvider).isLoading || !_form.currentState!.validate())
+    if (ref.read(authProvider).isLoading || !_form.currentState!.validate()) {
       return;
+    }
     FocusScope.of(context).unfocus();
     final controller = ref.read(authProvider.notifier);
     final success = widget.signUp
@@ -95,8 +96,9 @@ class _AuthEntryScreenState extends ConsumerState<AuthEntryScreen> {
 
   Future<void> _demo(UserRole role) async {
     final ok = await ref.read(authProvider.notifier).signInDemo(role);
-    if (mounted && ok)
+    if (mounted && ok) {
       context.go(role == UserRole.customer ? '/home' : '/staff');
+    }
   }
 
   @override
