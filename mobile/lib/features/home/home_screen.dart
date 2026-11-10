@@ -1,5 +1,5 @@
 import '../../core/widgets/catalog_cache_notice.dart';
-import '../../core/widgets/promo_dish_image.dart';
+import '../../core/widgets/promo_offer_card.dart';
 import '../../core/utils/dish_image_cache.dart';
 import '../../core/l10n/dish_copy.dart';
 import '../../core/widgets/app_sheet.dart';
@@ -46,6 +46,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _imagesWarmed = false;
+  final Set<String> _warmedPromoAssets = {};
 
   @override
   void didChangeDependencies() {
@@ -84,18 +85,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Color _parseHex(String hex) {
-    final clean = hex.replaceAll('#', '');
-    final val = int.tryParse('FF$clean', radix: 16);
-    return val != null ? Color(val) : AppColors.primary;
-  }
-
   @override
   Widget build(BuildContext context) {
     final t = ref.watch(appStringsProvider);
     final auth = ref.watch(authProvider);
     final address = ref.watch(deliveryAddressProvider);
     final promotionsAsync = ref.watch(promotionsProvider);
+    ref.listen<AsyncValue<List<PromotionModel>>>(promotionsProvider, (_, next) {
+      final assets = (next.valueOrNull ?? const <PromotionModel>[])
+          .take(2)
+          .map((p) => DishImage.resolveLocalAsset(p.imageKey))
+          .whereType<String>()
+          .where(_warmedPromoAssets.add)
+          .toList();
+      if (assets.isNotEmpty) {
+        precacheDishAssetsAfterFrame(
+            context, assets, PromoCardMetrics.imageSize);
+      }
+    });
     final discoveriesAsync = ref.watch(dailyDiscoveriesProvider);
     final menuAsync = ref.watch(allMenuItemsProvider);
     final favorites = ref.watch(favoritesProvider);
@@ -293,124 +300,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   padding: const EdgeInsets.only(bottom: AppSpace.lg),
                   child: promotionsAsync.when(
                     skipLoadingOnRefresh: true,
-                    data: (promos) => SizedBox(
-                      height: PromoCardMetrics.height,
-                      child: ListView.separated(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpace.screenH),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: promos.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(width: AppSpace.v14),
-                        itemBuilder: (context, index) {
-                          final p = promos[index];
-                          final bg = _parseHex(p.bgColorHex);
-                          return InkWell(
-                            borderRadius: BorderRadius.circular(
-                                PromoCardMetrics.borderRadius),
-                            onTap: () => context.go(
-                              '/search?category=${Uri.encodeComponent(p.targetCategory)}',
-                            ),
-                            child: Container(
-                              width: PromoCardMetrics.width,
-                              padding: const EdgeInsets.all(
-                                  PromoCardMetrics.padding),
-                              decoration: BoxDecoration(
-                                gradient: bg.green > bg.red
-                                    ? AppColors.promoGreen
-                                    : AppColors.promoOrange,
-                                borderRadius: BorderRadius.circular(
-                                    PromoCardMetrics.borderRadius),
-                              ),
-                              child: Row(
-                                children: [
-                                  Flexible(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        if (p.badgeText.isNotEmpty)
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: AppSpace.sm,
-                                                vertical: AppSpace.v2),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.scrim
-                                                  .withOpacity(0.22),
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                      AppRadius.pill),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                AppIcon(
-                                                  iconKey: p.iconKey ??
-                                                      appIconKeyForText(
-                                                        '${p.title} ${p.badgeText}',
-                                                        fallback:
-                                                            AppIconKey.fire,
-                                                      ),
-                                                  color: AppColors.surface,
-                                                ),
-                                                const SizedBox(
-                                                    width: AppSpace.v6),
-                                                Flexible(
-                                                  child: Text(
-                                                    stripEmoji(p.badgeText),
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: const TextStyle(
-                                                      color: AppColors.surface,
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w800,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        const SizedBox(height: AppSpace.v8),
-                                        Text(
-                                          stripEmoji(p.title),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            color: AppColors.surface,
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 17,
-                                          ),
-                                        ),
-                                        const SizedBox(height: AppSpace.v4),
-                                        Text(
-                                          stripEmoji(p.subtitle),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            color: AppColors.surface,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                            height: 1.3,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                    data: (promos) => promos.isEmpty
+                        ? const SizedBox.shrink()
+                        : SizedBox(
+                            height: PromoCardMetrics.height,
+                            child: ListView.separated(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpace.screenH),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: promos.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(width: AppSpace.v14),
+                              itemBuilder: (context, index) {
+                                final p = promos[index];
+                                return PromoOfferCard(
+                                  promotion: p,
+                                  actionLabel: t.isSw
+                                      ? 'Angalia menyu'
+                                      : 'Explore the menu',
+                                  onTap: () => context.go(
+                                    '/search?category=${Uri.encodeComponent(p.targetCategory)}',
                                   ),
-                                  const SizedBox(
-                                      width: PromoCardMetrics.imageGap),
-                                  PromoDishImage(imageRef: p.imageKey),
-                                ],
-                              ),
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
-                    ),
+                          ),
                     loading: () => SizedBox(
                       height: PromoCardMetrics.height,
                       child: ListView.separated(
@@ -423,7 +337,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         itemBuilder: (_, __) => const SkeletonPromoCard(),
                       ),
                     ),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error: (_, __) => StateMessage.error(
+                      compact: true,
+                      onRetry: () => ref.invalidate(promotionsProvider),
+                    ),
                   ),
                 ),
               ),
