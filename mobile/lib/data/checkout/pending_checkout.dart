@@ -118,7 +118,7 @@ class PendingCheckoutCoordinator {
           requestJson: json['request'] as String,
           phase: CheckoutPhase.values.byName(json['phase'] as String),
           responseJson: json['response'] as String?);
-      if (pending.request['version'] != 1 ||
+      if (!_validRequest(pending.request) ||
           (pending.phase == CheckoutPhase.confirmed
               ? pending.responseJson == null
               : pending.responseJson != null)) {
@@ -166,11 +166,7 @@ class PendingCheckoutCoordinator {
         }
         return existing;
       }
-      if (snapshot['version'] != 1 ||
-          snapshot['reviewed_quote'] is! Map ||
-          snapshot['items'] is! List ||
-          (snapshot['items'] as List).isEmpty ||
-          utf8.encode(requestJson).length > 65536) {
+      if (!_validRequest(snapshot)) {
         throw ArgumentError('checkout_invalid_request');
       }
       final pending = PendingCheckout(
@@ -234,6 +230,13 @@ class PendingCheckoutCoordinator {
         await _save(confirmed);
         return confirmed;
       });
+  static bool _validRequest(Map<String, dynamic> request) =>
+      request['version'] == 1 &&
+      request['reviewed_quote'] is Map &&
+      request['items'] is List &&
+      (request['items'] as List).isNotEmpty &&
+      utf8.encode(jsonEncode(request)).length <= 65536;
+
   static void _validateResponse(
       PendingCheckout pending, Map<String, dynamic> result) {
     final id = result['order_id'];

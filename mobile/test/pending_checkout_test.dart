@@ -35,8 +35,13 @@ class Journal implements CheckoutJournal {
   final values = <String, String>{};
   int writes = 0;
   int? failAt;
+  void Function()? onRead;
   @override
-  Future<String?> read(String scope) async => values[scope];
+  Future<String?> read(String scope) async {
+    onRead?.call();
+    return values[scope];
+  }
+
   @override
   Future<void> write(String scope, String value) async {
     writes++;
@@ -107,6 +112,29 @@ void main() {
     expect(transport.submits, 0);
     expect((await restarted.submitSaved()).phase, CheckoutPhase.confirmed);
     expect(transport.keys.single, prepared.key);
+  });
+  test('prepare freezes input before queued/storage awaits', () async {
+    final journal = Journal();
+    final transport = Transport();
+    final c = coordinator(journal, transport);
+    final body = request();
+    final operation = c.prepare(body);
+    body['name'] = 'changed immediately';
+    expect((await operation).request['name'], 'Asha Juma');
+    await expectLater(
+        coordinator(journal, Transport(project: 'https://wrong.supabase.co'))
+            .restore(),
+        throwsStateError);
+  });
+  test('owner change during journal read cannot expose old request', () async {
+    final journal = Journal();
+    final transport = Transport();
+    String? active = owner;
+    final c = coordinator(journal, transport, active: () => active);
+    await c.prepare(request());
+    journal.onRead = () => active = other;
+    await expectLater(c.restore(), throwsStateError);
+    expect(transport.submits, 0);
   });
   test('journal failure before prepared/unknown prevents network writes',
       () async {
@@ -190,7 +218,8 @@ void main() {
             .restore(),
         isNull);
     expect(
-        await coordinator(journal, transport,
+        await coordinator(
+                journal, Transport(project: 'https://another.supabase.co'),
                 project: 'https://another.supabase.co')
             .restore(),
         isNull);
