@@ -162,7 +162,8 @@ void main() {
       ('auth-password', 'securepass')
     ]) {
       final field = find.byKey(ValueKey(pair.$1));
-      await tester.ensureVisible(field);
+      await tester.scrollUntilVisible(field, 160,
+          scrollable: find.byType(Scrollable).first);
       await tester.enterText(field, pair.$2);
     }
     final submit = find.byKey(const ValueKey('auth-submit'));
