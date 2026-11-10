@@ -6,6 +6,7 @@ import '../data/models/models.dart';
 
 class CartState {
   final List<CartItemModel> items;
+  final bool restoring;
   final String appliedPromoCode;
   // Fixed v2: Promo discount ALWAYS starts at 0 until user explicitly applies a valid code
   final double promoDiscount;
@@ -13,6 +14,7 @@ class CartState {
 
   const CartState({
     this.items = const [],
+    this.restoring = false,
     this.appliedPromoCode = '',
     this.promoDiscount = 0,
     this.deliveryFee = 2000,
@@ -36,12 +38,14 @@ class CartState {
 
   CartState copyWith({
     List<CartItemModel>? items,
+    bool? restoring,
     String? appliedPromoCode,
     double? promoDiscount,
     double? deliveryFee,
   }) {
     return CartState(
       items: items ?? this.items,
+      restoring: restoring ?? this.restoring,
       appliedPromoCode: appliedPromoCode ?? this.appliedPromoCode,
       promoDiscount: promoDiscount ?? this.promoDiscount,
       deliveryFee: deliveryFee ?? this.deliveryFee,
@@ -62,7 +66,7 @@ class CartNotifier extends StateNotifier<CartState> {
   CartNotifier({bool persist = false, String owner = 'guest'})
       : _persist = persist,
         _owner = owner,
-        super(const CartState()) {
+        super(CartState(restoring: persist)) {
     _restoring = persist;
     ready = persist ? _restore() : Future<void>.value();
   }
@@ -120,6 +124,7 @@ class CartNotifier extends StateNotifier<CartState> {
       /* Corrupt or unavailable local data is not an order failure. */
     } finally {
       _restoring = false;
+      if (mounted) super.state = state.copyWith(restoring: false);
     }
   }
 
@@ -146,7 +151,7 @@ class CartNotifier extends StateNotifier<CartState> {
     if (wasGuest && next != 'guest' && state.items.isNotEmpty) {
       state = state; // Preserve the current guest cart on optional sign-in.
     } else {
-      super.state = const CartState();
+      super.state = CartState(restoring: _persist);
       if (_persist) {
         _restoring = true;
         ready = _restore();

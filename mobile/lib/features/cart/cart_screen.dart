@@ -70,7 +70,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     BranchSettingsModel branch,
     String deliveryAddress,
   ) async {
-    if (cart.items.isEmpty || _placingOrder) return;
+    if (cart.restoring || cart.items.isEmpty || _placingOrder) return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     setState(() {
       _placingOrder = true;
@@ -233,6 +233,19 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
         ref.read(cartProvider.notifier).syncDeliveryFee(branch.deliveryFee);
       }
     });
+
+    if (cart.restoring) {
+      return const Scaffold(
+          body: SafeArea(
+              child: Padding(
+        padding: EdgeInsets.all(AppSpace.screenH),
+        child: Column(children: [
+          SkeletonBox(height: AppSpace.v80),
+          SizedBox(height: AppSpace.md),
+          SkeletonBox(height: AppSpace.v80),
+        ]),
+      )));
+    }
 
     if (cart.items.isEmpty) {
       return Scaffold(
