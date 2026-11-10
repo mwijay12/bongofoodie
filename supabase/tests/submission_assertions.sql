@@ -20,12 +20,18 @@ select pg_temp.expect_error($q$select submit_checkout('10000000-0000-4000-8000-0
 do $$begin if exists(select 1 from checkout_requests) then raise exception 'disabled left request'; end if; end$$;
 update checkout_runtime set submission_enabled=true;
 select pg_temp.expect_error($q$select submit_checkout('10000000-0000-4000-8000-000000000001',(select body || '{"phone":"dummy"}'::jsonb from request_fixture))$q$,'checkout_invalid_recipient');
+select pg_temp.expect_error($q$select submit_checkout('10000000-0000-4000-8000-000000000001',(select body || '{"name":{"forged":"object"}}'::jsonb from request_fixture))$q$,'checkout_invalid_recipient');
+select pg_temp.expect_error($q$select submit_checkout('10000000-0000-4000-8000-000000000001',(select body || '{"profile_id":"22222222-2222-2222-2222-222222222222"}'::jsonb from request_fixture))$q$,'checkout_invalid_request');
 select pg_temp.expect_error($q$select submit_checkout('10000000-0000-4000-8000-000000000001',(select jsonb_set(body,'{reviewed_quote,total}','1') from request_fixture))$q$,'checkout_review_changed');
 begin;
 select submit_checkout('10000000-0000-4000-8000-000000000002',(select body from request_fixture));
 rollback;
 do $$begin if exists(select 1 from checkout_requests) then raise exception 'rollback left ledger'; end if; end$$;
+grant select on request_fixture to authenticated;
+set role authenticated;
 select submit_checkout('10000000-0000-4000-8000-000000000001',(select body from request_fixture));
+select lookup_checkout('10000000-0000-4000-8000-000000000001');
+reset role;
 do $$declare a jsonb; b jsonb; begin
  a:=lookup_checkout('10000000-0000-4000-8000-000000000001');
  b:=submit_checkout('10000000-0000-4000-8000-000000000001',(select body from request_fixture));
@@ -46,6 +52,7 @@ select pg_temp.expect_error($q$select * from checkout_requests$q$,'permission de
 select pg_temp.expect_error($q$update checkout_runtime set submission_enabled=true$q$,'permission denied');
 reset role;
 set role anon;
+select pg_temp.expect_error($q$select submit_checkout('10000000-0000-4000-8000-000000000001','{}')$q$,'permission denied');
 select pg_temp.expect_error($q$select lookup_checkout('10000000-0000-4000-8000-000000000001')$q$,'permission denied');
 reset role;
 select set_config('request.jwt.claim.sub','',false);

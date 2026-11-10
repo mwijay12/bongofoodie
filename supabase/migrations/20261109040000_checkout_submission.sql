@@ -47,6 +47,12 @@ begin
       ('version','items','region','district','ward','promo_code','name','phone','address','payment_method','notes','reviewed_quote')) then
     raise exception 'checkout_invalid_request';
   end if;
+  if exists(select 1 from unnest(array['name','phone','address','payment_method']) k
+    where jsonb_typeof(p_request->k) is distinct from 'string') or
+    (p_request ? 'notes' and jsonb_typeof(p_request->'notes') is distinct from 'string') or
+    (p_request ? 'promo_code' and jsonb_typeof(p_request->'promo_code') is distinct from 'string') then
+    raise exception 'checkout_invalid_recipient';
+  end if;
   name := btrim(p_request->>'name'); phone := p_request->>'phone';
   address := btrim(p_request->>'address'); method := p_request->>'payment_method';
   code := coalesce(p_request->>'promo_code',''); notes := coalesce(p_request->>'notes','');
