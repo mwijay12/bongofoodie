@@ -62,14 +62,15 @@ class AchievementCards extends StatelessWidget {
                         ClipRRect(
                             borderRadius: BorderRadius.circular(AppRadius.sm),
                             child: Image.asset('assets/badges/${badge.id}.png',
-                                width: AppSpace.v64,
-                                height: AppSpace.v64,
-                                cacheWidth: (AppSpace.v64 *
+                                width: AppSpace.xxl * 2,
+                                height: AppSpace.xxl * 2,
+                                cacheWidth: (AppSpace.xxl *
+                                        2 *
                                         MediaQuery.devicePixelRatioOf(context))
                                     .round(),
                                 errorBuilder: (_, __, ___) => const SizedBox(
-                                    width: AppSpace.v64,
-                                    height: AppSpace.v64,
+                                    width: AppSpace.xxl * 2,
+                                    height: AppSpace.xxl * 2,
                                     child: Icon(
                                         Icons.workspace_premium_outlined)))),
                         const SizedBox(width: AppSpace.md),

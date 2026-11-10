@@ -28,5 +28,10 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rewards_fixture.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20261109010000_authoritative_rewards.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rewards_assertions.sql
+      - name: Test event-based achievement authorization
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20261109020000_achievement_events.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/achievements_assertions.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20261109020000_achievement_events.sql
       - name: Compete for last campaign redemption
         run: bash supabase/tests/rewards_concurrency.sh
