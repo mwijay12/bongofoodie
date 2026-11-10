@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:bongo_foodie/core/widgets/tanzania_location_sheet.dart';
 import 'package:bongo_foodie/core/theme/app_theme.dart';
 import 'package:bongo_foodie/core/l10n/app_strings.dart';
@@ -13,6 +14,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 class OfflineLocations extends LocationRepository {
   @override
   Future<List<TzRegion>> getRegions() async => throw StateError('offline');
+}
+
+class RacingLocations extends LocationRepository {
+  final first = Completer<List<TzDistrict>>();
+  @override
+  Future<List<TzRegion>> getRegions() async => const [
+        TzRegion(code: 7, name: 'Dar es Salaam'),
+        TzRegion(code: 8, name: 'Other region')
+      ];
+  @override
+  Future<List<TzDistrict>> getDistricts(int region) => region == 7
+      ? first.future
+      : Future.value(
+          const [TzDistrict(code: 800, name: 'Other district', regionCode: 8)]);
 }
 
 Future<ProviderContainer> open(
@@ -107,6 +122,30 @@ void main() {
       }
     }
   }
+  testWidgets('late district response cannot replace a newer region',
+      (tester) async {
+    final repo = RacingLocations();
+    await open(tester, const Size(430, 932), false, false, repo: repo);
+    Future<void> choose(String name) async {
+      await tester.tap(find.byKey(const Key('location-region')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(name).last);
+      await tester.pumpAndSettle();
+    }
+
+    await choose('Dar es Salaam');
+    await choose('Other region');
+    repo.first.complete(
+        const [TzDistrict(code: 701, name: 'Old district', regionCode: 7)]);
+    await tester.pumpAndSettle();
+    final district = tester.widget<DropdownButtonFormField<TzDistrict>>(
+        find.byKey(const Key('location-district')));
+    expect(district.items!.single.value!.regionCode, 8);
+    expect(district.initialValue, isNull);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('no automatic first region or ward selected', (tester) async {
     await open(tester, const Size(360, 640), false, false);
     expect(
