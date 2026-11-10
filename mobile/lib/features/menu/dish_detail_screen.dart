@@ -1,3 +1,4 @@
+import '../../core/utils/addon_selection.dart';
 import '../../core/widgets/dish_back_scope.dart';
 import '../../core/l10n/dish_copy.dart';
 import 'dart:async';
@@ -99,7 +100,7 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
   List<CustomizationOption> _selectedCustomizationsFor(MenuItemModel item) {
     final options = ref.read(dishCustomizationsProvider(item.id)).valueOrNull ??
         const <CustomizationOption>[];
-    return options
+    return validatedAddons(options)
         .where((option) => _selectedCustomizationIds.contains(option.id))
         .toList(growable: false);
   }
@@ -120,6 +121,8 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
   }
 
   void _onAdd(MenuItemModel item) {
+    final options = ref.read(dishCustomizationsProvider(item.id));
+    if (options.isLoading || options.hasError || !options.hasValue) return;
     HapticFeedback.mediumImpact();
     ref.read(cartProvider.notifier).addItem(
           dish: item,
@@ -135,13 +138,16 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
 
   Widget _buildStickyBar(MenuItemModel item) {
     final customizations = _selectedCustomizationsFor(item);
+    final options = ref.watch(dishCustomizationsProvider(item.id));
     return _DishStickyBar(
       quantity: _quantity,
       total: _totalFor(item, _quantity, customizations),
       added: _added,
       onIncrement: _incrementQuantity,
       onDecrement: _decrementQuantity,
-      onAdd: () => _onAdd(item),
+      onAdd: options.hasValue && !options.isLoading && !options.hasError
+          ? () => _onAdd(item)
+          : null,
     );
   }
 
@@ -152,7 +158,9 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
       skeleton: const _AddOnSkeletonRows(),
       isEmpty: (options) => options.isEmpty,
       empty: const SizedBox.shrink(),
-      errorWidget: const SizedBox.shrink(),
+      errorWidget: StateMessage.error(
+          compact: true,
+          onRetry: () => ref.invalidate(dishCustomizationsProvider(item.id))),
       data: (options) => _AddOnsSection(
         options: options,
         selectedIds: _selectedCustomizationIds,
@@ -363,7 +371,7 @@ class _DishStickyBar extends ConsumerWidget {
   final bool added;
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
-  final VoidCallback onAdd;
+  final VoidCallback? onAdd;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -439,6 +447,7 @@ class _DishStickyBar extends ConsumerWidget {
             const SizedBox(width: AppSpace.v14),
             Expanded(
               child: FilledButton.icon(
+                key: const Key('dish-add-to-cart'),
                 onPressed: onAdd,
                 icon: AnimatedSwitcher(
                   duration: MediaQuery.disableAnimationsOf(context)
@@ -1124,6 +1133,10 @@ class _AddOnsSection extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _SectionTitle(title: t.addOns),
+          const SizedBox(height: AppSpace.xs),
+          Text(t.isSw
+              ? 'Si lazima. Chagua kila nyongeza mara moja kwa kila bidhaa.'
+              : 'Optional. Each extra is selected once per item.'),
           const SizedBox(height: AppSpace.md),
           for (final option in options) ...[
             _AddOnRow(

@@ -17,7 +17,10 @@ Map<String, dynamic> _baseMenuItemJson() => <String, dynamic>{
       'protein': 22,
       'prep_time_mins': 18,
       'category_id': 'cat-bites',
-      'categories': <String, dynamic>{'id': 'cat-bites', 'name': 'Swahili Bites'},
+      'categories': <String, dynamic>{
+        'id': 'cat-bites',
+        'name': 'Swahili Bites'
+      },
     };
 
 void main() {
@@ -136,7 +139,8 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    final missing = await container.read(menuItemByIdProvider('missing-id').future);
+    final missing =
+        await container.read(menuItemByIdProvider('missing-id').future);
 
     expect(missing, isNull);
   });
@@ -157,7 +161,10 @@ void main() {
 
     expect(options, isNotEmpty);
     expect(options.first.id, isNotEmpty);
-    expect(missingOptions, ShowcaseSeedData.defaultSwahiliSides);
+    expect(missingOptions, isEmpty);
+    expect(
+        await container.read(dishCustomizationsProvider('menu-stoney').future),
+        isEmpty);
   });
 
   test('dishReviewsProvider returns seed reviews with zero latency', () async {

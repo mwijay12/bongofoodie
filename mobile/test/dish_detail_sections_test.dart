@@ -1,3 +1,4 @@
+import 'package:bongo_foodie/data/mock/showcase_seed_data.dart';
 import 'package:bongo_foodie/core/l10n/app_strings.dart';
 import 'package:bongo_foodie/core/theme/app_theme.dart';
 import 'package:bongo_foodie/core/theme/app_tokens.dart';
@@ -120,6 +121,7 @@ class _SectionsRepository extends MenuRepository {
   final List<MenuItemModel> menu;
   final List<MenuReviewModel> reviews;
   final List<CustomizationOption> options;
+  bool failAddons = false;
 
   @override
   Future<List<MenuItemModel>> getMenu({
@@ -134,8 +136,10 @@ class _SectionsRepository extends MenuRepository {
       .toList(growable: false);
 
   @override
-  Future<List<CustomizationOption>> getDishCustomizations(String dishId) async =>
-      options;
+  Future<List<CustomizationOption>> getDishCustomizations(String dishId) async {
+    if (failAddons) throw StateError('offline');
+    return options;
+  }
 }
 
 List<Override> _overrides(
@@ -151,6 +155,7 @@ List<Override> _overrides(
 Widget _host({
   required Widget home,
   required Brightness brightness,
+  Size size = _screen,
 }) {
   return MaterialApp(
     theme: brightness == Brightness.dark ? AppTheme.dark() : buildAppTheme(),
@@ -158,7 +163,7 @@ Widget _host({
     themeMode: brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light,
     builder: (context, child) => MediaQuery(
       data: MediaQuery.of(context).copyWith(
-        size: _screen,
+        size: size,
         textScaler: const TextScaler.linear(1.3),
         platformBrightness: brightness,
         disableAnimations: true,
@@ -190,13 +195,15 @@ Future<ProviderContainer> _pump(
   required _SectionsRepository repo,
   Brightness brightness = Brightness.light,
   AppStrings strings = _en,
+  Size size = _screen,
 }) async {
-  _configureSurface(tester);
+  _configureSurface(tester, size: size);
   await tester.pumpWidget(
     ProviderScope(
       overrides: _overrides(repo, strings: strings),
       child: _host(
         brightness: brightness,
+        size: size,
         home: DishDetailScreen(
           id: item.id,
           args: DishRouteArgs(
@@ -370,6 +377,55 @@ void main() {
     });
   });
 
+  for (final size in [const Size(360, 640), const Size(430, 932)]) {
+    for (final dark in [false, true]) {
+      for (final strings in [_en, _sw]) {
+        testWidgets('soda has no addons $size dark=$dark sw=${strings.isSw}',
+            (tester) async {
+          final soda = ShowcaseSeedData.menuItems
+              .firstWhere((i) => i.id == 'menu-stoney');
+          final repo = _SectionsRepository(menu: [soda]);
+          final container = await _pump(tester,
+              item: soda,
+              repo: repo,
+              size: size,
+              brightness: dark ? Brightness.dark : Brightness.light,
+              strings: strings);
+          await _scrollToBottom(tester);
+          expect(find.byKey(const Key('dish-add-ons-section')), findsNothing);
+          expect(find.text('Pili Pili Kali'), findsNothing);
+          final add = find.byKey(const Key('dish-add-to-cart'));
+          expect(tester.widget<FilledButton>(add).onPressed, isNotNull);
+          await tester.tap(add);
+          await tester.pump(AppMotion.fast);
+          expect(container.read(cartProvider).items.single.customizations,
+              isEmpty);
+          expect(
+              container.read(cartProvider).items.single.lineTotal, soda.price);
+          expect(tester.takeException(), isNull);
+          await _disposeTree(tester);
+        });
+      }
+    }
+  }
+
+  testWidgets('addon read failure disables add until explicit retry succeeds',
+      (tester) async {
+    final repo = _SectionsRepository(menu: [_richItem])..failAddons = true;
+    await _pump(tester, item: _richItem, repo: repo);
+    final add = find.byKey(const Key('dish-add-to-cart'));
+    expect(tester.widget<FilledButton>(add).onPressed, isNull);
+    await _revealFinder(tester, find.text(_en.retry));
+    repo.failAddons = false;
+    await tester.tap(find.text(_en.retry));
+    await tester.pump(AppMotion.base);
+    await tester.pump(AppMotion.base);
+    expect(tester.widget<FilledButton>(add).onPressed, isNotNull);
+    expect(find.byKey(const Key('dish-add-ons-section')), findsNothing);
+    expect(tester.takeException(), isNull);
+    await _disposeTree(tester);
+  });
+
   group('add-ons still feed the existing pricing function', () {
     testWidgets('selecting an add-on updates the sticky total and multiplies',
         (tester) async {
@@ -383,7 +439,8 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.byKey(const ValueKey<String>('dish-add-on-side-1')));
+      await tester
+          .tap(find.byKey(const ValueKey<String>('dish-add-on-side-1')));
       await tester.pump(AppMotion.fast);
       expect(
         find.text('${_en.addToCart}  ${AppStrings.formatTzs(8500)}'),
@@ -397,7 +454,8 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.byKey(const ValueKey<String>('dish-add-on-side-1')));
+      await tester
+          .tap(find.byKey(const ValueKey<String>('dish-add-on-side-1')));
       await tester.pump(AppMotion.fast);
       expect(
         find.text('${_en.addToCart}  ${AppStrings.formatTzs(15000)}'),
@@ -418,9 +476,11 @@ void main() {
         tester,
         find.byKey(const ValueKey<String>('dish-add-on-side-1')),
       );
-      await tester.tap(find.byKey(const ValueKey<String>('dish-add-on-side-1')));
+      await tester
+          .tap(find.byKey(const ValueKey<String>('dish-add-on-side-1')));
       await tester.pump(AppMotion.fast);
-      await tester.tap(find.byWidgetPredicate((widget) => widget is FilledButton));
+      await tester
+          .tap(find.byWidgetPredicate((widget) => widget is FilledButton));
       await tester.pump(AppMotion.fast);
 
       final cart = container.read(cartProvider);

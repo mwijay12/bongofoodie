@@ -1,5 +1,8 @@
+import '../../core/utils/addon_selection.dart';
+import '../../core/utils/daily_selection.dart';
 import 'dart:async';
 import 'dart:convert';
+import '../../core/utils/local_snapshot.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/supabase_service.dart';
@@ -30,26 +33,96 @@ List<String> _asStringList(dynamic value) {
 
 final showcaseLatencyProvider = Provider<Duration>((ref) {
   if (SupabaseService.isLive) return Duration.zero;
-  const configuredMs = int.fromEnvironment('SHOWCASE_LATENCY_MS', defaultValue: 700);
+  const configuredMs =
+      int.fromEnvironment('SHOWCASE_LATENCY_MS', defaultValue: 700);
   return Duration(milliseconds: configuredMs < 0 ? 0 : configuredMs);
 });
 
+enum CatalogSource { live, saved, stale }
+
+final catalogSourcesProvider =
+    StateProvider<Map<String, CatalogSource>>((ref) => {});
+
 final menuRepositoryProvider = Provider<MenuRepository>((ref) {
-  return MenuRepository(showcaseLatency: ref.watch(showcaseLatencyProvider));
+  return MenuRepository(
+      showcaseLatency: ref.watch(showcaseLatencyProvider),
+      onSource: (key, source) => ref
+          .read(catalogSourcesProvider.notifier)
+          .update((current) => {...current, key: source}));
 });
 
 class MenuRepository {
-  MenuRepository({Duration? showcaseLatency})
+  MenuRepository({Duration? showcaseLatency, this.onSource})
       : _showcaseLatency = showcaseLatency ?? EnvConfig.showcaseLatency;
   final Duration _showcaseLatency;
+  final void Function(String, CatalogSource)? onSource;
+  final _snapshots = LocalSnapshot();
+
+  Future<List<T>> _cached<T>(
+      String key,
+      Future<List<T>> Function() fetch,
+      Map<String, dynamic> Function(T) encode,
+      T Function(Map<String, dynamic>) decode) async {
+    if (!SupabaseService.isLive) return fetch();
+    final storageKey = '${Uri.encodeComponent(EnvConfig.supabaseUrl)}:$key';
+    try {
+      final values = await fetch().timeout(_dishReadTimeout);
+      onSource?.call(key, CatalogSource.live);
+      try {
+        await _snapshots.write(storageKey, values.map(encode).toList());
+      } catch (_) {}
+      return values;
+    } catch (_) {
+      final snapshot = await _snapshots.read(storageKey);
+      if (snapshot == null) rethrow;
+      final values = (snapshot.data as List)
+          .map((r) => decode(Map<String, dynamic>.from(r as Map)))
+          .toList();
+      onSource?.call(
+          key, snapshot.stale ? CatalogSource.stale : CatalogSource.saved);
+      return values;
+    }
+  }
+
+  Future<List<CategoryModel>> getCategories() => _cached(
+      'categories',
+      _fetchCategories,
+      (c) => {'id': c.id, 'name': c.name, 'description': c.description},
+      CategoryModel.fromJson);
+
+  Future<List<MenuItemModel>> getMenu(
+          {String category = '', String query = ''}) =>
+      _cached(
+          'menu:${Uri.encodeComponent(category)}:${Uri.encodeComponent(query)}',
+          () => _fetchMenu(category: category, query: query),
+          (m) => m.toJson(),
+          MenuItemModel.fromJson);
+
+  Future<List<PromotionModel>> getPromotions() => _cached(
+      'promotions',
+      _fetchPromotions,
+      (p) => {
+            'id': p.id,
+            'title': p.title,
+            'subtitle': p.subtitle,
+            'discount_badge': p.discountBadge,
+            'promo_code': p.promoCode,
+            'image_key': p.imageKey,
+            'bg_hex': p.bgHex,
+            'is_active': p.isActive
+          },
+      PromotionModel.fromJson);
+
+  Future<List<DiscoveryModel>> getDailyDiscoveries() => _cached('discoveries',
+      _fetchDiscoveries, (d) => d.toJson(), DiscoveryModel.fromJson);
 
   static const _dishReadTimeout = Duration(seconds: 10);
   static const _favPrefKey = 'bongo_favorites_v2';
   static const _discoveriesPrefKey = 'bongo_discoveries_v2';
-  static const _quizDatePrefKey = 'bongo_quiz_date_v2';
-  static const _quizWinsPrefKey = 'bongo_quiz_wins_v2';
+  static const _quizDatePrefKey = 'bongo_demo_quiz_date_v3';
+  static const _quizWinsPrefKey = 'bongo_demo_quiz_wins_v3';
 
-  Future<List<CategoryModel>> getCategories() async {
+  Future<List<CategoryModel>> _fetchCategories() async {
     final sb = SupabaseService.client;
     if (sb == null && _showcaseLatency > Duration.zero) {
       await Future<void>.delayed(_showcaseLatency);
@@ -66,12 +139,15 @@ class MenuRepository {
                   (r) => CategoryModel.fromJson(Map<String, dynamic>.from(r)))
               .toList();
         }
-      } catch (_) {}
+        return [];
+      } catch (_) {
+        rethrow;
+      }
     }
     return ShowcaseSeedData.categories;
   }
 
-  Future<List<MenuItemModel>> getMenu({
+  Future<List<MenuItemModel>> _fetchMenu({
     String category = '',
     String query = '',
   }) async {
@@ -115,20 +191,9 @@ class MenuRepository {
           items = rows.map<MenuItemModel>((raw) {
             final r = Map<String, dynamic>.from(raw);
             final catObj = r['categories'];
-            final catMap = catObj is Map ? Map<String, dynamic>.from(catObj) : null;
-            final rawLinks = r['menu_customizations'];
-            final custList = <CustomizationOption>[];
-            if (rawLinks is List) {
-              for (final link in rawLinks) {
-                if (link is Map && link['customizations'] is Map) {
-                  custList.add(
-                    CustomizationOption.fromJson(
-                      Map<String, dynamic>.from(link['customizations'] as Map),
-                    ),
-                  );
-                }
-              }
-            }
+            final catMap =
+                catObj is Map ? Map<String, dynamic>.from(catObj) : null;
+            final custList = linkedAddonsFromRows(r['menu_customizations']);
 
             return MenuItemModel(
               id: (r['id'] ?? '').toString(),
@@ -143,9 +208,7 @@ class MenuRepository {
               prepTimeMins: (r['prep_time_mins'] as num?)?.toInt() ?? 20,
               categoryId: (catMap?['id'] ?? r['category_id'] ?? '').toString(),
               categoryName: (catMap?['name'] ?? 'Swahili Bites').toString(),
-              availableCustomizations: custList.isNotEmpty
-                  ? custList
-                  : ShowcaseSeedData.defaultSwahiliSides,
+              availableCustomizations: validatedAddons(custList),
               spiceLevel: (r['spice_level'] as num?)?.toInt(),
               ingredients: _asStringList(r['ingredients']),
               allergens: _asStringList(r['allergens']),
@@ -154,10 +217,12 @@ class MenuRepository {
             );
           }).toList();
         }
-      } catch (_) {}
+      } catch (_) {
+        rethrow;
+      }
     }
 
-    if (items.isEmpty) {
+    if (items.isEmpty && sb == null) {
       items = List<MenuItemModel>.from(ShowcaseSeedData.menuItems);
       if (query.trim().isNotEmpty) {
         final q = query.trim().toLowerCase();
@@ -183,38 +248,27 @@ class MenuRepository {
 
   Future<List<CustomizationOption>> getDishCustomizations(String dishId) async {
     final sb = SupabaseService.client;
-    if (sb == null && _showcaseLatency > Duration.zero) {
+    if (sb != null) {
+      final rows = await sb
+          .from('menu_customizations')
+          .select('customizations ( id, name, price, type )')
+          .eq('menu_id', dishId)
+          .order('created_at', ascending: true)
+          .timeout(_dishReadTimeout);
+      return linkedAddonsFromRows(rows);
+    }
+    if (EnvConfig.hasSupabaseCredentials) {
+      throw StateError('addon_catalog_unavailable');
+    }
+    if (_showcaseLatency > Duration.zero) {
       await Future<void>.delayed(_showcaseLatency);
     }
-    if (sb != null && !dishId.startsWith('menu-')) {
-      try {
-        final rows = await sb
-            .from('menu_customizations')
-            .select('customizations ( id, name, price, type )')
-            .eq('menu_id', dishId)
-            .order('created_at', ascending: true)
-            .timeout(_dishReadTimeout);
-        final options = <CustomizationOption>[];
-        for (final row in rows) {
-          final customization = row['customizations'];
-          if (customization is Map) {
-            options.add(CustomizationOption.fromJson(
-              Map<String, dynamic>.from(customization),
-            ));
-          }
-        }
-        if (options.isNotEmpty) return options;
-      } catch (_) {}
+    for (final item in ShowcaseSeedData.menuItems) {
+      if (item.id == dishId) {
+        return validatedAddons(item.availableCustomizations);
+      }
     }
-
-    final matches = ShowcaseSeedData.menuItems
-        .where((item) => item.id == dishId)
-        .toList();
-    if (matches.isNotEmpty &&
-        matches.first.availableCustomizations.isNotEmpty) {
-      return matches.first.availableCustomizations;
-    }
-    return ShowcaseSeedData.defaultSwahiliSides;
+    return const [];
   }
 
   Future<List<MenuReviewModel>> getDishReviews(String dishId) async {
@@ -245,7 +299,7 @@ class MenuRepository {
         .toList();
   }
 
-  Future<List<PromotionModel>> getPromotions() async {
+  Future<List<PromotionModel>> _fetchPromotions() async {
     final sb = SupabaseService.client;
     if (sb == null && _showcaseLatency > Duration.zero) {
       await Future<void>.delayed(_showcaseLatency);
@@ -271,7 +325,10 @@ class MenuRepository {
             return PromotionModel.fromJson(json);
           }).toList();
         }
-      } catch (_) {}
+        return [];
+      } catch (_) {
+        rethrow;
+      }
     }
     return ShowcaseSeedData.promotions;
   }
@@ -291,7 +348,10 @@ class MenuRepository {
         if (row != null) {
           return BranchSettingsModel.fromJson(Map<String, dynamic>.from(row));
         }
-      } catch (_) {}
+        throw StateError('Branch settings unavailable');
+      } catch (_) {
+        rethrow;
+      }
     }
     return const BranchSettingsModel();
   }
@@ -340,9 +400,9 @@ class MenuRepository {
     }
 
     final prefs = await SharedPreferences.getInstance();
-    final current =
-        (prefs.getStringList(_favPrefKey) ?? ['menu-nyama-choma', 'menu-pilau-kuku'])
-            .toSet();
+    final current = (prefs.getStringList(_favPrefKey) ??
+            ['menu-nyama-choma', 'menu-pilau-kuku'])
+        .toSet();
     final added = !current.contains(menuId);
     if (added) {
       current.add(menuId);
@@ -375,7 +435,7 @@ class MenuRepository {
     return double.parse((((currentRating * 8) + stars) / 9).toStringAsFixed(1));
   }
 
-  Future<List<DiscoveryModel>> getDailyDiscoveries() async {
+  Future<List<DiscoveryModel>> _fetchDiscoveries() async {
     final sb = SupabaseService.client;
     if (sb == null && _showcaseLatency > Duration.zero) {
       await Future<void>.delayed(_showcaseLatency);
@@ -398,7 +458,10 @@ class MenuRepository {
             return DiscoveryModel.fromJson(json);
           }).toList();
         }
-      } catch (_) {}
+        return [];
+      } catch (_) {
+        rethrow;
+      }
     }
 
     final prefs = await SharedPreferences.getInstance();
@@ -410,7 +473,9 @@ class MenuRepository {
             .whereType<Map>()
             .map((e) => DiscoveryModel.fromJson(Map<String, dynamic>.from(e)))
             .toList();
-      } catch (_) {}
+      } catch (_) {
+        rethrow;
+      }
     }
     return ShowcaseSeedData.discoveries;
   }
@@ -462,47 +527,60 @@ class MenuRepository {
   }
 
   Future<bool> hasAttemptedTriviaToday(String? userId) async {
-    final today = DateTime.now().toIso8601String().split('T').first;
-    final sb = SupabaseService.client;
-    if (sb != null && userId != null && !userId.startsWith('demo-')) {
-      try {
-        final row = await sb
-            .from('quiz_attempts')
-            .select('id')
-            .eq('profile_id', userId)
-            .eq('quiz_date', today)
-            .maybeSingle();
-        if (row != null) return true;
-      } catch (_) {}
+    if (EnvConfig.hasSupabaseCredentials) {
+      final sb = SupabaseService.client;
+      if (sb == null || sb.auth.currentUser == null) return false;
+      return await sb.rpc('reward_quiz_status') as bool;
     }
-
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_quizDatePrefKey) == today;
+    return prefs.getString(_quizDatePrefKey) ==
+        darCalendarDay(DateTime.now()).toIso8601String();
   }
 
-  Future<void> recordTriviaAttempt(String? userId, bool isCorrect) async {
-    final today = DateTime.now().toIso8601String().split('T').first;
-    final sb = SupabaseService.client;
-    if (sb != null && userId != null && !userId.startsWith('demo-')) {
-      try {
-        await sb.from('quiz_attempts').insert({
-          'profile_id': userId,
-          'quiz_date': today,
-          'is_correct': isCorrect,
-        });
-      } catch (_) {}
+  Future<bool> submitTriviaAnswer(int questionId, int answerIndex) async {
+    if (EnvConfig.hasSupabaseCredentials) {
+      final sb = SupabaseService.client;
+      if (sb == null || sb.auth.currentUser == null) {
+        return false; // Guest practice, no entitlement.
+      }
+      return await sb.rpc('submit_reward_quiz', params: {
+        'p_question_id': questionId,
+        'p_answer_index': answerIndex,
+      }) as bool;
     }
+    final question =
+        ShowcaseSeedData.triviaQuestions.firstWhere((q) => q.id == questionId);
+    final correct = answerIndex == question.correctIndex;
+    await recordTriviaAttempt(null, correct);
+    return correct;
+  }
 
+  /// Demo-only compatibility path. Live callers cannot assert correctness.
+  Future<void> recordTriviaAttempt(String? userId, bool isCorrect) async {
+    if (EnvConfig.hasSupabaseCredentials) {
+      throw StateError('server_quiz_required');
+    }
     final prefs = await SharedPreferences.getInstance();
+    final today = darCalendarDay(DateTime.now()).toIso8601String();
+    if (prefs.getString(_quizDatePrefKey) == today) return;
     await prefs.setString(_quizDatePrefKey, today);
     if (isCorrect) {
-      final wins = prefs.getInt(_quizWinsPrefKey) ?? 1;
-      await prefs.setInt(_quizWinsPrefKey, wins + 1);
+      await prefs.setInt(
+          _quizWinsPrefKey, (prefs.getInt(_quizWinsPrefKey) ?? 0) + 1);
     }
   }
 
   Future<int> getTriviaWinsCount() async {
+    if (EnvConfig.hasSupabaseCredentials) {
+      final sb = SupabaseService.client;
+      if (sb == null || sb.auth.currentUser == null) return 0;
+      final rows = await sb
+          .from('reward_quiz_attempts')
+          .select('quiz_date')
+          .eq('is_correct', true);
+      return rows.length;
+    }
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_quizWinsPrefKey) ?? 1;
+    return prefs.getInt(_quizWinsPrefKey) ?? 0;
   }
 }

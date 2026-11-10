@@ -10,12 +10,14 @@ class AuthViewState {
   final bool isLoading;
   final bool isInitialized;
   final String? errorMessage;
+  final String? confirmationEmail;
 
   const AuthViewState({
     this.user,
     this.isLoading = false,
     this.isInitialized = false,
     this.errorMessage,
+    this.confirmationEmail,
   });
 
   bool get isAuthenticated => user != null;
@@ -27,12 +29,17 @@ class AuthViewState {
     bool? isInitialized,
     String? errorMessage,
     bool clearError = false,
+    String? confirmationEmail,
+    bool clearConfirmation = false,
   }) {
     return AuthViewState(
       user: clearUser ? null : (user ?? this.user),
       isLoading: isLoading ?? this.isLoading,
       isInitialized: isInitialized ?? this.isInitialized,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      confirmationEmail: clearConfirmation
+          ? null
+          : (confirmationEmail ?? this.confirmationEmail),
     );
   }
 }
@@ -52,7 +59,17 @@ class AuthController extends StateNotifier<AuthViewState> {
   }
 
   Future<void> _initialize() async {
-    final restored = await _repo.restoreSession();
+    AppUser? restored;
+    try {
+      restored = await _repo.restoreSession();
+    } catch (_) {
+      if (!mounted) return;
+      state = const AuthViewState(
+          isInitialized: true,
+          errorMessage: 'Session could not be restored. Please sign in again.');
+      return;
+    }
+    if (!mounted) return;
     state = AuthViewState(
       user: restored,
       isLoading: false,
@@ -63,6 +80,7 @@ class AuthController extends StateNotifier<AuthViewState> {
     if (sb != null) {
       _authSub = sb.auth.onAuthStateChange.listen((data) async {
         final refreshed = await _repo.restoreSession();
+        if (!mounted) return;
         state = state.copyWith(
           user: refreshed,
           clearUser: refreshed == null,
@@ -73,7 +91,8 @@ class AuthController extends StateNotifier<AuthViewState> {
   }
 
   Future<bool> signInDemo(UserRole role) async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(
+        isLoading: true, clearError: true, clearConfirmation: true);
     try {
       final demoUser = await _repo.signInDemo(role);
       state = state.copyWith(user: demoUser, isLoading: false);
@@ -91,7 +110,8 @@ class AuthController extends StateNotifier<AuthViewState> {
     required String email,
     required String password,
   }) async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(
+        isLoading: true, clearError: true, clearConfirmation: true);
     try {
       final user = await _repo.signInWithEmail(
         email: email,
@@ -114,7 +134,8 @@ class AuthController extends StateNotifier<AuthViewState> {
     required String password,
     String phone = '',
   }) async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(
+        isLoading: true, clearError: true, clearConfirmation: true);
     try {
       final user = await _repo.signUpWithEmail(
         name: name,
@@ -124,6 +145,13 @@ class AuthController extends StateNotifier<AuthViewState> {
       );
       state = state.copyWith(user: user, isLoading: false);
       return true;
+    } on EmailConfirmationRequired catch (e) {
+      state = state.copyWith(
+          isLoading: false,
+          clearUser: true,
+          confirmationEmail: e.email,
+          clearError: true);
+      return false;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -134,7 +162,8 @@ class AuthController extends StateNotifier<AuthViewState> {
   }
 
   Future<void> signInWithGoogle() async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(
+        isLoading: true, clearError: true, clearConfirmation: true);
     try {
       await _repo.signInWithGoogleOAuth();
       state = state.copyWith(isLoading: false);

@@ -1,4 +1,5 @@
 import '../models/models.dart';
+import '../../core/l10n/daily_copy.dart';
 
 class ShowcaseSeedData {
   ShowcaseSeedData._();
@@ -63,50 +64,36 @@ class ShowcaseSeedData {
     ),
   ];
 
-  static const List<CustomizationOption> defaultSwahiliSides = [
-    CustomizationOption(
-      id: 'cust-kachumbari',
-      name: 'Kachumbari Extra',
-      price: 1000,
-      type: 'topping',
-    ),
-    CustomizationOption(
-      id: 'cust-pilipili',
-      name: 'Pili Pili Kali',
-      price: 500,
-      type: 'topping',
-    ),
-    CustomizationOption(
-      id: 'cust-ndimu',
-      name: 'Ndimu (Fresh Lime)',
-      price: 300,
-      type: 'topping',
-    ),
-    CustomizationOption(
-      id: 'cust-ugali',
-      name: 'Ugali Kipande',
-      price: 1500,
-      type: 'side',
-    ),
-    CustomizationOption(
-      id: 'cust-chapati',
-      name: 'Chapati Moja',
-      price: 1000,
-      type: 'side',
-    ),
-    CustomizationOption(
-      id: 'cust-avocado',
-      name: 'Avocado Slices',
-      price: 1000,
-      type: 'topping',
-    ),
-    CustomizationOption(
-      id: 'cust-stoney',
-      name: 'Stoney Tangawizi',
-      price: 1500,
-      type: 'drink',
-    ),
+  static const kachumbari = CustomizationOption(
+      id: 'cust-kachumbari', name: 'Kachumbari Extra', price: 1000);
+  static const pilipili = CustomizationOption(
+      id: 'cust-pilipili', name: 'Pili Pili Kali', price: 500);
+  static const ndimu = CustomizationOption(
+      id: 'cust-ndimu', name: 'Ndimu (Fresh Lime)', price: 300);
+  static const ugali = CustomizationOption(
+      id: 'cust-ugali', name: 'Ugali Kipande', price: 1500, type: 'side');
+  static const chapati = CustomizationOption(
+      id: 'cust-chapati', name: 'Chapati Moja', price: 1000, type: 'side');
+  static const avocado = CustomizationOption(
+      id: 'cust-avocado', name: 'Avocado Slices', price: 1000);
+  static const stoney = CustomizationOption(
+      id: 'cust-stoney', name: 'Stoney Tangawizi', price: 1500, type: 'drink');
+  // Catalog inventory only, NEVER a fallback for an unlinked product.
+  static const defaultSwahiliSides = [
+    kachumbari,
+    pilipili,
+    ndimu,
+    ugali,
+    chapati,
+    avocado,
+    stoney
   ];
+  static const chipsiAddons = [kachumbari, pilipili, ndimu, stoney];
+  static const grillAddons = [kachumbari, pilipili, ndimu, ugali, stoney];
+  static const riceAddons = [kachumbari, pilipili, avocado, stoney];
+  static const fishAddons = [ndimu, ugali, chapati, stoney];
+  static const snackAddons = [pilipili];
+  static const fastFoodAddons = [avocado, pilipili, stoney];
 
   static const List<MenuItemModel> menuItems = [
     MenuItemModel(
@@ -123,7 +110,7 @@ class ShowcaseSeedData {
       prepTimeMins: 12,
       categoryId: 'cat-bites',
       categoryName: 'Swahili Bites',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: chipsiAddons,
       spiceLevel: 2,
       ingredients: [
         'French fries',
@@ -153,7 +140,7 @@ class ShowcaseSeedData {
       prepTimeMins: 25,
       categoryId: 'cat-choma',
       categoryName: 'Nyama Choma',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: grillAddons,
       spiceLevel: 2,
       ingredients: [
         'beef',
@@ -185,7 +172,7 @@ class ShowcaseSeedData {
       prepTimeMins: 20,
       categoryId: 'cat-pilau',
       categoryName: 'Rice & Pilau',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: riceAddons,
       spiceLevel: 3,
       ingredients: [
         'basmati rice',
@@ -215,7 +202,7 @@ class ShowcaseSeedData {
       prepTimeMins: 25,
       categoryId: 'cat-stews',
       categoryName: 'Traditional Stews',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: fishAddons,
       spiceLevel: 2,
       ingredients: [
         'snapper',
@@ -244,7 +231,7 @@ class ShowcaseSeedData {
       prepTimeMins: 15,
       categoryId: 'cat-choma',
       categoryName: 'Nyama Choma',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: grillAddons,
       spiceLevel: 3,
       ingredients: ['beef', 'papaya', 'ginger', 'garlic', 'black pepper'],
       allergens: <String>[],
@@ -266,7 +253,7 @@ class ShowcaseSeedData {
       prepTimeMins: 15,
       categoryId: 'cat-pilau',
       categoryName: 'Rice & Pilau',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: riceAddons,
       spiceLevel: 1,
       ingredients: ['rice', 'coconut milk', 'red kidney beans', 'cardamom'],
       allergens: ['coconut'],
@@ -287,7 +274,7 @@ class ShowcaseSeedData {
       prepTimeMins: 18,
       categoryId: 'cat-stews',
       categoryName: 'Traditional Stews',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: fishAddons,
       spiceLevel: 2,
       ingredients: ['chicken', 'coconut milk', 'wheat flour', 'ghee', 'spices'],
       allergens: ['gluten', 'milk'],
@@ -309,7 +296,7 @@ class ShowcaseSeedData {
       prepTimeMins: 10,
       categoryId: 'cat-bites',
       categoryName: 'Swahili Bites',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: snackAddons,
       spiceLevel: 2,
       ingredients: ['plantain', 'black pepper', 'sea salt', 'tamarind'],
       allergens: <String>[],
@@ -330,7 +317,7 @@ class ShowcaseSeedData {
       prepTimeMins: 15,
       categoryId: 'cat-specials',
       categoryName: 'Gourmet Specials',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: fastFoodAddons,
       spiceLevel: 3,
       ingredients: [
         'beef',
@@ -360,7 +347,7 @@ class ShowcaseSeedData {
       prepTimeMins: 22,
       categoryId: 'cat-specials',
       categoryName: 'Gourmet Specials',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: fastFoodAddons,
       spiceLevel: 2,
       ingredients: [
         'sourdough crust',
@@ -490,76 +477,8 @@ class ShowcaseSeedData {
     ),
   ];
 
-  static const List<DiscoveryModel> discoveries = [
-    DiscoveryModel(
-      id: 'disc-1',
-      title: 'Zanzibar Spice Capital',
-      description:
-          "Zanzibar (Unguja) is nicknamed the 'Spice Island' because it remains one of the world's top producers of Cloves (Karafuu), Cinnamon (Mdalasini), and Nutmeg.",
-    ),
-    DiscoveryModel(
-      id: 'disc-2',
-      title: 'National Street Icon',
-      description:
-          'Chipsi Mayai started at Dar es Salaam roadside banda stalls and evolved into Tanzania’s most iconic comfort meal — best enjoyed with fresh kachumbari!',
-    ),
-    DiscoveryModel(
-      id: 'disc-3',
-      title: 'The Pilau Spice Path',
-      description:
-          'Authentic Swahili Pilau roasts whole cumin, cardamom, cloves, and cinnamon in caramelized onions before simmering meat and Morogoro rice together.',
-    ),
-    DiscoveryModel(
-      id: 'disc-4',
-      title: 'Coastal Coconut Magic',
-      description:
-          'Tui la Nazi (freshly pressed coconut milk) is the soul of coastal cooking, lending velvety richness to Samaki wa Kupaka and Wali wa Nazi.',
-    ),
-    DiscoveryModel(
-      id: 'disc-5',
-      title: 'Kijitonyama Flagship Kitchen',
-      description:
-          'Our flagship Bongo Foodie kitchen in Kijitonyama, Dar es Salaam unites traditional mkaa charcoal grilling with Chef AI recipe personalization.',
-    ),
-  ];
-
-  static const List<TriviaQuestion> triviaQuestions = [
-    TriviaQuestion(
-      id: 1,
-      question: "Which aromatic spice is called 'Mdalasini' in Kiswahili?",
-      options: [
-        'Clove (Karafuu)',
-        'Cinnamon',
-        'Cardamom (Iliki)',
-        'Ginger (Tangawizi)',
-      ],
-      correctIndex: 1,
-      explainer:
-          'Mdalasini is Cinnamon! Harvested from tree bark in Zanzibar and Tanga, it perfumes Swahili Chai and Pilau.',
-    ),
-    TriviaQuestion(
-      id: 2,
-      question: "What does 'Tui la Nazi' mean in coastal Swahili cuisine?",
-      options: [
-        'Coconut Milk',
-        'Clarified Ghee',
-        'Tamarind Glaze',
-        'Mango Nectar'
-      ],
-      correctIndex: 0,
-      explainer:
-          'Tui la Nazi is freshly squeezed Coconut Milk — the creamy foundation of Samaki wa Kupaka and Maharage ya Nazi.',
-    ),
-    TriviaQuestion(
-      id: 3,
-      question:
-          'Which Tanzanian dish consists of marinated charcoal-grilled skewers?',
-      options: ['Vitumbua', 'Mishkaki', 'Kachumbari', 'Mandazi'],
-      correctIndex: 1,
-      explainer:
-          'Mishkaki are tender beef or goat skewers marinated in papaya, ginger, garlic, and lime, grilled over hot charcoal.',
-    ),
-  ];
+  static const List<DiscoveryModel> discoveries = DailyCopy.discoveries;
+  static const List<TriviaQuestion> triviaQuestions = DailyCopy.trivia;
 
   static const List<TzRegion> regions = [
     TzRegion(code: 7, name: 'Dar es Salaam'),

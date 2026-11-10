@@ -1,3 +1,4 @@
+import '../../core/widgets/catalog_cache_notice.dart';
 import '../../core/l10n/dish_copy.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -115,6 +116,7 @@ class _SearchMenuScreenState extends ConsumerState<SearchMenuScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const CatalogCacheNotice(),
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                     AppSpace.v20, AppSpace.v14, AppSpace.v20, AppSpace.v10),

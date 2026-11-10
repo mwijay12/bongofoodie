@@ -8,8 +8,6 @@ import '../../core/theme/app_tokens.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/dish_image.dart';
-import '../../data/models/models.dart';
-import '../../state/auth_provider.dart';
 import '../../state/settings_provider.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -51,11 +49,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _instantExplore() async {
     await ref.read(appSettingsProvider.notifier).completeOnboarding();
-    final ok =
-        await ref.read(authProvider.notifier).signInDemo(UserRole.customer);
-    if (ok && mounted) {
-      context.go('/home');
-    }
+    if (mounted) context.go('/home');
   }
 
   void _showTermsSheet(AppStrings t) {
@@ -360,8 +354,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           Flexible(
                             child: Text(
                               t.isSw
-                                  ? 'Jaribu Showcase Demo Sasa'
-                                  : 'Launch Instant Showcase Demo',
+                                  ? 'Endelea bila akaunti'
+                                  : 'Continue as guest',
                               textAlign: TextAlign.center,
                             ),
                           ),

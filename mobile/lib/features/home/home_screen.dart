@@ -1,10 +1,14 @@
-import '../../core/widgets/promo_dish_image.dart';
+import '../../state/achievements_provider.dart';
+import 'dart:async';
+import '../../core/l10n/daily_copy.dart';
+import '../../core/utils/daily_selection.dart';
+import '../../core/widgets/catalog_cache_notice.dart';
+import '../../core/widgets/promo_offer_card.dart';
 import '../../core/utils/dish_image_cache.dart';
 import '../../core/l10n/dish_copy.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/icons/app_icon_key.dart';
 import '../../core/widgets/app_icon.dart';
-import '../../core/utils/emoji_sanitizer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,8 +47,46 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with WidgetsBindingObserver {
+  Timer? _dailyTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _scheduleDailyRefresh();
+  }
+
+  void _scheduleDailyRefresh() {
+    _dailyTimer?.cancel();
+    final now = DateTime.now().toUtc();
+    final nextMidnight =
+        darCalendarDay(now).add(const Duration(days: 1, hours: -3));
+    _dailyTimer = Timer(nextMidnight.difference(now), () {
+      if (!mounted) return;
+      setState(() {});
+      _scheduleDailyRefresh();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {});
+      _scheduleDailyRefresh();
+    }
+  }
+
+  @override
+  void dispose() {
+    _dailyTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
   bool _imagesWarmed = false;
+  final Set<String> _warmedPromoAssets = {};
 
   @override
   void didChangeDependencies() {
@@ -65,12 +107,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   ) async {
     final user = ref.read(authProvider).user;
     final repo = ref.read(menuRepositoryProvider);
-    final alreadyPlayed = await repo.hasAttemptedTriviaToday(user?.id);
+    bool alreadyPlayed;
+    try {
+      alreadyPlayed = await repo.hasAttemptedTriviaToday(user?.id);
+    } catch (_) {
+      if (!context.mounted) return;
+      final sw = ref.read(appStringsProvider).isSw;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(sw
+              ? 'Hali ya swali haijapatikana. Gusa tena kujaribu.'
+              : 'Could not check quiz status. Tap again to retry.')));
+      return;
+    }
     if (!context.mounted) return;
 
-    final daySeed = DateTime.now().day;
-    final question = ShowcaseSeedData
-        .triviaQuestions[daySeed % ShowcaseSeedData.triviaQuestions.length];
+    final question = selectDaily(ShowcaseSeedData.triviaQuestions,
+        DateTime.now(), (q) => q.id.toString())!;
 
     showAppSheet<void>(
       context,
@@ -83,18 +135,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Color _parseHex(String hex) {
-    final clean = hex.replaceAll('#', '');
-    final val = int.tryParse('FF$clean', radix: 16);
-    return val != null ? Color(val) : AppColors.primary;
-  }
-
   @override
   Widget build(BuildContext context) {
     final t = ref.watch(appStringsProvider);
     final auth = ref.watch(authProvider);
     final address = ref.watch(deliveryAddressProvider);
     final promotionsAsync = ref.watch(promotionsProvider);
+    ref.listen<AsyncValue<List<PromotionModel>>>(promotionsProvider, (_, next) {
+      final assets = (next.valueOrNull ?? const <PromotionModel>[])
+          .take(2)
+          .map((p) => DishImage.resolveLocalAsset(p.imageKey))
+          .whereType<String>()
+          .where(_warmedPromoAssets.add)
+          .toList();
+      if (assets.isNotEmpty) {
+        precacheDishAssetsAfterFrame(
+            context, assets, PromoCardMetrics.imageSize);
+      }
+    });
     final discoveriesAsync = ref.watch(dailyDiscoveriesProvider);
     final menuAsync = ref.watch(allMenuItemsProvider);
     final favorites = ref.watch(favoritesProvider);
@@ -116,6 +174,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
+              const SliverToBoxAdapter(child: CatalogCacheNotice()),
               // 1. Top Location + Role/Mode Header
               SliverToBoxAdapter(
                 child: Padding(
@@ -291,124 +350,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   padding: const EdgeInsets.only(bottom: AppSpace.lg),
                   child: promotionsAsync.when(
                     skipLoadingOnRefresh: true,
-                    data: (promos) => SizedBox(
-                      height: PromoCardMetrics.height,
-                      child: ListView.separated(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpace.screenH),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: promos.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(width: AppSpace.v14),
-                        itemBuilder: (context, index) {
-                          final p = promos[index];
-                          final bg = _parseHex(p.bgColorHex);
-                          return InkWell(
-                            borderRadius: BorderRadius.circular(
-                                PromoCardMetrics.borderRadius),
-                            onTap: () => context.go(
-                              '/search?category=${Uri.encodeComponent(p.targetCategory)}',
-                            ),
-                            child: Container(
-                              width: PromoCardMetrics.width,
-                              padding: const EdgeInsets.all(
-                                  PromoCardMetrics.padding),
-                              decoration: BoxDecoration(
-                                gradient: bg.green > bg.red
-                                    ? AppColors.promoGreen
-                                    : AppColors.promoOrange,
-                                borderRadius: BorderRadius.circular(
-                                    PromoCardMetrics.borderRadius),
-                              ),
-                              child: Row(
-                                children: [
-                                  Flexible(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        if (p.badgeText.isNotEmpty)
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: AppSpace.sm,
-                                                vertical: AppSpace.v2),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.scrim
-                                                  .withOpacity(0.22),
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                      AppRadius.pill),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                AppIcon(
-                                                  iconKey: p.iconKey ??
-                                                      appIconKeyForText(
-                                                        '${p.title} ${p.badgeText}',
-                                                        fallback:
-                                                            AppIconKey.fire,
-                                                      ),
-                                                  color: AppColors.surface,
-                                                ),
-                                                const SizedBox(
-                                                    width: AppSpace.v6),
-                                                Flexible(
-                                                  child: Text(
-                                                    stripEmoji(p.badgeText),
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: const TextStyle(
-                                                      color: AppColors.surface,
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w800,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        const SizedBox(height: AppSpace.v8),
-                                        Text(
-                                          stripEmoji(p.title),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            color: AppColors.surface,
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 17,
-                                          ),
-                                        ),
-                                        const SizedBox(height: AppSpace.v4),
-                                        Text(
-                                          stripEmoji(p.subtitle),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            color: AppColors.surface,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                            height: 1.3,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                    data: (promos) => promos.isEmpty
+                        ? const SizedBox.shrink()
+                        : SizedBox(
+                            height: PromoCardMetrics.height,
+                            child: ListView.separated(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpace.screenH),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: promos.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(width: AppSpace.v14),
+                              itemBuilder: (context, index) {
+                                final p = promos[index];
+                                return PromoOfferCard(
+                                  promotion: p,
+                                  actionLabel: t.isSw
+                                      ? 'Angalia menyu'
+                                      : 'Explore the menu',
+                                  onTap: () => context.go(
+                                    '/search?category=${Uri.encodeComponent(p.targetCategory)}',
                                   ),
-                                  const SizedBox(
-                                      width: PromoCardMetrics.imageGap),
-                                  PromoDishImage(imageRef: p.imageKey),
-                                ],
-                              ),
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
-                    ),
+                          ),
                     loading: () => SizedBox(
                       height: PromoCardMetrics.height,
                       child: ListView.separated(
@@ -421,7 +387,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         itemBuilder: (_, __) => const SkeletonPromoCard(),
                       ),
                     ),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error: (_, __) => StateMessage.error(
+                      compact: true,
+                      onRetry: () => ref.invalidate(promotionsProvider),
+                    ),
                   ),
                 ),
               ),
@@ -434,9 +403,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: discoveriesAsync.when(
                     skipLoadingOnRefresh: true,
                     data: (list) {
-                      final featured = list.isNotEmpty
-                          ? list.first
-                          : ShowcaseSeedData.discoveries.first;
+                      final selected =
+                          selectDaily(list, DateTime.now(), (d) => d.id);
+                      if (selected == null) {
+                        return StateMessage.empty(
+                          compact: true,
+                          title: t.isSw
+                              ? 'Hakuna dokezo la leo'
+                              : 'No discovery today',
+                          body: t.isSw
+                              ? 'Rudi baadaye kwa dokezo jipya.'
+                              : 'Check back later for another food story.',
+                        );
+                      }
+                      final featured =
+                          DailyCopy.discovery(selected, isSw: t.isSw);
                       return Container(
                         padding: const EdgeInsets.all(AppSpace.lg),
                         decoration: BoxDecoration(
@@ -472,7 +453,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                                 TextButton.icon(
                                   style: TextButton.styleFrom(
-                                    visualDensity: VisualDensity.compact,
+                                    minimumSize: const Size(
+                                        AppSpace.huge, AppSpace.huge),
                                   ),
                                   onPressed: () =>
                                       _openSpiceTriviaSheet(context, ref),
@@ -526,7 +508,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       );
                     },
                     loading: () => SkeletonDiscoveryCard(),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error: (_, __) => StateMessage.error(
+                        compact: true,
+                        onRetry: () => ref
+                            .read(dailyDiscoveriesProvider.notifier)
+                            .refresh()),
                   ),
                 ),
               ),
@@ -984,27 +970,49 @@ class _SpiceTriviaSheet extends ConsumerStatefulWidget {
 class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
   int? _pickedIndex;
   bool _submitted = false;
+  bool _saving = false;
+  bool _saveFailed = false;
+  bool _serverCorrect = false;
 
   Future<void> _pickAnswer(int idx) async {
-    if (_submitted) return;
-    final correct = idx == widget.question.correctIndex;
+    if (_submitted || _saving) return;
     setState(() {
+      _saving = true;
+      _saveFailed = false;
       _pickedIndex = idx;
-      _submitted = true;
     });
-    await ref
-        .read(menuRepositoryProvider)
-        .recordTriviaAttempt(widget.userId, correct);
+    try {
+      if (EnvConfig.hasSupabaseCredentials &&
+          ref.read(authProvider).user?.id != widget.userId) {
+        throw StateError('reward_owner_changed');
+      }
+      final correct = await ref
+          .read(menuRepositoryProvider)
+          .submitTriviaAnswer(widget.question.id, idx);
+      if (!mounted) return;
+      setState(() {
+        _serverCorrect = correct;
+        _submitted = true;
+      });
+      ref.invalidate(achievementsProvider);
+    } catch (_) {
+      if (mounted) setState(() => _saveFailed = true);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final sw = ref.watch(appStringsProvider).isSw;
+    final question = DailyCopy.question(widget.question, isSw: sw);
     final isCorrect = _pickedIndex == widget.question.correctIndex;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
           AppSpace.v22, AppSpace.v6, AppSpace.v22, AppSpace.v30),
-      child: Column(
+      child: SingleChildScrollView(
+          child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1012,32 +1020,37 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
             children: [
               const Icon(Icons.emoji_events_rounded, color: AppColors.primary),
               const SizedBox(width: AppSpace.v8),
-              Text(
-                'Daily Swahili Spice Trivia',
+              Expanded(
+                  child: Text(
+                sw ? 'Swali la leo kuhusu chakula' : 'Daily food quiz',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
-              ),
+              )),
             ],
           ),
           const SizedBox(height: AppSpace.v6),
           Text(
             widget.alreadyPlayed && !_submitted
-                ? 'You already unlocked today’s reward — feel free to practice again or copy code KARIBU2000!'
-                : 'Answer right to unlock code KARIBU2000 (TSh 2,000 OFF at checkout)!',
+                ? (sw
+                    ? 'Umeshajibu leo. Unaweza kujaribu tena kwa mazoezi.'
+                    : 'You have answered today. You can try again for practice.')
+                : (sw
+                    ? 'Chagua jibu moja, kisha soma maelezo yake.'
+                    : 'Choose an answer, then read the explanation.'),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: AppSpace.v16),
           Text(
-            widget.question.question,
+            question.question,
             style: const TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 16,
             ),
           ),
           const SizedBox(height: AppSpace.v14),
-          ...List.generate(widget.question.options.length, (i) {
-            final option = widget.question.options[i];
+          ...List.generate(question.options.length, (i) {
+            final option = question.options[i];
             final isAnswer = i == widget.question.correctIndex;
             final isPicked = i == _pickedIndex;
 
@@ -1070,10 +1083,18 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
                     ? const Icon(Icons.check_circle_rounded,
                         color: AppColors.success)
                     : null,
-                onTap: () => _pickAnswer(i),
+                onTap: _saving || _submitted ? null : () => _pickAnswer(i),
               ),
             );
           }),
+          if (_saving)
+            Text(sw ? 'Jibu linahakikiwa...' : 'Checking your answer...'),
+          if (_saveFailed)
+            TextButton(
+                onPressed: () => _pickAnswer(_pickedIndex!),
+                child: Text(sw
+                    ? 'Jibu halijahifadhiwa. Jaribu tena'
+                    : 'Answer not saved. Retry')),
           if (_submitted) ...[
             const SizedBox(height: AppSpace.v10),
             Container(
@@ -1088,12 +1109,28 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
                 children: [
                   Text(
                     isCorrect
-                        ? 'Hongera! Reward Code Unlocked: KARIBU2000'
-                        : 'Good try! ${widget.question.rewardNote}',
+                        ? (sw
+                            ? 'Sahihi! ${question.explainer}'
+                            : 'Correct! ${question.explainer}')
+                        : (sw
+                            ? 'Si jibu sahihi. ${question.explainer}'
+                            : 'Not quite. ${question.explainer}'),
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: AppSpace.v8),
+                  if (EnvConfig.hasSupabaseCredentials)
+                    Text(_serverCorrect
+                        ? (sw
+                            ? 'Jibu sahihi la leo limehifadhiwa. Masharti ya ofa bado yanatumika.'
+                            : 'Today’s saved result is correct. Offer conditions still apply.')
+                        : (sw
+                            ? 'Mazoezi pekee; hakuna zawadi mpya iliyothibitishwa.'
+                            : 'Practice only; no new reward has been verified.')),
                   if (isCorrect)
+                    Text(sw
+                        ? 'Kunakili msimbo hakuhakikishi punguzo. Masharti yatathibitishwa kwenye malipo.'
+                        : 'Copying a code does not guarantee a discount. Eligibility is checked at checkout.'),
+                  if (isCorrect && !EnvConfig.hasSupabaseCredentials)
                     OutlinedButton.icon(
                       onPressed: () {
                         Clipboard.setData(
@@ -1101,21 +1138,24 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
                         );
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content:
-                                Text('Promo code KARIBU2000 copied for Cart!'),
+                          SnackBar(
+                            content: Text(sw
+                                ? 'Msimbo KARIBU2000 umenakiliwa.'
+                                : 'Code KARIBU2000 copied.'),
                           ),
                         );
                       },
                       icon: const Icon(Icons.copy_rounded, size: 16),
-                      label: const Text('Copy Code KARIBU2000'),
+                      label: Text(sw
+                          ? 'Nakili msimbo KARIBU2000'
+                          : 'Copy code KARIBU2000'),
                     ),
                 ],
               ),
             ),
           ],
         ],
-      ),
+      )),
     );
   }
 }

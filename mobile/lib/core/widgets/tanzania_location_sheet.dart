@@ -47,6 +47,8 @@ class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
 
   Future<void> _loadInitial() async {
     final repo = ref.read(locationRepositoryProvider);
+    final saved =
+        await ref.read(deliveryAddressProvider.notifier).readSelection();
     final regions = await repo.getRegions();
     TzRegion? defaultReg = regions.isNotEmpty ? regions.first : null;
     for (final r in regions) {
@@ -56,6 +58,9 @@ class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
       }
     }
 
+    for (final r in regions) {
+      if (r.code == saved?['region']) defaultReg = r;
+    }
     List<TzDistrict> districts = const [];
     TzDistrict? defaultDist;
     List<TzWard> wards = const [];
@@ -64,14 +69,23 @@ class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
     if (defaultReg != null) {
       districts = await repo.getDistricts(defaultReg.code);
       defaultDist = districts.isNotEmpty ? districts.first : null;
+      for (final d in districts) {
+        if (d.code == saved?['district']) defaultDist = d;
+      }
       if (defaultDist != null) {
         wards = await repo.getWards(defaultDist.code);
         defaultWard = wards.isNotEmpty ? wards.first : null;
+        for (final w in wards) {
+          if (w.code == saved?['ward']) defaultWard = w;
+        }
       }
     }
 
     if (mounted) {
       setState(() {
+        if (defaultWard?.code == saved?['ward']) {
+          _streetCtrl.text = (saved?['street'] ?? '').toString();
+        }
         _regions = regions;
         _selectedRegion = defaultReg;
         _districts = districts;
@@ -114,7 +128,8 @@ class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
       _selectedWard = null;
       _wards = const [];
     });
-    final wards = await ref.read(locationRepositoryProvider).getWards(dist.code);
+    final wards =
+        await ref.read(locationRepositoryProvider).getWards(dist.code);
     if (mounted) {
       setState(() {
         _wards = wards;
@@ -132,7 +147,16 @@ class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
     ];
     final formatted =
         parts.isNotEmpty ? parts.join(', ') : 'Kijitonyama, Dar es Salaam';
-    ref.read(deliveryAddressProvider.notifier).setAddress(formatted);
+    if (_selectedRegion != null &&
+        _selectedDistrict != null &&
+        _selectedWard != null) {
+      ref.read(deliveryAddressProvider.notifier).saveSelection(
+          region: _selectedRegion!.code,
+          district: _selectedDistrict!.code,
+          ward: _selectedWard!.code,
+          street: _streetCtrl.text.trim(),
+          address: formatted);
+    }
     Navigator.pop(context, formatted);
   }
 

@@ -21,7 +21,9 @@ enum UserRole {
   }
 
   bool get isStaff =>
-      this == UserRole.admin || this == UserRole.waiter || this == UserRole.kitchen;
+      this == UserRole.admin ||
+      this == UserRole.waiter ||
+      this == UserRole.kitchen;
 
   String get value => name;
 }
@@ -30,13 +32,13 @@ enum PaymentMethod {
   lipaNamba,
   cashOnDelivery;
 
-  String get dbValue =>
-      this == PaymentMethod.lipaNamba ? 'lipanamba' : 'cash';
+  String get dbValue => this == PaymentMethod.lipaNamba ? 'lipanamba' : 'cash';
 
   // Keep free of surrounding parentheses: screens render it as "(TSh ... $label)".
   // Duplicating parens here caused "TSh 21,000 (Lipa Namba (Mobile Money))".
-  String get label =>
-      this == PaymentMethod.lipaNamba ? 'Lipa Namba - Mobile Money' : 'Cash on Delivery';
+  String get label => this == PaymentMethod.lipaNamba
+      ? 'Lipa Namba - Mobile Money'
+      : 'Cash on Delivery';
 
   static PaymentMethod fromString(String? raw) {
     final v = (raw ?? '').toLowerCase();
@@ -443,7 +445,8 @@ class CartItemModel {
     final parsedCust = rawCust is List
         ? rawCust
             .whereType<Map>()
-            .map((m) => CustomizationOption.fromJson(Map<String, dynamic>.from(m)))
+            .map((m) =>
+                CustomizationOption.fromJson(Map<String, dynamic>.from(m)))
             .toList()
         : <CustomizationOption>[];
 
@@ -554,6 +557,7 @@ class OrderModel {
   final String customerPhone;
   final String paymentMethod;
   final String notes;
+  final String promoCode;
   final DateTime createdAt;
 
   const OrderModel({
@@ -569,12 +573,14 @@ class OrderModel {
     this.customerPhone = '',
     this.paymentMethod = 'cash',
     this.notes = '',
+    this.promoCode = '',
     required this.createdAt,
   });
 
   double get totalAmount => totalPrice;
   String get deliveryAddress => deliveryLocation;
-  PaymentMethod get paymentMethodType => PaymentMethod.fromString(paymentMethod);
+  PaymentMethod get paymentMethodType =>
+      PaymentMethod.fromString(paymentMethod);
 
   OrderModel copyWith({OrderStatus? status}) => OrderModel(
         id: id,
@@ -589,6 +595,7 @@ class OrderModel {
         customerPhone: customerPhone,
         paymentMethod: paymentMethod,
         notes: notes,
+        promoCode: promoCode,
         createdAt: createdAt,
       );
 
@@ -607,6 +614,7 @@ class OrderModel {
         'customer_phone': customerPhone,
         'payment_method': paymentMethod,
         'notes': notes,
+        'promo_code': promoCode,
         'created_at': createdAt.toIso8601String(),
       };
 
@@ -649,6 +657,7 @@ class OrderModel {
       customerPhone: (json['customer_phone'] ?? '').toString(),
       paymentMethod: (json['payment_method'] ?? 'cash').toString(),
       notes: (json['notes'] ?? '').toString(),
+      promoCode: (json['promo_code'] ?? '').toString(),
       createdAt: DateTime.tryParse((json['created_at'] ?? '').toString()) ??
           DateTime.now(),
     );
@@ -790,9 +799,9 @@ class BranchSettingsModel {
   factory BranchSettingsModel.fromJson(Map<String, dynamic> json) =>
       BranchSettingsModel(
         restaurantName: (json['restaurant_name'] ?? 'Bongo Foodie').toString(),
-        branchAddress: (json['branch_address'] ??
-                'Kijitonyama Branch, Dar es Salaam')
-            .toString(),
+        branchAddress:
+            (json['branch_address'] ?? 'Kijitonyama Branch, Dar es Salaam')
+                .toString(),
         phone: (json['phone'] ?? '+255 712 345 678').toString(),
         mpesaTill: (json['mpesa_till'] ?? '556677').toString(),
         tigoTill: (json['tigo_till'] ?? '223344').toString(),

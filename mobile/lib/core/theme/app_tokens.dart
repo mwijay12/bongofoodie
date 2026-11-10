@@ -111,11 +111,11 @@ extension NavClearance on BuildContext {
 /// Shared card metrics so real widgets and their skeletons stay in sync
 /// with zero visual drift. All values come from AppRadius / AppSpace tokens.
 abstract final class PromoCardMetrics {
-  static const double width = 285;
-  static const double height = AppSpace.v220;
+  static const double width = 320;
+  static const double height = 320;
   static const double padding = AppSpace.lg;
   static const double borderRadius = AppRadius.v22;
-  static const double imageSize = AppSpace.v76;
+  static const double imageSize = AppSpace.v148;
   static const double imageRadius = AppRadius.v16;
   static const double imageGap = AppSpace.v10;
 }

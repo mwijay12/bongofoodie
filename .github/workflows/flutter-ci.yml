@@ -39,6 +39,8 @@ jobs:
         run: |
           flutter create --platforms=android,ios,web --org tz.co.bongofoodie --project-name bongo_foodie .
           rm -f test/widget_test.dart
+          python3 scripts/apply_branding.py
+          python3 scripts/test_branding.py
 
       - name: Install Dependencies
         run: flutter pub get
@@ -73,14 +75,14 @@ jobs:
           warnings=$(grep -c 'warning •' /tmp/flutter-analysis.log || true)
           infos=$(grep -c 'info •' /tmp/flutter-analysis.log || true)
           echo "::notice::Branch analyzer: $warnings warnings, $infos infos"
-          grep -E '(warning|info) •.*(app_shell|app_sheet|bongo_glass_nav_bar|tanzania_location_sheet|cart_screen|chef_ai_screen|home_screen|search_menu_screen|dish_detail_sheet|onboarding_screen|profile_screen|app_router|app_tokens|app_colors|shell_navigation_test)' /tmp/flutter-analysis.log | head -9 | while IFS= read -r line; do echo "::warning::$line"; done || true
+          grep -E '(warning|info) •.*(app_shell|app_sheet|bongo_glass_nav_bar|tanzania_location_sheet|cart_screen|chef_ai_screen|home_screen|search_menu_screen|dish_detail_sheet|onboarding_screen|profile_screen|app_router|app_tokens|app_colors|shell_navigation_test|auth_entry_screen|auth_guest_test|auth_repository|auth_validation|auth_provider|reward_repository|cart_provider|menu_repository)' /tmp/flutter-analysis.log | head -9 | while IFS= read -r line; do echo "::warning::$line"; done || true
 
       - name: Run Unit Tests
         run: |
           flutter test --reporter expanded > /tmp/flutter-tests.log 2>&1 || {
             cat /tmp/flutter-tests.log
-            while IFS= read -r line; do echo "::error::$line"; done < <(grep -A 12 'The relevant error-causing widget was:' /tmp/flutter-tests.log | head -40)
-            while IFS= read -r line; do echo "::error::$line"; done < <(grep -E "\[E\]|Expected:|Actual:|overflowed|Exception|Error|Some tests failed" /tmp/flutter-tests.log | head -40)
+            while IFS= read -r line; do echo "::error::$line"; done < <(grep '\[E\]' /tmp/flutter-tests.log | head -3)
+            while IFS= read -r line; do echo "::error::$line"; done < <(grep -A 18 'The following' /tmp/flutter-tests.log | head -20)
             exit 1
           }
           cat /tmp/flutter-tests.log

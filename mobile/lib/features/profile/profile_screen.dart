@@ -1,7 +1,9 @@
+import '../../state/achievements_provider.dart';
+import '../../core/widgets/achievement_cards.dart';
+import '../../core/widgets/skeleton/skeleton_box.dart';
+import '../../core/config/env_config.dart';
 import '../../core/l10n/dish_copy.dart';
 import '../../core/widgets/app_sheet.dart';
-import '../../core/icons/app_icon_key.dart';
-import '../../core/widgets/app_icon.dart';
 import '../../core/widgets/state_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -120,44 +122,9 @@ class ProfileScreen extends ConsumerWidget {
     final user = auth.user;
     final orders = ordersAsync.valueOrNull ?? const <OrderModel>[];
 
-    final achievements = [
-      (
-        icon: AppIconKey.fire,
-        title: 'Mkaa Connoisseur',
-        unlocked: orders.isNotEmpty,
-        desc: 'Placed a Swahili order',
-      ),
-      (
-        icon: AppIconKey.fire,
-        title: 'Pilipili Shujaa',
-        unlocked: favorites.length >= 2,
-        desc: 'Saved 2+ favorite dishes',
-      ),
-      (
-        icon: AppIconKey.restaurant,
-        title: 'Chef AI Co-Creator',
-        unlocked: orders.any((o) => o.items.any((i) => i.isCustomAiDish)),
-        desc: 'Ordered a Chef AI dish',
-      ),
-      (
-        icon: AppIconKey.eco,
-        title: 'Pwani Explorer',
-        unlocked: true,
-        desc: 'Explored coastal menu',
-      ),
-      (
-        icon: AppIconKey.trophy,
-        title: 'Spice Scholar',
-        unlocked: true,
-        desc: 'Daily Trivia participant',
-      ),
-      (
-        icon: AppIconKey.gem,
-        title: 'Bongo VIP',
-        unlocked: orders.length >= 3,
-        desc: '3+ orders completed',
-      ),
-    ];
+    final achievements = ref.watch(achievementsProvider);
+    final preview =
+        user == null || user.isDemo || !EnvConfig.hasSupabaseCredentials;
 
     return Scaffold(
       body: SafeArea(
@@ -302,9 +269,12 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: AppSpace.v10),
                 _StatCard(
-                  title: 'Badges',
-                  value:
-                      '${achievements.where((a) => a.unlocked).length}/${achievements.length}',
+                  title: t.isSw ? 'Beji' : 'Badges',
+                  value: !achievements.isLoading &&
+                          !achievements.hasError &&
+                          achievements.hasValue
+                      ? '${achievements.requireValue.unlockedCount}/3'
+                      : '—',
                   icon: Icons.workspace_premium_rounded,
                   onTap: null,
                 ),
@@ -373,15 +343,15 @@ class ProfileScreen extends ConsumerWidget {
             // 4. Live 4-Step Order Tracker
             Row(
               children: [
-                Text(
-                  t.isSw ? 'Fuatilia Oda Live' : 'Live Order Tracker',
+                Expanded(
+                    child: Text(
+                  t.isSw ? 'Fuatilia oda' : 'Order tracker',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
-                ),
-                const Spacer(),
+                )),
                 IconButton(
-                  tooltip: 'Refresh Orders',
+                  tooltip: t.isSw ? 'Sasisha oda' : 'Refresh orders',
                   onPressed: () =>
                       ref.read(userOrdersProvider.notifier).refresh(),
                   icon: const Icon(Icons.refresh_rounded, size: 20),
@@ -413,58 +383,34 @@ class ProfileScreen extends ConsumerWidget {
                   ),
             ),
             const SizedBox(height: AppSpace.v10),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.98,
-              ),
-              itemCount: achievements.length,
-              itemBuilder: (_, idx) {
-                final badge = achievements[idx];
-                return Opacity(
-                  opacity: badge.unlocked ? 1.0 : 0.45,
-                  child: Container(
-                    padding: const EdgeInsets.all(AppSpace.v10),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkCard : AppColors.surface,
-                      borderRadius: BorderRadius.circular(AppRadius.v16),
-                      border: Border.all(
-                        color: badge.unlocked
-                            ? AppColors.primary.withOpacity(0.4)
-                            : (isDark
-                                ? AppColors.darkBorder
-                                : AppColors.lightBorder),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AppIcon(
-                          iconKey: badge.icon,
-                          size: 24,
-                          color: AppColors.primary,
-                          tinted: true,
-                        ),
-                        const SizedBox(height: AppSpace.v6),
-                        Text(
-                          badge.title,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 11.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+            Text(preview
+                ? (t.isSw
+                    ? (user == null && EnvConfig.hasSupabaseCredentials
+                        ? 'Ingia kuhifadhi beji zako.'
+                        : 'Mfano wa maonyesho tu. Beji hizi hazijahifadhiwa kama tuzo zako.')
+                    : (user == null && EnvConfig.hasSupabaseCredentials
+                        ? 'Sign in to save your milestones.'
+                        : 'Demo preview only. These are not saved as your earned badges.'))
+                : (t.isSw
+                    ? 'Oda zinazohesabiwa ni zilizotumwa baada ya mfumo wa beji kuanza. Beji si uthibitisho wa malipo au kufikishwa.'
+                    : 'Order progress counts submissions recorded since badges launched. Badges do not confirm payment or delivery.')),
+            const SizedBox(height: AppSpace.sm),
+            achievements.when(
+              skipLoadingOnRefresh: false,
+              data: (progress) =>
+                  AchievementCards(progress: progress, isSw: t.isSw),
+              loading: () => const SkeletonLines(count: 3),
+              error: (_, __) => StateMessage.error(
+                  compact: true,
+                  onRetry: () => ref.invalidate(achievementsProvider)),
             ),
+            if (!preview)
+              TextButton.icon(
+                  onPressed: () => ref.invalidate(achievementsProvider),
+                  style: TextButton.styleFrom(
+                      minimumSize: const Size(AppSpace.huge, AppSpace.huge)),
+                  icon: const Icon(Icons.refresh),
+                  label: Text(t.isSw ? 'Sasisha beji' : 'Refresh badges')),
             const SizedBox(height: AppSpace.v24),
 
             // 6. Sign Out / Switch Account Button
@@ -569,7 +515,10 @@ class _LiveOrderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
+            spacing: AppSpace.sm,
+            runSpacing: AppSpace.xs,
+            alignment: WrapAlignment.spaceBetween,
             children: [
               Text(
                 '#${order.id}',
@@ -578,11 +527,10 @@ class _LiveOrderCard extends StatelessWidget {
                   fontSize: 14.5,
                 ),
               ),
-              const Spacer(),
               Text(
                 AppStrings.formatTzs(order.totalAmount),
-                style: const TextStyle(
-                  color: AppColors.primary,
+                style: TextStyle(
+                  color: isDark ? AppColors.heroLight : AppColors.primaryDeep,
                   fontWeight: FontWeight.w800,
                 ),
               ),

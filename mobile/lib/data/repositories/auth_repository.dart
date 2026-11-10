@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../core/config/env_config.dart';
 import '../../core/services/supabase_service.dart';
 import '../mock/showcase_seed_data.dart';
 import '../models/models.dart';
@@ -10,6 +9,12 @@ import '../models/models.dart';
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
 });
+
+/// Signup succeeded, but no authenticated session exists yet.
+class EmailConfirmationRequired implements Exception {
+  const EmailConfirmationRequired(this.email);
+  final String email;
+}
 
 class AuthRepository {
   static const _demoUserKey = 'bongo_demo_user_v2';
@@ -22,6 +27,8 @@ class AuthRepository {
       if (user != null) {
         return _mapSupabaseUser(sb, user);
       }
+      // Do not restore a local demo identity into an unauthenticated live app.
+      return null;
     }
 
     final prefs = await SharedPreferences.getInstance();
@@ -35,6 +42,9 @@ class AuthRepository {
   }
 
   Future<AppUser> signInDemo(UserRole role) async {
+    if (SupabaseService.isLive) {
+      throw StateError('Showcase roles are not available in live mode.');
+    }
     final profile = ShowcaseSeedData.demoProfiles[role] ??
         ShowcaseSeedData.demoProfiles[UserRole.customer]!;
     final prefs = await SharedPreferences.getInstance();
@@ -59,7 +69,8 @@ class AuthRepository {
     );
     final user = res.user;
     if (user == null) {
-      throw Exception('Unable to sign in. Please verify your email and password.');
+      throw Exception(
+          'Unable to sign in. Please verify your email and password.');
     }
     return _mapSupabaseUser(sb, user);
   }
@@ -78,9 +89,7 @@ class AuthRepository {
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
-        role: EnvConfig.authorizedAdminEmails.contains(email.trim().toLowerCase())
-            ? UserRole.admin
-            : UserRole.customer,
+        role: UserRole.customer,
         isDemo: true,
       );
       final prefs = await SharedPreferences.getInstance();
@@ -100,13 +109,18 @@ class AuthRepository {
     if (user == null) {
       throw Exception('Account registration failed.');
     }
-    return _mapSupabaseUser(sb, user, fallbackName: name.trim(), fallbackPhone: phone.trim());
+    if (res.session == null) {
+      throw EmailConfirmationRequired(email.trim());
+    }
+    return _mapSupabaseUser(sb, user,
+        fallbackName: name.trim(), fallbackPhone: phone.trim());
   }
 
   Future<void> signInWithGoogleOAuth() async {
     final sb = SupabaseService.client;
     if (sb == null) {
-      throw Exception('Google OAuth requires live Supabase credentials. Use 1-Click Showcase Login for instant demo!');
+      throw Exception(
+          'Google OAuth requires live Supabase credentials. Use 1-Click Showcase Login for instant demo!');
     }
     await sb.auth.signInWithOAuth(
       OAuthProvider.google,
@@ -117,7 +131,8 @@ class AuthRepository {
   Future<void> resetPassword(String email) async {
     final sb = SupabaseService.client;
     if (sb == null) {
-      throw Exception('Configure SUPABASE_URL & SUPABASE_ANON_KEY to send live password recovery emails.');
+      throw Exception(
+          'Configure SUPABASE_URL & SUPABASE_ANON_KEY to send live password recovery emails.');
     }
     await sb.auth.resetPasswordForEmail(
       email.trim(),
@@ -155,9 +170,7 @@ class AuthRepository {
     final roleFromDb = row?['role']?.toString();
     final role = roleFromDb != null
         ? UserRole.fromString(roleFromDb)
-        : (EnvConfig.authorizedAdminEmails.contains(email.toLowerCase())
-            ? UserRole.admin
-            : UserRole.customer);
+        : UserRole.customer;
 
     return AppUser(
       id: user.id,
@@ -167,13 +180,11 @@ class AuthRepository {
               email)
           .toString(),
       email: email,
-      phone: (row?['phone'] ??
-              user.userMetadata?['phone'] ??
-              fallbackPhone ??
-              '')
+      phone:
+          (row?['phone'] ?? user.userMetadata?['phone'] ?? fallbackPhone ?? '')
+              .toString(),
+      avatarUrl: (row?['avatar_url'] ?? user.userMetadata?['avatar_url'] ?? '')
           .toString(),
-      avatarUrl:
-          (row?['avatar_url'] ?? user.userMetadata?['avatar_url'] ?? '').toString(),
       role: role,
       isDemo: false,
     );

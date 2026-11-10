@@ -37,7 +37,8 @@ const String _longSubtitle =
 const MenuItemModel _item = MenuItemModel(
   id: 'polish-pilau',
   name: 'Polish Pilau',
-  description: 'A fragrant coastal rice dish with warm spices and coconut gravy.',
+  description:
+      'A fragrant coastal rice dish with warm spices and coconut gravy.',
   imageUrl: 'salad',
   price: 7500,
   rating: 4.6,
@@ -86,11 +87,13 @@ List<Override> _overrides({
     appStringsProvider.overrideWithValue(_englishStrings),
     showcaseLatencyProvider.overrideWithValue(Duration.zero),
     allMenuItemsProvider.overrideWith(
-      (ref) => menu ??
+      (ref) =>
+          menu ??
           Future<List<MenuItemModel>>.value(const <MenuItemModel>[_item]),
     ),
     promotionsProvider.overrideWith(
-      (ref) => promos ??
+      (ref) =>
+          promos ??
           Future<List<PromotionModel>>.value(const <PromotionModel>[]),
     ),
     categoriesProvider.overrideWith((ref) async => <CategoryModel>[]),
@@ -213,7 +216,8 @@ void main() {
   });
 
   test('shared promo and nav metrics stay in sync', () {
-    expect(PromoCardMetrics.height, AppSpace.v220);
+    expect(PromoCardMetrics.height, 320);
+    expect(PromoCardMetrics.imageSize, 148);
     expect(AppSpace.navClearance, AppSpace.navHeight + AppSpace.lg);
   });
 
@@ -367,8 +371,7 @@ void main() {
           );
           await tester.pump(const Duration(milliseconds: 100));
           await tester.pump(const Duration(milliseconds: 100));
-          final region =
-              tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+          final region = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
             find.byKey(ValueKey('${entry.key}-system-ui')),
           );
           expect(region.value.statusBarIconBrightness, Brightness.light);
@@ -411,9 +414,8 @@ void main() {
       const Offset(0, -5000),
     );
     await tester.pump(const Duration(milliseconds: 100));
-    final lastBottom = tester
-        .getBottomLeft(find.byKey(ValueKey('home-dish-${_item.id}')))
-        .dy;
+    final lastBottom =
+        tester.getBottomLeft(find.byKey(ValueKey('home-dish-${_item.id}'))).dy;
     final navTop = tester.getTopLeft(find.byType(BongoGlassNavBar)).dy;
     expect(lastBottom, lessThan(navTop));
     expect(
