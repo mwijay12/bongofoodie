@@ -343,15 +343,15 @@ class ProfileScreen extends ConsumerWidget {
             // 4. Live 4-Step Order Tracker
             Row(
               children: [
-                Text(
-                  t.isSw ? 'Fuatilia Oda Live' : 'Live Order Tracker',
+                Expanded(
+                    child: Text(
+                  t.isSw ? 'Fuatilia oda' : 'Order tracker',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
-                ),
-                const Spacer(),
+                )),
                 IconButton(
-                  tooltip: 'Refresh Orders',
+                  tooltip: t.isSw ? 'Sasisha oda' : 'Refresh orders',
                   onPressed: () =>
                       ref.read(userOrdersProvider.notifier).refresh(),
                   icon: const Icon(Icons.refresh_rounded, size: 20),
@@ -385,8 +385,12 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: AppSpace.v10),
             Text(preview
                 ? (t.isSw
-                    ? 'Huu ni mwonekano wa mfano. Ingia kuhifadhi beji zako.'
-                    : 'Preview only. Sign in to save your milestones.')
+                    ? (user == null && EnvConfig.hasSupabaseCredentials
+                        ? 'Ingia kuhifadhi beji zako.'
+                        : 'Mfano wa maonyesho tu. Beji hizi hazijahifadhiwa kama tuzo zako.')
+                    : (user == null && EnvConfig.hasSupabaseCredentials
+                        ? 'Sign in to save your milestones.'
+                        : 'Demo preview only. These are not saved as your earned badges.'))
                 : (t.isSw
                     ? 'Oda zinazohesabiwa ni zilizotumwa baada ya mfumo wa beji kuanza. Beji si uthibitisho wa malipo au kufikishwa.'
                     : 'Order progress counts submissions recorded since badges launched. Badges do not confirm payment or delivery.')),
