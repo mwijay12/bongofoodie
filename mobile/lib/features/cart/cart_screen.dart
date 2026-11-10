@@ -429,8 +429,8 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
                 liveRegion: true,
                 child: Text(
                   t.isSw
-                      ? 'Oda haijatumwa. Kikapu chako kimehifadhiwa. Jaribu tena.'
-                      : 'Order not sent. Your cart is saved. Please retry.',
+                      ? 'Mfano haujahifadhiwa. Kikapu chako kimehifadhiwa. Jaribu tena.'
+                      : 'Simulation could not be saved. Your cart is saved. Please retry.',
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -453,9 +453,13 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
                     ? null
                     : () => _submitOrder(cart, branch, address),
                 child: Text(
-                  _placingOrder
-                      ? (t.isSw ? 'Inahakiki…' : 'Reviewing…')
-                      : '${_orderFailed ? (t.isSw ? 'Jaribu tena' : 'Retry') : (t.isSw ? 'Hakiki mfano' : 'Review demo order')} • ${AppStrings.formatTzs(cart.grandTotal)}',
+                  EnvConfig.hasSupabaseCredentials
+                      ? (t.isSw
+                          ? 'Oda halisi haipatikani bado'
+                          : 'Live checkout unavailable')
+                      : _placingOrder
+                          ? (t.isSw ? 'Inahakiki…' : 'Reviewing…')
+                          : '${_orderFailed ? (t.isSw ? 'Jaribu tena' : 'Retry') : (t.isSw ? 'Hakiki mfano' : 'Review demo order')} • ${AppStrings.formatTzs(cart.grandTotal)}',
                   textAlign: TextAlign.center,
                 ),
               ),
