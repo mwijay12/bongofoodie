@@ -22,7 +22,9 @@ class RewardQuote {
 class RewardRepository {
   Future<RewardQuote> quote(String code, List<CartItemModel> items) async {
     final client = SupabaseService.client;
-    if (!EnvConfig.hasSupabaseCredentials || client?.auth.currentUser == null) {
+    if (!EnvConfig.hasSupabaseCredentials ||
+        client == null ||
+        client.auth.currentUser == null) {
       throw StateError('reward_sign_in_required');
     }
     final json = await client.rpc('quote_reward', params: {

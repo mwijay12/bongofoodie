@@ -552,7 +552,7 @@ class MenuRepository {
   Future<bool> hasAttemptedTriviaToday(String? userId) async {
     if (EnvConfig.hasSupabaseCredentials) {
       final sb = SupabaseService.client;
-      if (sb?.auth.currentUser == null) return false;
+      if (sb == null || sb.auth.currentUser == null) return false;
       return await sb.rpc('reward_quiz_status') as bool;
     }
     final prefs = await SharedPreferences.getInstance();
@@ -563,7 +563,7 @@ class MenuRepository {
   Future<bool> submitTriviaAnswer(int questionId, int answerIndex) async {
     if (EnvConfig.hasSupabaseCredentials) {
       final sb = SupabaseService.client;
-      if (sb?.auth.currentUser == null) {
+      if (sb == null || sb.auth.currentUser == null) {
         return false; // Guest practice, no entitlement.
       }
       return await sb.rpc('submit_reward_quiz', params: {
@@ -596,7 +596,7 @@ class MenuRepository {
   Future<int> getTriviaWinsCount() async {
     if (EnvConfig.hasSupabaseCredentials) {
       final sb = SupabaseService.client;
-      if (sb?.auth.currentUser == null) return 0;
+      if (sb == null || sb.auth.currentUser == null) return 0;
       final rows = await sb
           .from('reward_quiz_attempts')
           .select('quiz_date')
