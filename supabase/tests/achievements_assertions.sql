@@ -1,4 +1,12 @@
 -- Isolated fixture only, run after reward assertions and achievement migration.
+create or replace function pg_temp.expect_error(command text, expected text) returns void language plpgsql as $$
+begin
+  begin execute command; exception when others then
+    if position(expected in sqlerrm) > 0 then return; end if;
+    raise exception 'Unexpected error: % (wanted %)', sqlerrm, expected;
+  end;
+  raise exception 'Command unexpectedly succeeded: %', command;
+end $$;
 select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', false);
 do $$begin
  if (achievement_progress()->>'orders_submitted')::int <> 0 then raise exception 'legacy orders granted awards'; end if;
