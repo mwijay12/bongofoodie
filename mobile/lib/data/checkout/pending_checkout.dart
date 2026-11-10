@@ -112,7 +112,9 @@ class PendingCheckoutCoordinator {
       if (json['version'] != 1 ||
           json['project'] != project ||
           json['owner'] != owner ||
-          !_uuid.hasMatch(json['key'] as String)) throw const FormatException();
+          !_uuid.hasMatch(json['key'] as String)) {
+        throw const FormatException();
+      }
       final pending = PendingCheckout(
           key: json['key'] as String,
           requestJson: json['request'] as String,
@@ -202,7 +204,10 @@ class PendingCheckoutCoordinator {
           _authorize();
           final latest = await _read();
           _authorize();
-          return latest?.phase == CheckoutPhase.confirmed ? latest! : unknown;
+          if (latest != null && latest.phase == CheckoutPhase.confirmed) {
+            return latest;
+          }
+          return unknown;
         }
         final confirmed = unknown.withPhase(CheckoutPhase.confirmed,
             response: jsonEncode(result));
@@ -224,8 +229,9 @@ class PendingCheckoutCoordinator {
           .lookup(pending.key)
           .timeout(const Duration(seconds: 10));
       _authorize();
-      if (result == null)
+      if (result == null) {
         return pending; // Not proof of failure; NEVER delete/change key.
+      }
       _validateResponse(pending, result);
     } catch (_) {
       _authorize();
