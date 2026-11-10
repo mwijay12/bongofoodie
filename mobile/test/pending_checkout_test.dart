@@ -205,6 +205,24 @@ void main() {
     await Future.wait([first, second]);
     expect(transport.submits, 1);
   });
+  test('lookup confirms while original write future remains unresolved',
+      () async {
+    final journal = Journal();
+    final transport = Transport();
+    final c = coordinator(journal, transport);
+    final prepared = await c.prepare(request());
+    final pending = Completer<Map<String, dynamic>>();
+    transport.onSubmit = (_, __) => pending.future;
+    final write = c.submitSaved();
+    await Future<void>.delayed(Duration.zero);
+    expect((await c.restore())!.phase, CheckoutPhase.unknown);
+    transport.onLookup = (_) async => response(request());
+    expect((await c.reconcile())!.phase, CheckoutPhase.confirmed);
+    expect(transport.keys.toSet(), {prepared.key});
+    pending.completeError(StateError('lost response after committed result'));
+    expect((await write).phase, CheckoutPhase.confirmed);
+    expect(transport.submits, 1);
+  });
   test(
       'owner/project scopes isolate and session switch during response cannot expose confirmation',
       () async {

@@ -23,7 +23,12 @@ Phases:
 - **confirmed**: server response structure/quote checked and saved locally.
   Pending/unconfirmed server submission is NOT payment/kitchen/delivery acceptance.
 
-Same-process scopes share an async queue even across new coordinator instances.
+Same-process scope mutations share an async queue even across new coordinator instances.
+Read-only restore and owned reconciliation do not wait behind an unresolved write:
+a lookup can confirm a committed result while the original HTTP future still
+hangs. A later write failure preserves that concurrently confirmed journal. This
+relies on the no-clear/no-archive/no-replacement contract; future receipt lifecycle
+changes must add generation/transaction guards before allowing replacement.
 Concurrent prepare calls reuse one persisted key; queued submit after a confirmed
 result returns it without another write. After an ambiguous result, ONLY explicit
 submitSaved retries the SAME key/body (server idempotency), not a fresh basket.
@@ -74,7 +79,7 @@ and duplicate-confirmation UI must be integrated/tested separately.
 ## Validation and remaining gates
 
 Injected journal/transport tests cover persisted restart, immediate/post-prepare
-caller mutation, failures before either preflight save, lost submit response,
+caller mutation, lookup while the original write is unresolved, failures before either preflight save, lost submit response,
 missing/offline lookup, same-body explicit retry, confirmed-save failure followed
 by lookup without resubmit, concurrent objects, owner/project isolation, session
 switch during hydration/response, corrupt record and malformed response.
