@@ -4,6 +4,8 @@ import '../theme/app_colors.dart';
 import '../theme/app_tokens.dart';
 import '../utils/emoji_sanitizer.dart';
 import 'promo_dish_image.dart';
+import 'app_icon.dart';
+import '../icons/app_icon_key.dart';
 
 /// Food leads the offer; text never shares the artwork's paint bounds.
 class PromoOfferCard extends StatelessWidget {
@@ -56,14 +58,24 @@ class PromoOfferCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       if (badge.isNotEmpty) ...[
-                        Text(badge,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                color: foreground,
-                                fontSize: 12,
-                                height: 1.2,
-                                fontWeight: FontWeight.w800)),
+                        Row(children: [
+                          AppIcon(
+                              iconKey: promotion.iconKey ??
+                                  appIconKeyForText(
+                                      '${promotion.title} ${promotion.badgeText}',
+                                      fallback: AppIconKey.fire),
+                              color: foreground),
+                          const SizedBox(width: AppSpace.v6),
+                          Expanded(
+                              child: Text(badge,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      color: foreground,
+                                      fontSize: 12,
+                                      height: 1.2,
+                                      fontWeight: FontWeight.w800))),
+                        ]),
                         const SizedBox(height: AppSpace.sm),
                       ],
                       Text(title,
