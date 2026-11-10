@@ -270,7 +270,9 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(width: AppSpace.v10),
                 _StatCard(
                   title: t.isSw ? 'Beji' : 'Badges',
-                  value: achievements.hasValue
+                  value: !achievements.isLoading &&
+                          !achievements.hasError &&
+                          achievements.hasValue
                       ? '${achievements.requireValue.unlockedCount}/3'
                       : '—',
                   icon: Icons.workspace_premium_rounded,

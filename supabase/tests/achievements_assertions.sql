@@ -17,6 +17,7 @@ do $$begin
  if (achievement_progress()->>'orders_submitted')::int <> 3 then raise exception 'update duplicated event'; end if;
 end$$;
 -- Failed transactions cannot leave achievement events.
+-- SPLIT
 begin;
 insert into orders(id,profile_id,items,total_price) values ('achievement-rollback','11111111-1111-1111-1111-111111111111','[]',0);
 rollback;

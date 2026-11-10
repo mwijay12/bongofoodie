@@ -1,3 +1,11 @@
+import 'package:bongo_foodie/features/profile/profile_screen.dart';
+import 'package:bongo_foodie/core/l10n/app_strings.dart';
+import 'package:bongo_foodie/state/settings_provider.dart';
+import 'package:bongo_foodie/data/repositories/menu_repository.dart';
+import 'package:bongo_foodie/state/menu_provider.dart';
+import 'package:bongo_foodie/data/models/models.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bongo_foodie/core/widgets/achievement_cards.dart';
 import 'package:bongo_foodie/core/theme/app_theme.dart';
 import 'package:bongo_foodie/state/achievements_provider.dart';
@@ -26,6 +34,43 @@ void main() {
   for (final size in [const Size(360, 640), const Size(430, 932)]) {
     for (final sw in [false, true]) {
       for (final dark in [false, true]) {
+        testWidgets('profile badge preview $size sw=$sw dark=$dark',
+            (tester) async {
+          SharedPreferences.setMockInitialValues({});
+          tester.view.physicalSize = size;
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          await tester.pumpWidget(ProviderScope(
+              overrides: [
+                appStringsProvider.overrideWithValue(
+                    AppStrings(sw ? AppLanguage.sw : AppLanguage.en)),
+                showcaseLatencyProvider.overrideWithValue(Duration.zero),
+                allMenuItemsProvider
+                    .overrideWith((ref) async => <MenuItemModel>[]),
+              ],
+              child: MaterialApp(
+                  theme: dark ? AppTheme.dark() : buildAppTheme(),
+                  builder: (context, child) => MediaQuery(
+                      data: MediaQuery.of(context).copyWith(
+                          textScaler: const TextScaler.linear(1.3),
+                          disableAnimations: true),
+                      child: child!),
+                  home: const ProfileScreen())));
+          await tester.pumpAndSettle();
+          expect(find.text('0/3'), findsOneWidget);
+          await tester.scrollUntilVisible(find.byType(AchievementCards), 150,
+              scrollable: find.byType(Scrollable).first);
+          await tester.ensureVisible(
+              find.text(sw ? 'Mjuzi wa viungo' : 'Spice knowledge'));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          expect(
+              find.textContaining(sw ? 'Bado haijapatikana' : 'Not yet earned'),
+              findsNWidgets(3));
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pumpAndSettle();
+        });
         for (final earned in [false, true]) {
           testWidgets(
               'badge copy and art $size sw=$sw dark=$dark earned=$earned',
