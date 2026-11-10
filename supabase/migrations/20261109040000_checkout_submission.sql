@@ -8,7 +8,7 @@ alter table public.checkout_runtime enable row level security;
 revoke all on public.checkout_runtime from public, anon, authenticated;
 
 create table if not exists public.checkout_requests (
-  owner_id uuid not null references public.profiles(id),
+  owner_id uuid not null references public.profiles(id) on delete cascade,
   request_key uuid not null,
   -- jsonb equality is the authoritative fingerprint; never rely on a short hash.
   request_body jsonb not null,
@@ -28,7 +28,8 @@ declare u uuid := auth.uid(); stored public.checkout_requests%rowtype;
   name text; phone text; address text; method text; code text; notes text; oid text;
 begin
   if u is null then raise exception 'checkout_session_required'; end if;
-  if p_key is null or p_request is null or jsonb_typeof(p_request) <> 'object' then
+  if p_key is null or p_request is null or jsonb_typeof(p_request) <> 'object' or
+    octet_length(p_request::text) > 65536 then
     raise exception 'checkout_invalid_request';
   end if;
   -- Unique insert waits for a concurrent same-key transaction to commit/rollback.
@@ -37,6 +38,7 @@ begin
   select * into stored from public.checkout_requests where owner_id=u and request_key=p_key for update;
   if stored.request_body is distinct from p_request then raise exception 'checkout_request_changed'; end if;
   if stored.response is not null then return stored.response; end if;
+  lock table public.checkout_runtime in share mode;
   if not exists(select 1 from public.checkout_runtime where id and submission_enabled) then
     raise exception 'checkout_submission_disabled';
   end if;
