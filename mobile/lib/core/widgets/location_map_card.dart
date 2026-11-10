@@ -171,10 +171,12 @@ class _LocationMapCardState extends ConsumerState<LocationMapCard> {
                               });
                             },
                             tileBuilder: (context, tile, image) {
-                              if (image.loadFinishedAt == null)
+                              if (image.loadFinishedAt == null) {
                                 return const SkeletonBox(height: AppSpace.v220);
-                              if (!image.loadError && revision == _revision)
+                              }
+                              if (!image.loadError && revision == _revision) {
                                 _loadTimer?.cancel();
+                              }
                               return tile;
                             }),
                         if (target.hasCoordinates)

@@ -123,6 +123,7 @@ void main() {
           const address = 'House 14, Near market, Dar es Salaam';
           await tester.enterText(
               find.byKey(const Key('manual-address')), address);
+          await tester.pumpAndSettle();
           await tester.ensureVisible(find.byKey(const Key('save-location')));
           await tester.pumpAndSettle();
           await tester.tap(find.byKey(const Key('save-location')));
