@@ -152,6 +152,7 @@ class PendingCheckoutCoordinator {
   Future<PendingCheckout> prepare(Map<String, dynamic> request) =>
       _exclusive(() async {
         final existing = await _read();
+        _authorize();
         if (existing != null) {
           if (_canonical(existing.request) != _canonical(request))
             throw StateError('checkout_pending_request_exists');
@@ -173,6 +174,7 @@ class PendingCheckoutCoordinator {
   /// Explicit caller action only. Unknown outcomes reuse the SAME stored request.
   Future<PendingCheckout> submitSaved() => _exclusive(() async {
         final pending = await _read();
+        _authorize();
         if (pending == null) throw StateError('checkout_no_pending_request');
         if (pending.phase == CheckoutPhase.confirmed) return pending;
         final unknown = pending.withPhase(CheckoutPhase.unknown);
@@ -198,6 +200,7 @@ class PendingCheckoutCoordinator {
       });
   Future<PendingCheckout?> reconcile() => _exclusive(() async {
         final pending = await _read();
+        _authorize();
         if (pending == null || pending.phase == CheckoutPhase.confirmed)
           return pending;
         Map<String, dynamic>? result;
