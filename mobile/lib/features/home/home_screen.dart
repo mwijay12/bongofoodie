@@ -1,3 +1,4 @@
+import 'dart:async';
 import '../../core/l10n/daily_copy.dart';
 import '../../core/utils/daily_selection.dart';
 import '../../core/widgets/catalog_cache_notice.dart';
@@ -45,7 +46,44 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with WidgetsBindingObserver {
+  Timer? _dailyTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _scheduleDailyRefresh();
+  }
+
+  void _scheduleDailyRefresh() {
+    _dailyTimer?.cancel();
+    final now = DateTime.now().toUtc();
+    final nextMidnight =
+        darCalendarDay(now).add(const Duration(days: 1, hours: -3));
+    _dailyTimer = Timer(nextMidnight.difference(now), () {
+      if (!mounted) return;
+      setState(() {});
+      _scheduleDailyRefresh();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {});
+      _scheduleDailyRefresh();
+    }
+  }
+
+  @override
+  void dispose() {
+    _dailyTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
   bool _imagesWarmed = false;
   final Set<String> _warmedPromoAssets = {};
 
@@ -1041,6 +1079,10 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: AppSpace.v8),
+                  if (isCorrect)
+                    Text(sw
+                        ? 'Kunakili msimbo hakuhakikishi punguzo. Masharti yatathibitishwa kwenye malipo.'
+                        : 'Copying a code does not guarantee a discount. Eligibility is checked at checkout.'),
                   if (isCorrect)
                     OutlinedButton.icon(
                       onPressed: () {
