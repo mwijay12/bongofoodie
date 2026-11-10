@@ -142,4 +142,20 @@ void main() {
     first.dispose();
     second.dispose();
   });
+  test('signout during address save cannot restore private selection',
+      () async {
+    final address = DeliveryAddressNotifier();
+    final saving = address.saveSelection(
+        region: 7,
+        district: 701,
+        ward: 70101,
+        street: 'Private street',
+        address: 'Private address');
+    final clearing = address.clearPrivateAddress();
+    await Future.wait([saving, clearing]);
+    expect(await address.readSelection(), isNull);
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('bongo_delivery_address_v2'), isNull);
+    address.dispose();
+  });
 }
