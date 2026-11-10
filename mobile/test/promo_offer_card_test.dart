@@ -45,7 +45,6 @@ void main() {
             addTearDown(tester.view.resetPhysicalSize);
             addTearDown(tester.view.resetDevicePixelRatio);
             final semantics = tester.ensureSemantics();
-            addTearDown(semantics.dispose);
             var taps = 0;
             final promo = offer(sw, green);
             final action = sw ? 'Angalia menyu' : 'Explore the menu';
@@ -90,6 +89,7 @@ void main() {
             expect(node.label, contains(action));
             await tester.tap(find.byType(PromoOfferCard));
             expect(taps, 1);
+            semantics.dispose();
             await tester.pumpWidget(const SizedBox.shrink());
             await tester.pump(const Duration(milliseconds: 50));
           });
