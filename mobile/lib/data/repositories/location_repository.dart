@@ -3,7 +3,8 @@ import '../../state/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/supabase_service.dart';
-import '../mock/showcase_seed_data.dart';
+import '../mock/dar_location_reference.dart';
+import '../../core/config/env_config.dart';
 import '../models/models.dart';
 
 final locationRepositoryProvider = Provider<LocationRepository>((ref) {
@@ -22,7 +23,7 @@ final deliveryAddressProvider =
 class DeliveryAddressNotifier extends StateNotifier<String> {
   static const _prefKey = 'bongo_delivery_address_v2';
 
-  DeliveryAddressNotifier() : super('Kijitonyama, Kinondoni, Dar es Salaam') {
+  DeliveryAddressNotifier() : super('') {
     _load();
   }
 
@@ -74,9 +75,17 @@ class DeliveryAddressNotifier extends StateNotifier<String> {
         }));
   }
 
+  Future<void> saveManualAddress(String address) async {
+    final revision = _revision + 1;
+    await setAddress(address);
+    final prefs = await SharedPreferences.getInstance();
+    if (revision == _revision)
+      await prefs.remove('bongo_location_selection_v1');
+  }
+
   Future<void> clearPrivateAddress() async {
     _revision++;
-    state = 'Kijitonyama, Kinondoni, Dar es Salaam';
+    state = '';
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_prefKey);
     await prefs.remove('bongo_location_selection_v1');
@@ -93,74 +102,71 @@ class DeliveryAddressNotifier extends StateNotifier<String> {
 }
 
 class LocationRepository {
+  static const _timeout = Duration(seconds: 10);
+  void _requireDemo() {
+    if (EnvConfig.hasSupabaseCredentials)
+      throw StateError('location_catalog_unavailable');
+  }
+
   Future<List<TzRegion>> getRegions() async {
     final sb = SupabaseService.client;
-    if (sb != null) {
-      try {
-        final rows = await sb
-            .from('regions')
-            .select('region_code, region_name')
-            .order('region_name', ascending: true);
-        if (rows.isNotEmpty) {
-          return rows
-              .map<TzRegion>((r) => TzRegion(
-                    code: (r['region_code'] as num).toInt(),
-                    name: r['region_name'].toString(),
-                  ))
-              .toList();
-        }
-      } catch (_) {}
+    if (sb == null) {
+      _requireDemo();
+      return DarLocationReference.regions;
     }
-    return ShowcaseSeedData.regions;
+    final rows = await sb
+        .from('regions')
+        .select('region_code, region_name')
+        .order('region_name')
+        .timeout(_timeout);
+    return rows
+        .map((r) => TzRegion(
+            code: (r['region_code'] as num).toInt(),
+            name: r['region_name'].toString()))
+        .toList();
   }
 
   Future<List<TzDistrict>> getDistricts(int regionCode) async {
     final sb = SupabaseService.client;
-    if (sb != null) {
-      try {
-        final rows = await sb
-            .from('districts')
-            .select('district_code, district_name')
-            .eq('region_id', regionCode)
-            .order('district_name', ascending: true);
-        if (rows.isNotEmpty) {
-          return rows
-              .map<TzDistrict>((r) => TzDistrict(
-                    code: (r['district_code'] as num).toInt(),
-                    name: r['district_name'].toString(),
-                    regionCode: regionCode,
-                  ))
-              .toList();
-        }
-      } catch (_) {}
+    if (sb == null) {
+      _requireDemo();
+      return DarLocationReference.districts
+          .where((d) => d.regionCode == regionCode)
+          .toList();
     }
-    return ShowcaseSeedData.districts
-        .where((d) => d.regionCode == regionCode)
+    final rows = await sb
+        .from('districts')
+        .select('district_code, district_name')
+        .eq('region_id', regionCode)
+        .order('district_name')
+        .timeout(_timeout);
+    return rows
+        .map((r) => TzDistrict(
+            code: (r['district_code'] as num).toInt(),
+            name: r['district_name'].toString(),
+            regionCode: regionCode))
         .toList();
   }
 
   Future<List<TzWard>> getWards(int districtCode) async {
     final sb = SupabaseService.client;
-    if (sb != null) {
-      try {
-        final rows = await sb
-            .from('wards')
-            .select('ward_code, ward_name')
-            .eq('district_id', districtCode)
-            .order('ward_name', ascending: true);
-        if (rows.isNotEmpty) {
-          return rows
-              .map<TzWard>((r) => TzWard(
-                    code: (r['ward_code'] as num).toInt(),
-                    name: r['ward_name'].toString(),
-                    districtCode: districtCode,
-                  ))
-              .toList();
-        }
-      } catch (_) {}
+    if (sb == null) {
+      _requireDemo();
+      return DarLocationReference.wards
+          .where((w) => w.districtCode == districtCode)
+          .toList();
     }
-    return ShowcaseSeedData.wards
-        .where((w) => w.districtCode == districtCode)
+    final rows = await sb
+        .from('wards')
+        .select('ward_code, ward_name')
+        .eq('district_id', districtCode)
+        .order('ward_name')
+        .timeout(_timeout);
+    return rows
+        .map((r) => TzWard(
+            code: (r['ward_code'] as num).toInt(),
+            name: r['ward_name'].toString(),
+            districtCode: districtCode))
         .toList();
   }
 }

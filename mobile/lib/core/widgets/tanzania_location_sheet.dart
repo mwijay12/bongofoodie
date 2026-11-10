@@ -1,258 +1,343 @@
 import '../theme/app_tokens.dart';
+import '../theme/app_colors.dart';
 import 'app_sheet.dart';
+import 'skeleton/skeleton_box.dart';
+import '../../state/settings_provider.dart';
+import '../../data/mock/dar_location_reference.dart';
+import '../../core/config/env_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/location_repository.dart';
-import '../theme/app_colors.dart';
 
-Future<String?> showTanzaniaLocationPicker(BuildContext context) {
-  return showAppSheet<String>(
-    context,
-    showDragHandle: true,
-    builder: (_) => const TanzaniaLocationSheet(),
-  );
-}
+Future<String?> showTanzaniaLocationPicker(BuildContext context) =>
+    showAppSheet<String>(context,
+        showDragHandle: true, builder: (_) => const TanzaniaLocationSheet());
 
 class TanzaniaLocationSheet extends ConsumerStatefulWidget {
   const TanzaniaLocationSheet({super.key});
-
   @override
-  ConsumerState<TanzaniaLocationSheet> createState() =>
-      _TanzaniaLocationSheetState();
+  ConsumerState<TanzaniaLocationSheet> createState() => _LocationState();
 }
 
-class _TanzaniaLocationSheetState extends ConsumerState<TanzaniaLocationSheet> {
-  List<TzRegion> _regions = const [];
-  List<TzDistrict> _districts = const [];
-  List<TzWard> _wards = const [];
-
-  TzRegion? _selectedRegion;
-  TzDistrict? _selectedDistrict;
-  TzWard? _selectedWard;
-  final _streetCtrl = TextEditingController();
+class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
+  List<TzRegion> _regions = [];
+  List<TzDistrict> _districts = [];
+  List<TzWard> _wards = [];
+  TzRegion? _region;
+  TzDistrict? _district;
+  TzWard? _ward;
+  final _street = TextEditingController();
+  final _manual = TextEditingController();
+  bool _manualMode = false;
   bool _loading = true;
+  bool _error = false;
+  bool _saving = false;
+  int _request = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadInitial();
+    _initial();
   }
 
   @override
   void dispose() {
-    _streetCtrl.dispose();
+    _request++;
+    _street.dispose();
+    _manual.dispose();
     super.dispose();
   }
 
-  Future<void> _loadInitial() async {
-    final repo = ref.read(locationRepositoryProvider);
-    final saved =
-        await ref.read(deliveryAddressProvider.notifier).readSelection();
-    final regions = await repo.getRegions();
-    TzRegion? defaultReg = regions.isNotEmpty ? regions.first : null;
-    for (final r in regions) {
-      if (r.name.toLowerCase().contains('dar')) {
-        defaultReg = r;
-        break;
+  Future<void> _initial() async {
+    final request = ++_request;
+    setState(() {
+      _loading = true;
+      _error = false;
+    });
+    try {
+      final repo = ref.read(locationRepositoryProvider);
+      final saved =
+          await ref.read(deliveryAddressProvider.notifier).readSelection();
+      final regions = await repo.getRegions();
+      TzRegion? region;
+      for (final r in regions) {
+        if (r.code == saved?['region']) region = r;
       }
-    }
-
-    for (final r in regions) {
-      if (r.code == saved?['region']) defaultReg = r;
-    }
-    List<TzDistrict> districts = const [];
-    TzDistrict? defaultDist;
-    List<TzWard> wards = const [];
-    TzWard? defaultWard;
-
-    if (defaultReg != null) {
-      districts = await repo.getDistricts(defaultReg.code);
-      defaultDist = districts.isNotEmpty ? districts.first : null;
+      final districts = region == null
+          ? <TzDistrict>[]
+          : await repo.getDistricts(region.code);
+      TzDistrict? district;
       for (final d in districts) {
-        if (d.code == saved?['district']) defaultDist = d;
+        if (d.code == saved?['district']) district = d;
       }
-      if (defaultDist != null) {
-        wards = await repo.getWards(defaultDist.code);
-        defaultWard = wards.isNotEmpty ? wards.first : null;
-        for (final w in wards) {
-          if (w.code == saved?['ward']) defaultWard = w;
-        }
+      final wards =
+          district == null ? <TzWard>[] : await repo.getWards(district.code);
+      TzWard? ward;
+      for (final w in wards) {
+        if (w.code == saved?['ward']) ward = w;
       }
-    }
-
-    if (mounted) {
+      if (!mounted || request != _request) return;
       setState(() {
-        if (defaultWard?.code == saved?['ward']) {
-          _streetCtrl.text = (saved?['street'] ?? '').toString();
-        }
         _regions = regions;
-        _selectedRegion = defaultReg;
+        _region = region;
         _districts = districts;
-        _selectedDistrict = defaultDist;
+        _district = district;
         _wards = wards;
-        _selectedWard = defaultWard;
+        _ward = ward;
+        if (ward != null) _street.text = (saved?['street'] ?? '').toString();
         _loading = false;
       });
+    } catch (_) {
+      if (mounted && request == _request)
+        setState(() {
+          _error = true;
+          _loading = false;
+        });
     }
   }
 
-  Future<void> _onRegionChanged(TzRegion? reg) async {
-    if (reg == null) return;
+  Future<void> _changeRegion(TzRegion? value) async {
+    final request = ++_request;
     setState(() {
-      _selectedRegion = reg;
-      _selectedDistrict = null;
-      _selectedWard = null;
-      _districts = const [];
-      _wards = const [];
+      _region = value;
+      _district = null;
+      _ward = null;
+      _districts = [];
+      _wards = [];
+      _street.clear();
+      _loading = true;
+      _error = false;
     });
-    final repo = ref.read(locationRepositoryProvider);
-    final dists = await repo.getDistricts(reg.code);
-    final firstDist = dists.isNotEmpty ? dists.first : null;
-    final wards =
-        firstDist != null ? await repo.getWards(firstDist.code) : <TzWard>[];
-    if (mounted) {
-      setState(() {
-        _districts = dists;
-        _selectedDistrict = firstDist;
-        _wards = wards;
-        _selectedWard = wards.isNotEmpty ? wards.first : null;
-      });
+    try {
+      final rows = value == null
+          ? <TzDistrict>[]
+          : await ref.read(locationRepositoryProvider).getDistricts(value.code);
+      if (mounted && request == _request)
+        setState(() {
+          _districts = rows;
+          _loading = false;
+        });
+    } catch (_) {
+      if (mounted && request == _request)
+        setState(() {
+          _loading = false;
+          _error = true;
+        });
     }
   }
 
-  Future<void> _onDistrictChanged(TzDistrict? dist) async {
-    if (dist == null) return;
+  Future<void> _changeDistrict(TzDistrict? value) async {
+    final request = ++_request;
     setState(() {
-      _selectedDistrict = dist;
-      _selectedWard = null;
-      _wards = const [];
+      _district = value;
+      _ward = null;
+      _wards = [];
+      _street.clear();
+      _loading = true;
+      _error = false;
     });
-    final wards =
-        await ref.read(locationRepositoryProvider).getWards(dist.code);
-    if (mounted) {
-      setState(() {
-        _wards = wards;
-        _selectedWard = wards.isNotEmpty ? wards.first : null;
-      });
+    try {
+      final rows = value == null
+          ? <TzWard>[]
+          : await ref.read(locationRepositoryProvider).getWards(value.code);
+      if (mounted && request == _request)
+        setState(() {
+          _wards = rows;
+          _loading = false;
+        });
+    } catch (_) {
+      if (mounted && request == _request)
+        setState(() {
+          _loading = false;
+          _error = true;
+        });
     }
   }
 
-  void _confirmAddress() {
-    final parts = <String>[
-      if (_streetCtrl.text.trim().isNotEmpty) _streetCtrl.text.trim(),
-      if (_selectedWard != null) _selectedWard!.name,
-      if (_selectedDistrict != null) _selectedDistrict!.name,
-      if (_selectedRegion != null) _selectedRegion!.name,
-    ];
-    final formatted =
-        parts.isNotEmpty ? parts.join(', ') : 'Kijitonyama, Dar es Salaam';
-    if (_selectedRegion != null &&
-        _selectedDistrict != null &&
-        _selectedWard != null) {
-      ref.read(deliveryAddressProvider.notifier).saveSelection(
-          region: _selectedRegion!.code,
-          district: _selectedDistrict!.code,
-          ward: _selectedWard!.code,
-          street: _streetCtrl.text.trim(),
-          address: formatted);
+  Future<void> _save() async {
+    if (_saving) return;
+    if (_manualMode
+        ? _manual.text.trim().length < 10
+        : (_loading ||
+            _error ||
+            _region == null ||
+            _district == null ||
+            _ward == null ||
+            _street.text.trim().isEmpty)) return;
+    final notifier = ref.read(deliveryAddressProvider.notifier);
+    setState(() => _saving = true);
+    final address = _manualMode
+        ? _manual.text.trim()
+        : [_street.text.trim(), _ward!.name, _district!.name, _region!.name]
+            .join(', ');
+    try {
+      if (_manualMode) {
+        await notifier.saveManualAddress(address);
+      } else {
+        await notifier.saveSelection(
+            region: _region!.code,
+            district: _district!.code,
+            ward: _ward!.code,
+            street: _street.text.trim(),
+            address: address);
+      }
+      if (mounted) Navigator.pop(context, address);
+    } catch (_) {
+      if (mounted)
+        setState(() {
+          _saving = false;
+          _error = true;
+        });
     }
-    Navigator.pop(context, formatted);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final sw = ref.watch(appStringsProvider).isSw;
+    final canSave = !_saving &&
+        (_manualMode
+            ? _manual.text.trim().length >= 10
+            : !_loading &&
+                !_error &&
+                _ward != null &&
+                _street.text.trim().isNotEmpty);
+    return SingleChildScrollView(
+        child: Padding(
       padding: EdgeInsets.fromLTRB(
-        AppSpace.v22,
-        AppSpace.v4,
-        AppSpace.v22,
-        MediaQuery.of(context).viewInsets.bottom + AppSpace.v26,
-      ),
-      child: _loading
-          ? const SizedBox(
-              height: AppSpace.v220,
-              child: Center(child: CircularProgressIndicator()),
-            )
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.location_on_rounded,
-                        color: AppColors.primary),
-                    const SizedBox(width: AppSpace.v8),
-                    Text(
-                      'Select Delivery Location (Tanzania)',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpace.v16),
-                DropdownButtonFormField<TzRegion>(
-                  value: _selectedRegion,
-                  decoration: const InputDecoration(
-                    labelText: 'Region (Mkoa)',
-                  ),
+          AppSpace.screenH,
+          AppSpace.sm,
+          AppSpace.screenH,
+          MediaQuery.viewInsetsOf(context).bottom + AppSpace.xl),
+      child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(sw ? 'Mahali pa kufikisha' : 'Delivery location',
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: AppSpace.sm),
+            Text(sw
+                ? 'Anwani si uthibitisho wa eneo la huduma. Hakuna GPS au ruhusa ya mahali inayotumika hapa.'
+                : 'An address does not confirm delivery coverage. This picker does not use GPS or request location permission.'),
+            if (!EnvConfig.hasSupabaseCredentials)
+              Text(sw
+                  ? 'Orodha ya Dar ni sehemu tu; namba ni za ndani ya programu.'
+                  : 'Partial Dar reference list; IDs are internal app identifiers.'),
+            SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                    sw ? 'Andika anwani mwenyewe' : 'Enter address manually'),
+                value: _manualMode,
+                onChanged: _saving
+                    ? null
+                    : (value) => setState(() {
+                          _manualMode = value;
+                          if (value && _manual.text.isEmpty)
+                            _manual.text = ref.read(deliveryAddressProvider);
+                        })),
+            if (_manualMode)
+              TextField(
+                  key: const Key('manual-address'),
+                  controller: _manual,
+                  maxLines: 4,
+                  minLines: 2,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                      labelText: sw ? 'Anwani kamili' : 'Full address',
+                      helperText: sw
+                          ? 'Mkoa, wilaya, kata, mtaa/jengo na alama ya karibu; angalau herufi 10.'
+                          : 'Region, district, ward, street/building and landmark; at least 10 characters.',
+                      helperMaxLines: 4))
+            else ...[
+              DropdownButtonFormField<TzRegion>(
+                  key: const Key('location-region'),
+                  value: _region,
+                  isExpanded: true,
+                  decoration:
+                      InputDecoration(labelText: sw ? 'Mkoa' : 'Region'),
                   items: _regions
-                      .map((r) => DropdownMenuItem(
-                            value: r,
-                            child: Text(r.name),
-                          ))
+                      .map((r) =>
+                          DropdownMenuItem(value: r, child: Text(r.name)))
                       .toList(),
-                  onChanged: _onRegionChanged,
-                ),
-                const SizedBox(height: AppSpace.v12),
-                DropdownButtonFormField<TzDistrict>(
-                  value: _selectedDistrict,
-                  decoration: const InputDecoration(
-                    labelText: 'District (Wilaya)',
-                  ),
+                  onChanged: _saving ? null : _changeRegion),
+              const SizedBox(height: AppSpace.md),
+              DropdownButtonFormField<TzDistrict>(
+                  key: const Key('location-district'),
+                  value: _district,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                      labelText:
+                          sw ? 'Wilaya / halmashauri' : 'District / council'),
                   items: _districts
-                      .map((d) => DropdownMenuItem(
-                            value: d,
-                            child: Text(d.name),
-                          ))
+                      .map((d) =>
+                          DropdownMenuItem(value: d, child: Text(d.name)))
                       .toList(),
-                  onChanged: _onDistrictChanged,
-                ),
-                const SizedBox(height: AppSpace.v12),
-                DropdownButtonFormField<TzWard>(
-                  value: _selectedWard,
-                  decoration: const InputDecoration(
-                    labelText: 'Ward (Kata)',
-                  ),
+                  onChanged: _loading || _saving ? null : _changeDistrict),
+              const SizedBox(height: AppSpace.md),
+              DropdownButtonFormField<TzWard>(
+                  key: const Key('location-ward'),
+                  value: _ward,
+                  isExpanded: true,
+                  decoration: InputDecoration(labelText: sw ? 'Kata' : 'Ward'),
                   items: _wards
-                      .map((w) => DropdownMenuItem(
-                            value: w,
-                            child: Text(w.name),
-                          ))
+                      .map((w) =>
+                          DropdownMenuItem(value: w, child: Text(w.name)))
                       .toList(),
-                  onChanged: (w) => setState(() => _selectedWard = w),
-                ),
-                const SizedBox(height: AppSpace.v12),
-                TextField(
-                  controller: _streetCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Street / Landmark (Mtaa au Jengo)',
-                    hintText: 'e.g. Near Mlimani City Gate 2, House #14',
-                    prefixIcon: Icon(Icons.home_work_outlined),
-                  ),
-                ),
-                const SizedBox(height: AppSpace.v20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _confirmAddress,
-                    icon: const Icon(Icons.check_circle_outline_rounded),
-                    label: const Text('Save Delivery Location'),
-                  ),
-                ),
-              ],
-            ),
-    );
+                  onChanged: _loading || _saving
+                      ? null
+                      : (w) => setState(() {
+                            _ward = w;
+                            _street.clear();
+                          })),
+              if (_ward != null &&
+                  !EnvConfig.hasSupabaseCredentials &&
+                  DarLocationReference.placesByWard.containsKey(_ward!.code))
+                Text(
+                    '${sw ? "Mfano wa eneo, si kata" : "Place example, not a ward"}: ${DarLocationReference.placesByWard[_ward!.code]!.join(", ")}'),
+              if (_loading)
+                const Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSpace.md),
+                    child: SkeletonLines(count: 3)),
+              if (_error)
+                TextButton(
+                    onPressed: _initial,
+                    style: TextButton.styleFrom(
+                        minimumSize: const Size(AppSpace.huge, AppSpace.huge)),
+                    child: Text(sw
+                        ? 'Orodha haijapatikana. Jaribu tena au andika anwani.'
+                        : 'Could not load list. Retry or enter address manually.')),
+              if (!_loading &&
+                  !_error &&
+                  (_regions.isEmpty ||
+                      (_region != null && _districts.isEmpty) ||
+                      (_district != null && _wards.isEmpty)))
+                Text(sw
+                    ? 'Hakuna orodha hapa. Andika anwani mwenyewe.'
+                    : 'No list here. Enter your address manually.'),
+              const SizedBox(height: AppSpace.md),
+              TextField(
+                  controller: _street,
+                  onChanged: (_) => setState(() {}),
+                  maxLength: 240,
+                  decoration: InputDecoration(
+                      labelText: sw
+                          ? 'Mtaa / jengo / alama ya karibu'
+                          : 'Street / building / landmark')),
+            ],
+            const SizedBox(height: AppSpace.lg),
+            SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                    key: const Key('save-location'),
+                    onPressed: canSave ? _save : null,
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryDeep,
+                        foregroundColor: AppColors.surface,
+                        minimumSize: const Size(AppSpace.huge, AppSpace.huge)),
+                    child: Text(_saving
+                        ? (sw ? 'Inahifadhi...' : 'Saving...')
+                        : (sw ? 'Hifadhi anwani' : 'Save address')))),
+          ]),
+    ));
   }
 }

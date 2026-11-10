@@ -246,7 +246,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                     const SizedBox(width: AppSpace.v4),
                                     Flexible(
                                       child: Text(
-                                        address,
+                                        address.isEmpty
+                                            ? (t.isSw
+                                                ? 'Chagua mahali'
+                                                : 'Choose location')
+                                            : address,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(

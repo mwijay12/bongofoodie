@@ -601,7 +601,9 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
                       fontSize: 12, fontWeight: FontWeight.w700),
                 ),
                 subtitle: Text(
-                  address,
+                  address.isEmpty
+                      ? (t.isSw ? 'Chagua mahali' : 'Choose location')
+                      : address,
                   style: const TextStyle(
                       fontWeight: FontWeight.w800, fontSize: 13.5),
                 ),
