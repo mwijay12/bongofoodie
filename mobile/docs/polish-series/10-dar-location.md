@@ -113,3 +113,55 @@ denial/permanent denial, services off, plugin error, low accuracy/stale/invalid
 fixes and out-of-Dar coordinates remaining non-service-authoritative. Python
 native configuration tests also run in CI. No schema change, production migration,
 merge, release or claim that outside-area orders are validated.
+
+## Opt-in embedded map and external navigation
+
+User requested a free alternative to embedding Leaflet.js and easy links to common
+map apps. Chosen renderer: **flutter_map 8.2.2**, pure Flutter/Dart (no JavaScript
+Leaflet/WebView); it is Leaflet-inspired, not an unrelated engine. Tagged source
+`fleaflet/flutter_map` v8.2.2 (6b9fc9c8f2be6aa9f4308c0bfe1a484dcb793559)
+was inspected for constructor/callback/cache APIs and SDK requirements. Requires
+Dart >=3.6 / Flutter >=3.27: app minimum Dart raised to ^3.6.0, compatible with CI
+Flutter 3.29.3. Existing older Dart 3.5 installations must upgrade. `latlong2` is a
+direct coordinate-model import; `url_launcher` 6.3.1 opens external apps/browser.
+These are narrowly map-scoped dependencies, not new routes/backend services.
+
+- Tile requests begin ONLY after Load map. Consent text discloses tile provider
+  receiving IP/viewed area and external map providers receiving chosen address or
+  coordinates. No automatic GPS or geocoding from map gestures.
+- Default background map: HTTPS OpenStreetMap standard tiles. Displayed/clickable
+  attribution remains outside the map viewport. Native User-Agent identifies the
+  app/project; browsers use browser User-Agent/Referer. Do not strip Referer in web
+  deployment headers. Tile cache uses flutter_map built-in HTTP-header-aware disk
+  caching on native, browser HTTP cache on web. No offline download, bulk scrape,
+  cache-busting headers or prefetch feature; panBuffer is zero.
+- OSM data/library availability is NOT unlimited free hosting or a commercial SLA.
+  Policy: https://operations.osmfoundation.org/policies/tiles/ . Deployment must
+  confirm caching/identification/attribution and expected volume against policy.
+  For production capacity choose an appropriate provider/self-hosted service:
+  `--dart-define=MAP_TILE_URL=https://.../{z}/{x}/{y}.png`,
+  `--dart-define=MAP_ATTRIBUTION=...`,
+  `--dart-define=MAP_ATTRIBUTION_URL=https://...`.
+  Include required provider attribution (including OSM data credit where applicable)
+  and review provider terms. Bundled client URLs/keys are public, never secret keys.
+- Map without a good device fix is clearly a Dar reference view, NOT the manually
+  typed address geocoded. Device fix is a labelled pin, NOT verified ward/address.
+  Pan/zoom never changes the delivery address. Use my entered address instead
+  clears the temporary fix to enable address-search links.
+- External Google Maps/Apple Maps use HTTPS searches (app or browser depending on
+  device). OpenStreetMap works in a browser. Android Other map apps uses geo URI
+  and falls back to OpenStreetMap if launching fails; OS decides available handler.
+  No guarantee Google Maps is installed or that an OS always shows a chooser.
+  Address strings are URI-encoded, coordinates validated, no untrusted launch URL.
+- Loading skeletons, a 20-second initial-load timeout and tile error/Retry are
+  provided; manual entry and external links remain when tiles fail. No map pin or
+  external URL authorizes delivery/serviceability. Android release INTERNET
+  permission is included alongside the foreground-location overlay.
+
+Map tests cover URI encoding/invalid coordinates, opt-in/no initial tile request,
+failed tiles/Retry, attribution, launcher failures and empty target at 360/430dp,
+EN/SW and scale1.3. Mocked tile/launcher tests do NOT validate real external app
+handoff, browser popup policies, public tile server availability/terms compliance,
+cache persistence on devices, gesture accessibility or visual device map rendering.
+Sandbox network allowlist prevents live OSM tile testing; local Flutter absent.
+No routing/geocoding/API-key or paid service was added.

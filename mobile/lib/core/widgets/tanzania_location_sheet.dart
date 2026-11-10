@@ -312,6 +312,14 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
                   child: SkeletonLines(count: 2)),
             if (_fix != null) ...[
               Semantics(liveRegion: true, child: Text(_fixMessage(sw))),
+              if (_fix!.outcome == LocationOutcome.available)
+                TextButton(
+                    onPressed: () => setState(() => _fix = null),
+                    style: TextButton.styleFrom(
+                        minimumSize: const Size(AppSpace.huge, AppSpace.huge)),
+                    child: Text(sw
+                        ? 'Tumia anwani niliyoandika badala yake'
+                        : 'Use my entered address instead')),
               if (_fix!.outcome == LocationOutcome.deniedForever)
                 TextButton(
                     onPressed: () async {

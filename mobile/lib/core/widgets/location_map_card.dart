@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -30,6 +31,45 @@ class _LocationMapCardState extends ConsumerState<LocationMapCard> {
   bool _tileError = false;
   int _revision = 0;
   TileProvider? _tileProvider;
+  Timer? _loadTimer;
+  void _load() {
+    _loadTimer?.cancel();
+    setState(() {
+      _loaded = true;
+      _tileError = false;
+      _revision++;
+      _tileProvider = null;
+    });
+    _watchLoad();
+  }
+
+  void _watchLoad() {
+    _loadTimer?.cancel();
+    final revision = _revision;
+    _loadTimer = Timer(const Duration(seconds: 20), () {
+      if (mounted && revision == _revision) setState(() => _tileError = true);
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant LocationMapCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.target.latitude != widget.target.latitude ||
+        oldWidget.target.longitude != widget.target.longitude) {
+      _revision++;
+      _tileProvider = null;
+      _tileError = false;
+      _loadTimer?.cancel();
+      if (_loaded) _watchLoad();
+    }
+  }
+
+  @override
+  void dispose() {
+    _loadTimer?.cancel();
+    super.dispose();
+  }
+
   static const _tileUrl = String.fromEnvironment('MAP_TILE_URL',
       defaultValue: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png');
   static const _attribution = String.fromEnvironment('MAP_ATTRIBUTION',
@@ -81,7 +121,7 @@ class _LocationMapCardState extends ConsumerState<LocationMapCard> {
             : 'Loading shares your IP and viewed area with the tile provider. Opening another map shares the address or coordinates with that provider.'),
         OutlinedButton.icon(
             key: const Key('load-location-map'),
-            onPressed: () => setState(() => _loaded = true),
+            onPressed: _load,
             style: OutlinedButton.styleFrom(
                 minimumSize: const Size(AppSpace.huge, AppSpace.huge)),
             icon: const Icon(Icons.map_outlined),
@@ -123,14 +163,19 @@ class _LocationMapCardState extends ConsumerState<LocationMapCard> {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 if (mounted &&
                                     revision == _revision &&
-                                    !_tileError)
+                                    !_tileError) {
+                                  _loadTimer?.cancel();
                                   setState(() => _tileError = true);
+                                }
                               });
                             },
-                            tileBuilder: (context, tile, image) =>
-                                image.loadFinished == null
-                                    ? const SkeletonBox(height: AppSpace.v220)
-                                    : tile),
+                            tileBuilder: (context, tile, image) {
+                              if (image.loadFinished == null)
+                                return const SkeletonBox(height: AppSpace.v220);
+                              if (!image.loadError && revision == _revision)
+                                _loadTimer?.cancel();
+                              return tile;
+                            }),
                         if (target.hasCoordinates)
                           MarkerLayer(markers: [
                             Marker(
@@ -157,11 +202,7 @@ class _LocationMapCardState extends ConsumerState<LocationMapCard> {
               : 'Map unavailable. Address entry and external map links still work.'),
           TextButton(
               key: const Key('retry-location-map'),
-              onPressed: () => setState(() {
-                    _revision++;
-                    _tileProvider = null;
-                    _tileError = false;
-                  }),
+              onPressed: _load,
               style: buttonStyle,
               child: Text(sw ? 'Jaribu ramani tena' : 'Retry map')),
         ],
