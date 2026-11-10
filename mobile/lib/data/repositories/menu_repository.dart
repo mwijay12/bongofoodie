@@ -1,3 +1,4 @@
+import '../../core/utils/daily_selection.dart';
 import 'dart:async';
 import 'dart:convert';
 import '../../core/utils/local_snapshot.dart';
@@ -117,8 +118,8 @@ class MenuRepository {
   static const _dishReadTimeout = Duration(seconds: 10);
   static const _favPrefKey = 'bongo_favorites_v2';
   static const _discoveriesPrefKey = 'bongo_discoveries_v2';
-  static const _quizDatePrefKey = 'bongo_quiz_date_v2';
-  static const _quizWinsPrefKey = 'bongo_quiz_wins_v2';
+  static const _quizDatePrefKey = 'bongo_demo_quiz_date_v3';
+  static const _quizWinsPrefKey = 'bongo_demo_quiz_wins_v3';
 
   Future<List<CategoryModel>> _fetchCategories() async {
     final sb = SupabaseService.client;
@@ -549,47 +550,58 @@ class MenuRepository {
   }
 
   Future<bool> hasAttemptedTriviaToday(String? userId) async {
-    final today = DateTime.now().toIso8601String().split('T').first;
-    final sb = SupabaseService.client;
-    if (sb != null && userId != null && !userId.startsWith('demo-')) {
-      try {
-        final row = await sb
-            .from('quiz_attempts')
-            .select('id')
-            .eq('profile_id', userId)
-            .eq('quiz_date', today)
-            .maybeSingle();
-        if (row != null) return true;
-      } catch (_) {}
+    if (EnvConfig.hasSupabaseCredentials) {
+      final sb = SupabaseService.client;
+      if (sb?.auth.currentUser == null) return false;
+      return await sb!.rpc('reward_quiz_status') as bool;
     }
-
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_quizDatePrefKey) == today;
+    return prefs.getString(_quizDatePrefKey) ==
+        darCalendarDay(DateTime.now()).toIso8601String();
   }
 
-  Future<void> recordTriviaAttempt(String? userId, bool isCorrect) async {
-    final today = DateTime.now().toIso8601String().split('T').first;
-    final sb = SupabaseService.client;
-    if (sb != null && userId != null && !userId.startsWith('demo-')) {
-      try {
-        await sb.from('quiz_attempts').insert({
-          'profile_id': userId,
-          'quiz_date': today,
-          'is_correct': isCorrect,
-        });
-      } catch (_) {}
+  Future<bool> submitTriviaAnswer(int questionId, int answerIndex) async {
+    if (EnvConfig.hasSupabaseCredentials) {
+      final sb = SupabaseService.client;
+      if (sb?.auth.currentUser == null)
+        return false; // Guest practice, no entitlement.
+      return await sb!.rpc('submit_reward_quiz', params: {
+        'p_question_id': questionId,
+        'p_answer_index': answerIndex,
+      }) as bool;
     }
+    final question =
+        ShowcaseSeedData.triviaQuestions.firstWhere((q) => q.id == questionId);
+    final correct = answerIndex == question.correctIndex;
+    await recordTriviaAttempt(null, correct);
+    return correct;
+  }
 
+  /// Demo-only compatibility path. Live callers cannot assert correctness.
+  Future<void> recordTriviaAttempt(String? userId, bool isCorrect) async {
+    if (EnvConfig.hasSupabaseCredentials)
+      throw StateError('server_quiz_required');
     final prefs = await SharedPreferences.getInstance();
+    final today = darCalendarDay(DateTime.now()).toIso8601String();
+    if (prefs.getString(_quizDatePrefKey) == today) return;
     await prefs.setString(_quizDatePrefKey, today);
     if (isCorrect) {
-      final wins = prefs.getInt(_quizWinsPrefKey) ?? 1;
-      await prefs.setInt(_quizWinsPrefKey, wins + 1);
+      await prefs.setInt(
+          _quizWinsPrefKey, (prefs.getInt(_quizWinsPrefKey) ?? 0) + 1);
     }
   }
 
   Future<int> getTriviaWinsCount() async {
+    if (EnvConfig.hasSupabaseCredentials) {
+      final sb = SupabaseService.client;
+      if (sb?.auth.currentUser == null) return 0;
+      final rows = await sb!
+          .from('reward_quiz_attempts')
+          .select('quiz_date')
+          .eq('is_correct', true);
+      return rows.length;
+    }
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_quizWinsPrefKey) ?? 1;
+    return prefs.getInt(_quizWinsPrefKey) ?? 0;
   }
 }

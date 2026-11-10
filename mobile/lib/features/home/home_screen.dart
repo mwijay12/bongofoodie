@@ -106,7 +106,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   ) async {
     final user = ref.read(authProvider).user;
     final repo = ref.read(menuRepositoryProvider);
-    final alreadyPlayed = await repo.hasAttemptedTriviaToday(user?.id);
+    bool alreadyPlayed;
+    try {
+      alreadyPlayed = await repo.hasAttemptedTriviaToday(user?.id);
+    } catch (_) {
+      if (!context.mounted) return;
+      final sw = ref.read(appStringsProvider).isSw;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(sw
+              ? 'Hali ya swali haijapatikana. Gusa tena kujaribu.'
+              : 'Could not check quiz status. Tap again to retry.')));
+      return;
+    }
     if (!context.mounted) return;
 
     final question = selectDaily(ShowcaseSeedData.triviaQuestions,
@@ -958,17 +969,31 @@ class _SpiceTriviaSheet extends ConsumerStatefulWidget {
 class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
   int? _pickedIndex;
   bool _submitted = false;
+  bool _saving = false;
+  bool _saveFailed = false;
+  bool _serverCorrect = false;
 
   Future<void> _pickAnswer(int idx) async {
-    if (_submitted) return;
-    final correct = idx == widget.question.correctIndex;
+    if (_submitted || _saving) return;
     setState(() {
+      _saving = true;
+      _saveFailed = false;
       _pickedIndex = idx;
-      _submitted = true;
     });
-    await ref
-        .read(menuRepositoryProvider)
-        .recordTriviaAttempt(widget.userId, correct);
+    try {
+      final correct = await ref
+          .read(menuRepositoryProvider)
+          .submitTriviaAnswer(widget.question.id, idx);
+      if (!mounted) return;
+      setState(() {
+        _serverCorrect = correct;
+        _submitted = true;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _saveFailed = true);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
@@ -1052,10 +1077,18 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
                     ? const Icon(Icons.check_circle_rounded,
                         color: AppColors.success)
                     : null,
-                onTap: () => _pickAnswer(i),
+                onTap: _saving || _submitted ? null : () => _pickAnswer(i),
               ),
             );
           }),
+          if (_saving)
+            Text(sw ? 'Jibu linahakikiwa...' : 'Checking your answer...'),
+          if (_saveFailed)
+            TextButton(
+                onPressed: () => _pickAnswer(_pickedIndex!),
+                child: Text(sw
+                    ? 'Jibu halijahifadhiwa. Jaribu tena'
+                    : 'Answer not saved. Retry')),
           if (_submitted) ...[
             const SizedBox(height: AppSpace.v10),
             Container(
@@ -1083,7 +1116,9 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
                     Text(sw
                         ? 'Kunakili msimbo hakuhakikishi punguzo. Masharti yatathibitishwa kwenye malipo.'
                         : 'Copying a code does not guarantee a discount. Eligibility is checked at checkout.'),
-                  if (isCorrect)
+                  if (isCorrect &&
+                      (!EnvConfig.hasSupabaseCredentials ||
+                          (_serverCorrect && !widget.alreadyPlayed)))
                     OutlinedButton.icon(
                       onPressed: () {
                         Clipboard.setData(

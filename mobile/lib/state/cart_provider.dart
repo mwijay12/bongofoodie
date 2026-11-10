@@ -1,3 +1,5 @@
+import '../core/config/env_config.dart';
+import '../data/repositories/reward_repository.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_provider.dart';
@@ -63,14 +65,17 @@ final cartProvider = StateNotifierProvider<CartNotifier, CartState>((ref) {
 });
 
 class CartNotifier extends StateNotifier<CartState> {
-  CartNotifier({bool persist = false, String owner = 'guest'})
-      : _persist = persist,
+  CartNotifier(
+      {bool persist = false, String owner = 'guest', bool? liveRewards})
+      : _liveRewards = liveRewards ?? EnvConfig.hasSupabaseCredentials,
+        _persist = persist,
         _owner = owner,
         super(CartState(restoring: persist)) {
     _restoring = persist;
     ready = persist ? _restore() : Future<void>.value();
   }
   final bool _persist;
+  final bool _liveRewards;
   String _owner;
   int _revision = 0;
   Future<void> _writes = Future<void>.value();
@@ -82,6 +87,10 @@ class CartNotifier extends StateNotifier<CartState> {
 
   @override
   set state(CartState value) {
+    if (!identical(value.items, state.items) ||
+        value.deliveryFee != state.deliveryFee) {
+      value = value.copyWith(appliedPromoCode: '', promoDiscount: 0);
+    }
     super.state = value;
     _revision++;
     if (!_persist) return;
@@ -251,27 +260,38 @@ class CartNotifier extends StateNotifier<CartState> {
     required String code,
     required BranchSettingsModel settings,
   }) {
+    removePromoCode();
     final normalized = code.trim().toUpperCase();
-    if (normalized.isEmpty) return false;
+    if (_liveRewards ||
+        state.items.isEmpty ||
+        normalized.isEmpty ||
+        !settings.promoActive ||
+        !settings.promoDiscount.isFinite ||
+        settings.promoDiscount <= 0 ||
+        normalized != settings.promoCode.trim().toUpperCase()) return false;
+    state = state.copyWith(
+        appliedPromoCode: normalized, promoDiscount: settings.promoDiscount);
+    return true;
+  }
 
-    if (settings.promoActive &&
-        normalized == settings.promoCode.trim().toUpperCase()) {
-      state = state.copyWith(
-        appliedPromoCode: normalized,
-        promoDiscount: settings.promoDiscount,
-      );
-      return true;
-    }
-
-    if (normalized == 'KARIBU2000') {
-      state = state.copyWith(
-        appliedPromoCode: 'KARIBU2000',
-        promoDiscount: 2000,
-      );
-      return true;
-    }
-
-    return false;
+  /// Quote is provisional. The database revalidates and consumes at order insert.
+  Future<bool> applyLivePromo(String code, RewardRepository repository) async {
+    removePromoCode();
+    final revision = _revision;
+    final owner = _owner;
+    final snapshot = state;
+    if (!_liveRewards || snapshot.items.isEmpty) return false;
+    final quote = await repository.quote(code, snapshot.items);
+    if (!mounted || revision != _revision || owner != _owner) return false;
+    if (quote.code != code.trim().toUpperCase() ||
+        !quote.discount.isFinite ||
+        quote.discount <= 0 ||
+        quote.discount > snapshot.subtotal ||
+        quote.subtotal != snapshot.subtotal ||
+        quote.deliveryFee != snapshot.effectiveDeliveryFee) return false;
+    state = state.copyWith(
+        appliedPromoCode: quote.code, promoDiscount: quote.discount);
+    return true;
   }
 
   void removePromoCode() {

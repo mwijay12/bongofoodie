@@ -1,3 +1,5 @@
+import '../../core/config/env_config.dart';
+import '../../data/repositories/reward_repository.dart';
 import '../../core/l10n/dish_copy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +34,33 @@ class _CartScreenState extends ConsumerState<CartScreen> {
   PaymentMethod _paymentMethod = PaymentMethod.lipaNamba;
   bool _placingOrder = false;
   bool _orderFailed = false;
+  bool _checkingPromo = false;
+
+  Future<void> _applyPromo(BranchSettingsModel branch) async {
+    if (_checkingPromo || _placingOrder) return;
+    final t = ref.read(appStringsProvider);
+    final notifier = ref.read(cartProvider.notifier);
+    setState(() => _checkingPromo = true);
+    bool ok = false;
+    try {
+      ok = EnvConfig.hasSupabaseCredentials
+          ? await notifier.applyLivePromo(_promoCtrl.text, RewardRepository())
+          : notifier.applyPromoCode(code: _promoCtrl.text, settings: branch);
+    } catch (_) {
+      // Failed live eligibility never falls back to a local coupon.
+    } finally {
+      if (mounted) setState(() => _checkingPromo = false);
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(ok
+            ? (t.isSw
+                ? 'Makadirio ya punguzo yamepatikana; yatathibitishwa ukituma oda.'
+                : 'Discount quoted; eligibility is rechecked when you submit.')
+            : (t.isSw
+                ? 'Punguzo halijathibitishwa. Ingia, hakiki msimbo na masharti, kisha jaribu tena.'
+                : 'Discount not verified. Sign in, check the code and conditions, then retry.'))));
+  }
 
   void _removeLine(CartItemModel item) {
     final t = ref.read(appStringsProvider);
@@ -70,7 +99,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     BranchSettingsModel branch,
     String deliveryAddress,
   ) async {
-    if (cart.restoring || cart.items.isEmpty || _placingOrder) return;
+    if (cart.restoring || cart.items.isEmpty || _placingOrder || _checkingPromo)
+      return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     setState(() {
       _placingOrder = true;
@@ -92,6 +122,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
           : (user?.phone ?? '+255 754 123 456'),
       deliveryLocation: deliveryAddress,
       items: cart.items,
+      promoCode: EnvConfig.hasSupabaseCredentials ? cart.appliedPromoCode : '',
       totalPrice: cart.grandTotal,
       paymentMethod: _paymentMethod.dbValue,
       notes: _notesCtrl.text.trim(),
@@ -625,26 +656,12 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
                   ),
                   const SizedBox(width: AppSpace.v10),
                   ElevatedButton(
-                    onPressed: () {
-                      final ok = ref.read(cartProvider.notifier).applyPromoCode(
-                            code: _promoCtrl.text,
-                            settings: branch,
-                          );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            ok
-                                ? (t.isSw
-                                    ? 'Punguzo limetumika.'
-                                    : 'Promo applied.')
-                                : (t.isSw
-                                    ? 'Msimbo si sahihi.'
-                                    : 'Invalid promo code.'),
-                          ),
-                        ),
-                      );
-                    },
-                    child: Text(t.applyPromo),
+                    onPressed: _checkingPromo || _placingOrder
+                        ? null
+                        : () => _applyPromo(branch),
+                    child: Text(_checkingPromo
+                        ? (t.isSw ? 'Inahakiki...' : 'Checking...')
+                        : t.applyPromo),
                   ),
                 ],
               ),
