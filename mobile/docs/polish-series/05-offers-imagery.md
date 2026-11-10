@@ -4,7 +4,7 @@
 
 The previous promo image slot was 76 logical pixels inside a 285×220 card.
 Canonical art is 1600×1600, so increasing source resolution alone would not fix
-its small appearance. New shared geometry: 320×300 card, 148×148 contain image.
+its small appearance. New shared geometry: 320×320 card, 148×148 contain image.
 Image slot is 1.95× its former linear size; this is geometry, not a device-measured
 performance or perceived-size claim.
 
@@ -13,6 +13,9 @@ and a menu-discovery action. Image never paints underneath copy. Title supports
 four lines; subtitle three. Full unsnipped copy is available as one semantic button
 label. Whole card remains the tap target and existing category navigation remains.
 No new offer eligibility, coupon application, menu ID or pricing rule was added.
+CI caught a 9px bottom overflow in the initial 300dp-high candidate at text scale
+1.3; the shared real/skeleton height was increased to 320dp without reducing text
+scale or image size.
 
 `SkeletonPromoCard` uses the same row, image and card dimensions. Home prewarms
 only the first two resolved LOCAL promotion images after a frame, at the same

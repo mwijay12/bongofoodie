@@ -112,7 +112,7 @@ extension NavClearance on BuildContext {
 /// with zero visual drift. All values come from AppRadius / AppSpace tokens.
 abstract final class PromoCardMetrics {
   static const double width = 320;
-  static const double height = 300;
+  static const double height = 320;
   static const double padding = AppSpace.lg;
   static const double borderRadius = AppRadius.v22;
   static const double imageSize = AppSpace.v148;
