@@ -10,8 +10,9 @@ class CatalogCacheNotice extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sources = ref.watch(catalogSourcesProvider);
-    if (!sources.values.any((s) => s != CatalogSource.live))
+    if (!sources.values.any((s) => s != CatalogSource.live)) {
       return const SizedBox.shrink();
+    }
     final sw = ref.watch(appStringsProvider).isSw;
     final stale = sources.values.contains(CatalogSource.stale);
     return Padding(

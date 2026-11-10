@@ -53,21 +53,32 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     _hydrate();
   }
 
+  bool _themeEdited = false;
+  bool _languageEdited = false;
+  bool _onboardingEdited = false;
+
   Future<void> _hydrate() async {
     final prefs = await SharedPreferences.getInstance();
     final isDark = prefs.getBool(_themeKey) ?? false;
     final langRaw = prefs.getString(_langKey) ?? 'en';
     final seenOnboarding = prefs.getBool(_onboardedKey) ?? false;
 
+    if (!mounted) return;
     state = AppSettingsState(
-      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
-      language: langRaw == 'sw' ? AppLanguage.sw : AppLanguage.en,
-      hasSeenOnboarding: seenOnboarding,
+      themeMode: _themeEdited
+          ? state.themeMode
+          : (isDark ? ThemeMode.dark : ThemeMode.light),
+      language: _languageEdited
+          ? state.language
+          : (langRaw == 'sw' ? AppLanguage.sw : AppLanguage.en),
+      hasSeenOnboarding:
+          _onboardingEdited ? state.hasSeenOnboarding : seenOnboarding,
       isReady: true,
     );
   }
 
   Future<void> toggleDarkMode(bool enabled) async {
+    _themeEdited = true;
     state = state.copyWith(
       themeMode: enabled ? ThemeMode.dark : ThemeMode.light,
     );
@@ -76,6 +87,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
   }
 
   Future<void> setLanguage(AppLanguage lang) async {
+    _languageEdited = true;
     state = state.copyWith(language: lang);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_langKey, lang == AppLanguage.sw ? 'sw' : 'en');
@@ -88,6 +100,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
   }
 
   Future<void> completeOnboarding() async {
+    _onboardingEdited = true;
     state = state.copyWith(hasSeenOnboarding: true);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_onboardedKey, true);

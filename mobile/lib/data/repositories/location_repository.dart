@@ -26,10 +26,16 @@ class DeliveryAddressNotifier extends StateNotifier<String> {
     _load();
   }
 
+  int _revision = 0;
+
   Future<void> _load() async {
+    final revision = _revision;
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString(_prefKey);
-    if (mounted && saved != null && saved.trim().isNotEmpty) {
+    if (mounted &&
+        revision == _revision &&
+        saved != null &&
+        saved.trim().isNotEmpty) {
       state = saved;
     }
   }
@@ -53,7 +59,9 @@ class DeliveryAddressNotifier extends StateNotifier<String> {
       required String street,
       required String address}) async {
     await setAddress(address);
+    final revision = _revision;
     final prefs = await SharedPreferences.getInstance();
+    if (revision != _revision) return;
     await prefs.setString(
         'bongo_location_selection_v1',
         jsonEncode({
@@ -66,6 +74,7 @@ class DeliveryAddressNotifier extends StateNotifier<String> {
   }
 
   Future<void> clearPrivateAddress() async {
+    _revision++;
     state = 'Kijitonyama, Kinondoni, Dar es Salaam';
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_prefKey);
@@ -76,8 +85,9 @@ class DeliveryAddressNotifier extends StateNotifier<String> {
     final trimmed = address.trim();
     if (trimmed.isEmpty) return;
     state = trimmed;
+    final revision = ++_revision;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefKey, trimmed);
+    if (revision == _revision) await prefs.setString(_prefKey, trimmed);
   }
 }
 

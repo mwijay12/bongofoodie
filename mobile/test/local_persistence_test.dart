@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'package:bongo_foodie/state/settings_provider.dart';
+import 'package:bongo_foodie/core/l10n/app_strings.dart';
+import 'package:flutter/material.dart';
 import 'package:bongo_foodie/core/utils/local_snapshot.dart';
 import 'package:bongo_foodie/data/models/models.dart';
 import 'package:bongo_foodie/data/repositories/location_repository.dart';
@@ -13,6 +16,18 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+  test('preference hydration cannot undo immediate user choices', () async {
+    final settings = AppSettingsNotifier();
+    await Future.wait([
+      settings.completeOnboarding(),
+      settings.setLanguage(AppLanguage.sw),
+      settings.toggleDarkMode(true),
+    ]);
+    expect(settings.state.hasSeenOnboarding, isTrue);
+    expect(settings.state.language, AppLanguage.sw);
+    expect(settings.state.themeMode, ThemeMode.dark);
+    settings.dispose();
+  });
   test('cart restart preserves variants/quantity, not promo entitlement',
       () async {
     final first = CartNotifier(persist: true);
