@@ -32,8 +32,9 @@ List<CustomizationOption> linkedAddonsFromRows(dynamic rows) {
       throw const FormatException('Invalid addon link');
     }
     final nested = Map<String, dynamic>.from(row['customizations'] as Map);
-    if (nested['price'] is! num)
+    if (nested['price'] is! num) {
       throw const FormatException('Missing addon price');
+    }
     return CustomizationOption.fromJson(nested);
   }));
 }

@@ -257,13 +257,16 @@ class MenuRepository {
           .timeout(_dishReadTimeout);
       return linkedAddonsFromRows(rows);
     }
-    if (EnvConfig.hasSupabaseCredentials)
+    if (EnvConfig.hasSupabaseCredentials) {
       throw StateError('addon_catalog_unavailable');
-    if (_showcaseLatency > Duration.zero)
+    }
+    if (_showcaseLatency > Duration.zero) {
       await Future<void>.delayed(_showcaseLatency);
+    }
     for (final item in ShowcaseSeedData.menuItems) {
-      if (item.id == dishId)
+      if (item.id == dishId) {
         return validatedAddons(item.availableCustomizations);
+      }
     }
     return const [];
   }
