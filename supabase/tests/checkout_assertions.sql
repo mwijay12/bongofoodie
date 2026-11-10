@@ -57,3 +57,25 @@ select pg_temp.expect_error($q$select quote_checkout('[]',1,10,100)$q$,'permissi
 reset role;
 select set_config('request.jwt.claim.sub','',false);
 select pg_temp.expect_error($q$select quote_checkout('[]',1,10,100)$q$,'checkout_session_required');
+-- A quote is only a preview: current catalog and area config are re-read.
+select set_config('request.jwt.claim.sub','11111111-1111-1111-1111-111111111111',false);
+update menu set price=11000 where id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+do $$declare q jsonb; begin
+ q := quote_checkout('[{"id":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","quantity":1}]',1,10,100);
+ if q->>'total' <> '13000' then raise exception 'stale catalog quote'; end if;
+end$$;
+select pg_temp.expect_error($q$select quote_checkout('[]',1,10,100)$q$,'reward_invalid_basket');
+select pg_temp.expect_error($q$select quote_checkout('[{"id":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","quantity":21}]',1,10,100)$q$,'reward_invalid_quantity');
+select pg_temp.expect_error($q$select quote_checkout('[{"id":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","quantity":1}]',1,10,100,'missing')$q$,'reward_unavailable');
+update checkout_service_wards set enabled=false;
+select pg_temp.expect_error($q$select quote_checkout('[{"id":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","quantity":1}]',1,10,100)$q$,'checkout_area_unavailable');
+set role anon;
+select pg_temp.expect_error($q$update orders set total_price=1$q$,'permission denied');
+select pg_temp.expect_error($q$delete from orders$q$,'permission denied');
+reset role;
+do $$begin
+ if exists(select 1 from orders where id in ('forged','anon-forged')) then raise exception 'forged order persisted'; end if;
+ if exists(select 1 from pg_policies where schemaname='public' and tablename='orders' and cmd in ('INSERT','UPDATE')) then
+   raise exception 'legacy mutation policy survived';
+ end if;
+end$$;

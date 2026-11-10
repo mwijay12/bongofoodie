@@ -80,3 +80,58 @@ and app launch unavailable: GitHub Flutter3.29.3 CI supplies analysis/test/APK/w
 validation (final status in draft PR19). No physical-device/accessibility/native-
 speaker/live database/E2E or real delivery/payment tests. No production deployment,
 release or claim of complete Prompt11 authority/idempotency/status enforcement.
+
+## Server quote foundation (undeployed)
+
+`20261109030000_checkout_quote_foundation.sql` follows the reward/achievement
+migrations. This is deliberately NOT an order-submit API and is not connected to
+mobile checkout. The mobile live gate remains in place.
+
+- Revokes direct order INSERT/UPDATE/DELETE and other mutation privileges from
+  PUBLIC/anon/authenticated, and drops the schema's legacy unrestricted insert
+  and owner/staff update policies. Owner price/status edits and anonymous forged
+  inserts must no longer work after deployment. Existing staff clients that update
+  orders directly will also stop working: a reviewed staff transition RPC must
+  replace that path BEFORE enabling live operations. Do not restore table writes
+  as a workaround. No production migration is applied by this commit/CI.
+- Adds server-only `checkout_service_wards`: empty by default; enabled defaults
+  false; a nonempty operational evidence note is mandatory. Only trusted operators
+  via migration/service role may configure it. It is NOT permission for clients to
+  self-declare coverage, not a geographic boundary dataset and not seed demo codes.
+  Explicit enabled ward must exist under the supplied district/region in live DB.
+  Merely claiming that ward still does NOT verify the recipient's street/GPS or
+  actual serviceability; address verification/submission remains an open gate.
+- `quote_checkout` requires authenticated server UID and is not granted to anon.
+  This is NOT a requirement to create a permanent user account: a future reviewed
+  anonymous-auth/capability ownership design must be decided and tested. No session
+  is silently created here. No guest submit endpoint or owned lookup is added.
+- All basket prices, availability, quantity bounds and linked unique addons use
+  the existing strict server basket-pricing function, also for orders without a
+  promo. Fee comes from server settings; invalid/missing/nonfinite fee fails.
+  Optional campaign eligibility uses quote_reward, not client discounts. Returned
+  schema-version/currency/parent-chain/totals are previews, not durable quote IDs,
+  reservation/payment/acceptance tokens or a signed price guarantee. No campaign
+  redemption or order is created by quote_checkout. No client-supplied price wins.
+- Quote reads are nonbinding: catalog/config/campaign may change immediately after
+  quoting. Future transactional submission MUST recheck authoritative data and
+  require review when monetary/eligibility values change. No current claim of
+  concurrency-safe quote reservation, durable idempotency or immutable receipt
+  snapshots. The existing helper's reward-prefixed error names are retained.
+
+Database CI extends `rewards-security.yml` AFTER prior reward/achievement/concurrency
+checks with isolated geography/legacy-grant fixture, migration, quote/ACL assertions
+and migration reapplication. Tests include empty/disabled/wrong-parent area, client
+price/addon tampering, duplicate/unlinked addons, quantity limits/unavailable item,
+nonfinite fee, catalog price changes, reward nonconsumption, direct owner/anon
+mutation denial and private config denial. Test codes/coverage are fictitious,
+only in the isolated test DB. This verifies the narrow schema fixture, NOT a full
+production Supabase deployment, inherited custom-role grants, unknown security-
+definer APIs or existing project policy drift. Deployment must audit those paths
+and rerun authorization tests against a staging copy. Rerunning a legacy schema
+bootstrap must not regrant insecure writes/policies after this migration.
+
+First database CI run 42804378651 passed at fd03cf6. Expanded final results are
+recorded in PR19. No new Flutter code, dependencies, routes or map behavior changed
+in this server-foundation pass. Full Prompt11 remains incomplete: recipient/address
+verification, guest ownership/RLS review, transactional submit/request hash/durable
+replay/owned reconciliation, server status transitions and client integration.
