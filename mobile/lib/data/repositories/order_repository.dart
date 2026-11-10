@@ -1,10 +1,11 @@
 import 'dart:async';
+import '../../core/config/env_config.dart';
+import '../../core/utils/checkout_validation.dart';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/services/supabase_service.dart';
-import '../mock/showcase_seed_data.dart';
 import '../models/models.dart';
 
 final orderRepositoryProvider = Provider<OrderRepository>((ref) {
@@ -60,31 +61,46 @@ class OrderRepository {
             .toList();
       } catch (_) {}
     }
-    final seeded = ShowcaseSeedData.initialOrders();
-    await _saveLocalOrders(seeded);
-    return seeded;
+    return [];
   }
 
   Future<void> _saveLocalOrders(List<OrderModel> orders) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
+    final saved = await prefs.setString(
       _ordersPrefKey,
       jsonEncode(orders.map((o) => o.toLocalJson()).toList()),
     );
+    if (!saved) throw StateError('demo_order_save_failed');
     if (!_ordersStreamController.isClosed) {
       _ordersStreamController.add(orders);
     }
   }
 
   Future<OrderModel> createOrder(OrderModel order) async {
-    final sb = SupabaseService.client;
-    if (sb != null && !(order.profileId?.startsWith('demo-') ?? false)) {
-      // A failed live write must reach checkout. Never turn it into demo success
-      // and never time out/retry a write whose server outcome is still unknown.
-      await sb.from('orders').insert(order.toDbJson());
-      return order;
+    // Fail closed until server totals, ownership, service-area and replay contracts
+    // are implemented/deployed. A configured-but-unavailable client is not demo.
+    if (EnvConfig.hasSupabaseCredentials || SupabaseService.client != null) {
+      throw StateError('live_checkout_not_available');
+    }
+    if (!CheckoutValidation.validName(order.customerName) ||
+        CheckoutValidation.normalizeTzPhone(order.customerPhone) == null ||
+        !CheckoutValidation.validAddress(order.deliveryLocation) ||
+        order.items.isEmpty ||
+        !order.totalPrice.isFinite ||
+        order.totalPrice < 0 ||
+        order.status != OrderStatus.pending) {
+      throw ArgumentError('invalid_demo_checkout');
     }
     final local = await _loadLocalOrders();
+    for (final previous in local) {
+      if (previous.id == order.id) {
+        if (jsonEncode(previous.toLocalJson()) !=
+            jsonEncode(order.toLocalJson())) {
+          throw StateError('order_id_payload_mismatch');
+        }
+        return previous;
+      }
+    }
     await _saveLocalOrders([order, ...local]);
     return order;
   }

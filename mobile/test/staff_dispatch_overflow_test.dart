@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:bongo_foodie/data/mock/showcase_seed_data.dart';
 import 'package:bongo_foodie/core/theme/app_theme.dart';
 import 'package:bongo_foodie/data/repositories/menu_repository.dart';
 import 'package:bongo_foodie/features/cart/cart_screen.dart';
@@ -27,6 +29,13 @@ void main() {
     required double textScaleFactor,
     required Brightness brightness,
   }) async {
+    // Explicit layout fixture: a fresh runtime no longer manufactures orders.
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+        'bongo_orders_v2',
+        jsonEncode(ShowcaseSeedData.initialOrders()
+            .map((o) => o.toLocalJson())
+            .toList()));
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -57,7 +66,8 @@ void main() {
 
   /// After every settle: no layout exceptions and every button's right edge
   /// stays within the screen width.
-  Future<void> settleAndCheckButtons(WidgetTester tester, double screenWidth) async {
+  Future<void> settleAndCheckButtons(
+      WidgetTester tester, double screenWidth) async {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     final buttons = find.byType(ElevatedButton);
@@ -66,7 +76,8 @@ void main() {
       expect(
         rect.dx,
         lessThanOrEqualTo(screenWidth),
-        reason: 'button ${i + 1} right edge ${rect.dx} overflows screen width $screenWidth',
+        reason:
+            'button ${i + 1} right edge ${rect.dx} overflows screen width $screenWidth',
       );
     }
   }
@@ -130,12 +141,16 @@ void main() {
             GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
             GoRoute(
               path: '/search',
-              builder: (_, __) => const SearchMenuScreen(initialCategory: 'All'),
+              builder: (_, __) =>
+                  const SearchMenuScreen(initialCategory: 'All'),
             ),
             GoRoute(path: '/chef-ai', builder: (_, __) => const ChefAiScreen()),
             GoRoute(path: '/cart', builder: (_, __) => const CartScreen()),
-            GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
-            GoRoute(path: '/staff', builder: (_, __) => const StaffDispatchScreen()),
+            GoRoute(
+                path: '/profile', builder: (_, __) => const ProfileScreen()),
+            GoRoute(
+                path: '/staff',
+                builder: (_, __) => const StaffDispatchScreen()),
           ],
         );
         await tester.pumpWidget(
