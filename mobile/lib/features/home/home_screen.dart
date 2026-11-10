@@ -5,7 +5,6 @@ import '../../core/l10n/dish_copy.dart';
 import '../../core/widgets/app_sheet.dart';
 import '../../core/icons/app_icon_key.dart';
 import '../../core/widgets/app_icon.dart';
-import '../../core/utils/emoji_sanitizer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
