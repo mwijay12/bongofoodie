@@ -171,7 +171,9 @@ class CartNotifier extends StateNotifier<CartState> {
   void syncDeliveryFee(double fee) {
     if (fee >= 0 && fee != state.deliveryFee) {
       // A fee refresh must not overwrite a cart while its disk restore is pending.
-      super.state = state.copyWith(deliveryFee: fee);
+      _revision++;
+      super.state = state.copyWith(
+          deliveryFee: fee, appliedPromoCode: '', promoDiscount: 0);
     }
   }
 

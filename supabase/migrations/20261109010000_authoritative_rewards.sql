@@ -81,7 +81,7 @@ begin
     qty := (line->>'quantity')::integer;
     if qty not between 1 and 20 then raise exception 'reward_invalid_quantity'; end if;
     select price into unit from public.menu where id = (line->>'id')::uuid and is_available = true;
-    if unit is null then raise exception 'reward_item_unavailable'; end if;
+    if unit is null or unit < 0 or unit >= 100000000 then raise exception 'reward_item_unavailable'; end if;
     seen := array[]::text[];
     if jsonb_typeof(coalesce(line->'customizations', '[]'::jsonb)) <> 'array' then raise exception 'reward_invalid_addon'; end if;
     for addon in select value from jsonb_array_elements(coalesce(line->'customizations', '[]'::jsonb)) loop
@@ -89,7 +89,7 @@ begin
       seen := array_append(seen, addon->>'id');
       select c.price into extra from public.customizations c join public.menu_customizations m on m.customization_id = c.id
         where m.menu_id = (line->>'id')::uuid and c.id = (addon->>'id')::uuid;
-      if extra is null then raise exception 'reward_invalid_addon'; end if;
+      if extra is null or extra < 0 or extra >= 100000000 then raise exception 'reward_invalid_addon'; end if;
       unit := unit + extra;
     end loop;
     subtotal := subtotal + unit * qty;
@@ -105,7 +105,7 @@ begin
   if u is null then raise exception 'reward_sign_in_required'; end if;
   -- A single campaign lock serializes all limit checks and order redemptions.
   select * into c from public.reward_campaigns where code = upper(btrim(p_code)) for update;
-  if not found or not c.active or now() < c.starts_at or now() >= c.expires_at then raise exception 'reward_unavailable'; end if;
+  if not found or not c.active or clock_timestamp() < c.starts_at or clock_timestamp() >= c.expires_at then raise exception 'reward_unavailable'; end if;
   if (select count(*) from public.reward_redemptions where code = c.code) >= c.total_limit or
      (select count(*) from public.reward_redemptions where code = c.code and profile_id = u) >= c.per_user_limit then
     raise exception 'reward_limit_reached';
