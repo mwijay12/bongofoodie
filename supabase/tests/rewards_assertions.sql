@@ -43,10 +43,17 @@ select pg_temp.expect_error($q$select quote_reward('TEST','[]')$q$, 'reward_quiz
 select submit_reward_quiz(((((now() at time zone 'Africa/Dar_es_Salaam')::date-date '2024-01-01')%3+3)%3)+1, 3);
 select submit_reward_quiz(((((now() at time zone 'Africa/Dar_es_Salaam')::date-date '2024-01-01')%3+3)%3)+1, 1);
 do $$begin if exists(select 1 from reward_quiz_attempts where is_correct) then raise exception 'replay granted win'; end if; end$$;
+update reward_campaigns set requires_quiz=false, minimum_subtotal=20000;
+select pg_temp.expect_error($q$select quote_reward('TEST','[{"id":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","quantity":1}]')$q$, 'reward_minimum_spend');
+update reward_campaigns set minimum_subtotal=0, total_limit=1;
+select pg_temp.expect_error($q$select quote_reward('TEST','[]')$q$, 'reward_limit_reached');
 set role authenticated;
 select pg_temp.expect_error($q$insert into reward_quiz_attempts values ('22222222-2222-2222-2222-222222222222',current_date,1,1,true)$q$, 'permission denied');
 select pg_temp.expect_error($q$insert into reward_redemptions values ('fake','22222222-2222-2222-2222-222222222222','TEST',2000,now())$q$, 'permission denied');
 select pg_temp.expect_error($q$select * from reward_campaigns$q$, 'permission denied');
+do $$begin
+ if exists(select 1 from public.reward_redemptions) then raise exception 'RLS exposed another user redemption'; end if;
+end$$;
 reset role;
 select set_config('request.jwt.claim.sub', '', false);
 select pg_temp.expect_error($q$select quote_reward('TEST','[]')$q$, 'reward_sign_in_required');

@@ -1,0 +1,32 @@
+name: Rewards database security
+on:
+  push:
+    branches: [main, 'arena/**']
+    paths: ['supabase/**', '.github/workflows/rewards-security.yml']
+  pull_request:
+    paths: ['supabase/**', '.github/workflows/rewards-security.yml']
+  workflow_dispatch:
+jobs:
+  rewards-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: rewards_test_only
+          POSTGRES_DB: rewards_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:rewards_test_only@localhost:5432/rewards_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test isolated migration and authorization
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rewards_fixture.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20261109010000_authoritative_rewards.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rewards_assertions.sql
+      - name: Compete for last campaign redemption
+        run: bash supabase/tests/rewards_concurrency.sh

@@ -1,6 +1,7 @@
 create role anon; create role authenticated;
 create schema auth;
 create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
+grant usage on schema auth to authenticated;
 create table public.profiles(id uuid primary key);
 create table public.menu(id uuid primary key, price numeric, is_available boolean);
 create table public.customizations(id uuid primary key, price numeric);
