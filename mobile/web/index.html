@@ -6,10 +6,12 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="BongoFoodie TZ — Authentic Swahili Gastronomy & Chef AI Flutter App">
-  <meta name="theme-color" content="#F6821F">
+  <meta name="theme-color" content="#F58220">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="BongoFoodie">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.json">
   <title>BongoFoodie TZ — Flutter Mobile</title>
   <style>
@@ -17,7 +19,7 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      background-color: #120D09;
+      background-color: #1A100B;
       font-family: system-ui, -apple-system, sans-serif;
     }
     #bongo-boot {
@@ -29,26 +31,23 @@
       justify-content: center;
       gap: 14px;
       color: #FFFFFF;
-      background: radial-gradient(circle at center, #26160B 0%, #120D09 100%);
+      background: #1A100B;
       z-index: 9999;
-      transition: opacity 0.35s ease;
+      transition: opacity 0.28s ease;
     }
-    .bongo-spinner {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      border: 3.5px solid rgba(246, 130, 31, 0.22);
-      border-top-color: #F6821F;
-      animation: spin 0.85s linear infinite;
+    .bongo-brand {
+      width: 192px;
+      height: 192px;
+      object-fit: contain;
     }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    @media (prefers-reduced-motion: reduce) {
+      #bongo-boot { transition: none; }
     }
   </style>
 </head>
 <body>
   <div id="bongo-boot">
-    <div class="bongo-spinner"></div>
+    <img class="bongo-brand" src="icons/Icon-192.png" alt="BongoFoodie">
     <div style="font-weight: 800; font-size: 18px; letter-spacing: -0.3px;">BongoFoodie TZ</div>
     <div style="font-size: 12px; color: rgba(255,255,255,0.68);">Loading Flutter Swahili Kitchen...</div>
   </div>
@@ -57,7 +56,7 @@
       var el = document.getElementById('bongo-boot');
       if (el) {
         el.style.opacity = '0';
-        setTimeout(function () { el.remove(); }, 380);
+        setTimeout(function () { el.remove(); }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 280);
       }
     });
   </script>
