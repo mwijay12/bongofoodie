@@ -80,9 +80,12 @@ Future<void> _fillDetails(
   await container
       .read(deliveryAddressProvider.notifier)
       .setAddress('House 14, Kijitonyama, Kinondoni, Dar es Salaam');
-  await tester.ensureVisible(find.byKey(const Key('checkout-name')));
+  await tester.pumpAndSettle();
+  await tester.scrollUntilVisible(find.byKey(const Key('checkout-name')), 200,
+      scrollable: find.byType(Scrollable).first);
   await tester.enterText(find.byKey(const Key('checkout-name')), 'Asha Juma');
-  await tester.ensureVisible(find.byKey(const Key('checkout-phone')));
+  await tester.scrollUntilVisible(find.byKey(const Key('checkout-phone')), 120,
+      scrollable: find.byType(Scrollable).first);
   await tester.enterText(find.byKey(const Key('checkout-phone')), '0712345678');
   tester.testTextInput.hide();
   await tester.pumpAndSettle();
