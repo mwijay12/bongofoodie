@@ -41,3 +41,9 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20261109030000_checkout_quote_foundation.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/checkout_assertions.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20261109030000_checkout_quote_foundation.sql
+      - name: Test disabled submission, replay and owned reconciliation
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/submission_fixture.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20261109040000_checkout_submission.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/submission_assertions.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20261109040000_checkout_submission.sql
