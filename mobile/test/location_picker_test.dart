@@ -116,6 +116,8 @@ void main() {
                       find.byKey(const Key('save-location')))
                   .onPressed,
               isNull);
+          await tester.ensureVisible(find.byType(SwitchListTile));
+          await tester.pumpAndSettle();
           await tester.tap(find.byType(SwitchListTile));
           await tester.pumpAndSettle();
           const address = 'House 14, Near market, Dar es Salaam';
