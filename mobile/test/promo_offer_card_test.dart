@@ -84,7 +84,10 @@ void main() {
                     of: find.byType(PromoDishImage),
                     matching: find.byType(ClipRRect)),
                 findsNothing);
-            expect(find.bySemanticsLabel(RegExp(promo.title)), findsOneWidget);
+            final node = tester.getSemantics(find.byType(PromoOfferCard));
+            expect(node.label, contains(promo.title));
+            expect(node.label, contains(promo.subtitle));
+            expect(node.label, contains(action));
             await tester.tap(find.byType(PromoOfferCard));
             expect(taps, 1);
             await tester.pumpWidget(const SizedBox.shrink());
