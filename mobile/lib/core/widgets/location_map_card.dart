@@ -11,6 +11,7 @@ import 'skeleton/skeleton_box.dart';
 
 final mapTileProviderFactoryProvider = Provider<TileProvider Function()>(
     (ref) => () => NetworkTileProvider(
+        attemptDecodeOfHttpErrorResponses: false,
         cachingProvider: BuiltInMapCachingProvider.getOrCreateInstance()));
 
 final externalMapLauncherProvider = Provider<Future<bool> Function(Uri)>(

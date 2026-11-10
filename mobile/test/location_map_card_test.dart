@@ -34,6 +34,7 @@ void main() {
               mapTileProviderFactoryProvider.overrideWithValue(() =>
                   NetworkTileProvider(
                       httpClient: client,
+                      attemptDecodeOfHttpErrorResponses: false,
                       cachingProvider: const DisabledMapCachingProvider())),
             ],
             child: MaterialApp(
