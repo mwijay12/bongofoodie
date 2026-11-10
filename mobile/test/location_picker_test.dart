@@ -1,3 +1,4 @@
+import 'package:bongo_foodie/data/repositories/foreground_location_repository.dart';
 import 'dart:async';
 import 'package:bongo_foodie/core/widgets/tanzania_location_sheet.dart';
 import 'package:bongo_foodie/core/theme/app_theme.dart';
@@ -30,9 +31,26 @@ class RacingLocations extends LocationRepository {
           const [TzDistrict(code: 800, name: 'Other district', regionCode: 8)]);
 }
 
+class FixedLocation extends ForegroundLocationRepository {
+  FixedLocation(this.fix) : super(_NoDevice());
+  final LocationFix fix;
+  int calls = 0;
+  @override
+  Future<LocationFix> locate() async {
+    calls++;
+    return fix;
+  }
+}
+
+class _NoDevice implements ForegroundLocationDevice {
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw StateError('must not touch device');
+}
+
 Future<ProviderContainer> open(
     WidgetTester tester, Size size, bool sw, bool dark,
-    {LocationRepository? repo}) async {
+    {LocationRepository? repo, ForegroundLocationRepository? gps}) async {
   SharedPreferences.setMockInitialValues({});
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -43,6 +61,7 @@ Future<ProviderContainer> open(
         appStringsProvider.overrideWithValue(
             AppStrings(sw ? AppLanguage.sw : AppLanguage.en)),
         if (repo != null) locationRepositoryProvider.overrideWithValue(repo),
+        if (gps != null) foregroundLocationProvider.overrideWithValue(gps),
       ],
       child: MaterialApp(
           theme: dark ? AppTheme.dark() : buildAppTheme(),
@@ -149,6 +168,43 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  for (final sw in [false, true]) {
+    for (final outcome in LocationOutcome.values) {
+      testWidgets('explicit GPS action $outcome sw=$sw retains address control',
+          (tester) async {
+        final gps = FixedLocation(LocationFix(outcome,
+            latitude: 51.5, longitude: -0.1, accuracy: 20));
+        final container =
+            await open(tester, const Size(360, 640), sw, true, gps: gps);
+        expect(gps.calls, 0);
+        final action = find.byKey(const Key('use-current-location'));
+        await tester.ensureVisible(action);
+        await tester.tap(action);
+        await tester.pumpAndSettle();
+        expect(gps.calls, 1);
+        expect(container.read(deliveryAddressProvider), isEmpty);
+        expect(
+            tester
+                .widget<DropdownButtonFormField<TzRegion>>(
+                    find.byKey(const Key('location-region')))
+                .initialValue,
+            isNull);
+        expect(
+            tester
+                .widget<ElevatedButton>(find.byKey(const Key('save-location')))
+                .onPressed,
+            isNull);
+        expect(
+            find.text(sw ? 'Fungua mipangilio' : 'Open settings'),
+            outcome == LocationOutcome.deniedForever
+                ? findsOneWidget
+                : findsNothing);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      });
+    }
+  }
 
   testWidgets('no automatic first region or ward selected', (tester) async {
     await open(tester, const Size(360, 640), false, false);
