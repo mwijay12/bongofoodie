@@ -27,6 +27,7 @@ class PromoOfferCard extends StatelessWidget {
     final subtitle = stripEmoji(promotion.subtitle);
     final badge = stripEmoji(promotion.badgeText);
     return Semantics(
+      container: true,
       button: true,
       label: [title, badge, subtitle, actionLabel]
           .where((s) => s.isNotEmpty)

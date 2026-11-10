@@ -83,7 +83,7 @@ jobs:
             cat /tmp/flutter-tests.log
             while IFS= read -r line; do echo "::error::$line"; done < <(grep '\[E\]' /tmp/flutter-tests.log | head -3)
             while IFS= read -r line; do echo "::error::$line"; done < <(grep -E 'overflowed by|Expected:|Actual:' /tmp/flutter-tests.log | head -4)
-            while IFS= read -r line; do echo "::error::$line"; done < <(grep -A 2 'The relevant error-causing widget was:' /tmp/flutter-tests.log | head -3)
+            while IFS= read -r line; do echo "::error::$line"; done < <(grep -E '#[0-9]+.*(promo_offer_card_test|home_polish_test)\.dart' /tmp/flutter-tests.log | head -3)
             exit 1
           }
           cat /tmp/flutter-tests.log
