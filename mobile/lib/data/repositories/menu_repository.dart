@@ -553,7 +553,7 @@ class MenuRepository {
     if (EnvConfig.hasSupabaseCredentials) {
       final sb = SupabaseService.client;
       if (sb?.auth.currentUser == null) return false;
-      return await sb!.rpc('reward_quiz_status') as bool;
+      return await sb.rpc('reward_quiz_status') as bool;
     }
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_quizDatePrefKey) ==
@@ -565,7 +565,7 @@ class MenuRepository {
       final sb = SupabaseService.client;
       if (sb?.auth.currentUser == null)
         return false; // Guest practice, no entitlement.
-      return await sb!.rpc('submit_reward_quiz', params: {
+      return await sb.rpc('submit_reward_quiz', params: {
         'p_question_id': questionId,
         'p_answer_index': answerIndex,
       }) as bool;
@@ -579,8 +579,9 @@ class MenuRepository {
 
   /// Demo-only compatibility path. Live callers cannot assert correctness.
   Future<void> recordTriviaAttempt(String? userId, bool isCorrect) async {
-    if (EnvConfig.hasSupabaseCredentials)
+    if (EnvConfig.hasSupabaseCredentials) {
       throw StateError('server_quiz_required');
+    }
     final prefs = await SharedPreferences.getInstance();
     final today = darCalendarDay(DateTime.now()).toIso8601String();
     if (prefs.getString(_quizDatePrefKey) == today) return;
@@ -595,7 +596,7 @@ class MenuRepository {
     if (EnvConfig.hasSupabaseCredentials) {
       final sb = SupabaseService.client;
       if (sb?.auth.currentUser == null) return 0;
-      final rows = await sb!
+      final rows = await sb
           .from('reward_quiz_attempts')
           .select('quiz_date')
           .eq('is_correct', true);

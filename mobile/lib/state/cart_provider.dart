@@ -171,7 +171,6 @@ class CartNotifier extends StateNotifier<CartState> {
   void syncDeliveryFee(double fee) {
     if (fee >= 0 && fee != state.deliveryFee) {
       // A fee refresh must not overwrite a cart while its disk restore is pending.
-      _revision++;
       super.state = state.copyWith(
           deliveryFee: fee, appliedPromoCode: '', promoDiscount: 0);
     }
@@ -286,13 +285,18 @@ class CartNotifier extends StateNotifier<CartState> {
     final snapshot = state;
     if (!_liveRewards || snapshot.items.isEmpty) return false;
     final quote = await repository.quote(code, snapshot.items);
-    if (!mounted || revision != _revision || owner != _owner) return false;
+    if (!mounted ||
+        revision != _revision ||
+        owner != _owner ||
+        !identical(snapshot, state)) return false;
     if (quote.code != code.trim().toUpperCase() ||
         !quote.discount.isFinite ||
         quote.discount <= 0 ||
         quote.discount > snapshot.subtotal ||
         quote.subtotal != snapshot.subtotal ||
-        quote.deliveryFee != snapshot.effectiveDeliveryFee) return false;
+        quote.deliveryFee != snapshot.effectiveDeliveryFee) {
+      return false;
+    }
     state = state.copyWith(
         appliedPromoCode: quote.code, promoDiscount: quote.discount);
     return true;

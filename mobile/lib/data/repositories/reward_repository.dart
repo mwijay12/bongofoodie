@@ -25,7 +25,7 @@ class RewardRepository {
     if (!EnvConfig.hasSupabaseCredentials || client?.auth.currentUser == null) {
       throw StateError('reward_sign_in_required');
     }
-    final json = await client!.rpc('quote_reward', params: {
+    final json = await client.rpc('quote_reward', params: {
       'p_code': code.trim().toUpperCase(),
       'p_items': items.map((i) => i.toJson()).toList(),
     });
