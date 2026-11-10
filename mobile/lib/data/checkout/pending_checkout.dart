@@ -149,11 +149,13 @@ class PendingCheckoutCoordinator {
     _authorize();
   }
 
-  Future<PendingCheckout?> restore() => _exclusive(() async {
-        final pending = await _read();
-        _authorize();
-        return pending;
-      });
+  Future<PendingCheckout?> restore() async {
+    _authorize();
+    final pending = await _read();
+    _authorize();
+    return pending;
+  }
+
   Future<PendingCheckout> prepare(Map<String, dynamic> request) async {
     // Snapshot at invocation, before waiting for storage or another operation.
     final requestJson = jsonEncode(request);
@@ -198,7 +200,9 @@ class PendingCheckoutCoordinator {
         } catch (_) {
           // Even RPC errors stay conservative until typed rejection/review UX exists.
           _authorize();
-          return unknown;
+          final latest = await _read();
+          _authorize();
+          return latest?.phase == CheckoutPhase.confirmed ? latest! : unknown;
         }
         final confirmed = unknown.withPhase(CheckoutPhase.confirmed,
             response: jsonEncode(result));
@@ -206,31 +210,33 @@ class PendingCheckoutCoordinator {
         await _save(confirmed);
         return confirmed;
       });
-  Future<PendingCheckout?> reconcile() => _exclusive(() async {
-        final pending = await _read();
-        _authorize();
-        if (pending == null || pending.phase == CheckoutPhase.confirmed) {
-          return pending;
-        }
-        Map<String, dynamic>? result;
-        try {
-          _authorize();
-          result = await transport
-              .lookup(pending.key)
-              .timeout(const Duration(seconds: 10));
-          _authorize();
-          if (result == null)
-            return pending; // Not proof of failure; NEVER delete/change key.
-          _validateResponse(pending, result);
-        } catch (_) {
-          _authorize();
-          return pending;
-        }
-        final confirmed = pending.withPhase(CheckoutPhase.confirmed,
-            response: jsonEncode(result));
-        await _save(confirmed);
-        return confirmed;
-      });
+  Future<PendingCheckout?> reconcile() async {
+    _authorize();
+    final pending = await _read();
+    _authorize();
+    if (pending == null || pending.phase == CheckoutPhase.confirmed) {
+      return pending;
+    }
+    Map<String, dynamic>? result;
+    try {
+      _authorize();
+      result = await transport
+          .lookup(pending.key)
+          .timeout(const Duration(seconds: 10));
+      _authorize();
+      if (result == null)
+        return pending; // Not proof of failure; NEVER delete/change key.
+      _validateResponse(pending, result);
+    } catch (_) {
+      _authorize();
+      return pending;
+    }
+    final confirmed = pending.withPhase(CheckoutPhase.confirmed,
+        response: jsonEncode(result));
+    await _save(confirmed);
+    return confirmed;
+  }
+
   static bool _validRequest(Map<String, dynamic> request) =>
       request['version'] == 1 &&
       request['reviewed_quote'] is Map &&
