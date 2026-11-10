@@ -2,6 +2,7 @@
 """Apply checked-in branding AFTER flutter create; no Flutter dependency needed."""
 from pathlib import Path
 import argparse
+from apply_location_permissions import apply as apply_location_permissions
 import shutil
 import xml.etree.ElementTree as ET
 
@@ -25,6 +26,7 @@ def apply(root: Path) -> None:
                             green=str(16/255), blue=str(11/255), alpha='1',
                             colorSpace='custom', customColorSpace='sRGB')
     tree.write(storyboard, encoding='utf-8', xml_declaration=True)
+    apply_location_permissions(root)
     print('Applied BongoFoodie Android/iOS launcher and launch-screen branding.')
 
 

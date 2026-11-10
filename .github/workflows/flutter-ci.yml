@@ -41,6 +41,7 @@ jobs:
           rm -f test/widget_test.dart
           python3 scripts/apply_branding.py
           python3 scripts/test_branding.py
+          python3 scripts/test_location_permissions.py
 
       - name: Install Dependencies
         run: flutter pub get

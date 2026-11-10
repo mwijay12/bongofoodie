@@ -11,6 +11,10 @@ if (-not (Test-Path ".\android") -or -not (Test-Path ".\ios")) {
     flutter create --platforms=android,ios,web --org tz.co.bongofoodie --project-name bongo_foodie .
 }
 
+# Foreground-only location permissions and approved branding survive regeneration.
+python scripts/apply_branding.py
+if ($LASTEXITCODE -ne 0) { throw "Native configuration failed" }
+
 Write-Host "📥 Fetching pub dependencies..." -ForegroundColor Cyan
 flutter pub get
 

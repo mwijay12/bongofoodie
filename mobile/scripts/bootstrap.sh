@@ -9,6 +9,9 @@ if [ ! -d "android" ] || [ ! -d "ios" ]; then
   flutter create --platforms=android,ios,web --org tz.co.bongofoodie --project-name bongo_foodie .
 fi
 
+# Foreground-only location permissions and approved branding survive regeneration.
+python3 scripts/apply_branding.py
+
 echo "📥 Fetching pub dependencies..."
 flutter pub get
 
