@@ -69,8 +69,9 @@ class ForegroundLocationRepository {
         return const LocationFix(LocationOutcome.servicesOff);
       }
       var permission = await device.permission();
-      if (permission == LocationPermission.denied)
+      if (permission == LocationPermission.denied) {
         permission = await device.requestPermission();
+      }
       if (permission == LocationPermission.deniedForever) {
         return const LocationFix(LocationOutcome.deniedForever);
       }
