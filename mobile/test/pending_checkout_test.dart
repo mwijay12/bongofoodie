@@ -19,7 +19,15 @@ Map<String, dynamic> response(Map<String, dynamic> request) => {
       'order_id': 'BF-aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
       'status': 'pending',
       'payment_state': 'unconfirmed',
-      'items': [],
+      'items': [
+        {
+          'id': 'dish',
+          'quantity': 1,
+          'name': 'Catalog dish',
+          'price': 10000,
+          'customizations': []
+        }
+      ],
       'quote': request['reviewed_quote']
     };
 
@@ -38,6 +46,13 @@ class Journal implements CheckoutJournal {
 }
 
 class Transport implements CheckoutTransport {
+  Transport(
+      {this.project = 'https://test.supabase.co',
+      this.owner = '11111111-1111-4111-8111-111111111111'});
+  @override
+  final String project;
+  @override
+  final String owner;
   int submits = 0;
   int lookups = 0;
   Future<Map<String, dynamic>> Function(String, Map<String, dynamic>)? onSubmit;
@@ -171,7 +186,9 @@ void main() {
     final c = coordinator(journal, transport, active: () => active);
     await c.prepare(request());
     expect(
-        await coordinator(journal, transport, user: other).restore(), isNull);
+        await coordinator(journal, Transport(owner: other), user: other)
+            .restore(),
+        isNull);
     expect(
         await coordinator(journal, transport,
                 project: 'https://another.supabase.co')

@@ -48,6 +48,8 @@ class PreferencesCheckoutJournal implements CheckoutJournal {
 }
 
 abstract interface class CheckoutTransport {
+  String get project;
+  String get owner;
   Future<Map<String, dynamic>> submit(String key, Map<String, dynamic> request);
   Future<Map<String, dynamic>?> lookup(String key);
 }
@@ -78,7 +80,9 @@ class PendingCheckoutCoordinator {
     if (uri?.scheme != 'https' ||
         uri?.host.isEmpty != false ||
         !_uuid.hasMatch(owner) ||
-        currentOwner() != owner) {
+        currentOwner() != owner ||
+        transport.owner != owner ||
+        transport.project != project) {
       throw StateError('checkout_owner_unavailable');
     }
   }
@@ -149,27 +153,34 @@ class PendingCheckoutCoordinator {
         _authorize();
         return pending;
       });
-  Future<PendingCheckout> prepare(Map<String, dynamic> request) =>
-      _exclusive(() async {
-        final existing = await _read();
-        _authorize();
-        if (existing != null) {
-          if (_canonical(existing.request) != _canonical(request))
-            throw StateError('checkout_pending_request_exists');
-          return existing;
+  Future<PendingCheckout> prepare(Map<String, dynamic> request) async {
+    // Snapshot at invocation, before waiting for storage or another operation.
+    final requestJson = jsonEncode(request);
+    final snapshot = jsonDecode(requestJson) as Map<String, dynamic>;
+    return _exclusive(() async {
+      final existing = await _read();
+      _authorize();
+      if (existing != null) {
+        if (_canonical(existing.request) != _canonical(snapshot)) {
+          throw StateError('checkout_pending_request_exists');
         }
-        if (request['version'] != 1 ||
-            request['reviewed_quote'] is! Map ||
-            request['items'] is! List ||
-            utf8.encode(jsonEncode(request)).length > 65536)
-          throw ArgumentError('checkout_invalid_request');
-        final pending = PendingCheckout(
-            key: CheckoutValidation.newOrderId().substring(3),
-            requestJson: jsonEncode(request),
-            phase: CheckoutPhase.prepared);
-        await _save(pending);
-        return pending;
-      });
+        return existing;
+      }
+      if (snapshot['version'] != 1 ||
+          snapshot['reviewed_quote'] is! Map ||
+          snapshot['items'] is! List ||
+          (snapshot['items'] as List).isEmpty ||
+          utf8.encode(requestJson).length > 65536) {
+        throw ArgumentError('checkout_invalid_request');
+      }
+      final pending = PendingCheckout(
+          key: CheckoutValidation.newOrderId().substring(3),
+          requestJson: requestJson,
+          phase: CheckoutPhase.prepared);
+      await _save(pending);
+      return pending;
+    });
+  }
 
   /// Explicit caller action only. Unknown outcomes reuse the SAME stored request.
   Future<PendingCheckout> submitSaved() => _exclusive(() async {
@@ -201,8 +212,9 @@ class PendingCheckoutCoordinator {
   Future<PendingCheckout?> reconcile() => _exclusive(() async {
         final pending = await _read();
         _authorize();
-        if (pending == null || pending.phase == CheckoutPhase.confirmed)
+        if (pending == null || pending.phase == CheckoutPhase.confirmed) {
           return pending;
+        }
         Map<String, dynamic>? result;
         try {
           _authorize();
@@ -232,6 +244,8 @@ class PendingCheckoutCoordinator {
         result['status'] != 'pending' ||
         result['payment_state'] != 'unconfirmed' ||
         result['items'] is! List ||
+        (result['items'] as List).length !=
+            (pending.request['items'] as List).length ||
         _canonical(result['quote']) !=
             _canonical(pending.request['reviewed_quote'])) {
       throw const FormatException('checkout_invalid_response');

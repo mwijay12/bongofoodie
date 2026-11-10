@@ -1,15 +1,23 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/services/supabase_service.dart';
+import '../../core/config/env_config.dart';
 import 'pending_checkout.dart';
 
 /// Explicitly constructed only after deployment/guest/address gates are resolved.
 /// Does not initialize auth, sign in anonymously, insert orders or retry writes.
 class SupabaseCheckoutTransport implements CheckoutTransport {
-  SupabaseCheckoutTransport(this.client, this.owner);
-  final SupabaseClient client;
+  SupabaseCheckoutTransport(this.owner);
+  @override
   final String owner;
+  @override
+  String get project => EnvConfig.supabaseUrl;
+  SupabaseClient get client =>
+      SupabaseService.client ??
+      (throw StateError('checkout_backend_unavailable'));
   void _authorize() {
-    if (client.auth.currentUser?.id != owner)
+    if (client.auth.currentUser?.id != owner) {
       throw StateError('checkout_owner_unavailable');
+    }
   }
 
   @override
