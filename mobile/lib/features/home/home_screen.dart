@@ -1112,13 +1112,19 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: AppSpace.v8),
+                  if (EnvConfig.hasSupabaseCredentials)
+                    Text(_serverCorrect
+                        ? (sw
+                            ? 'Jibu sahihi la leo limehifadhiwa. Masharti ya ofa bado yanatumika.'
+                            : 'Today’s saved result is correct. Offer conditions still apply.')
+                        : (sw
+                            ? 'Mazoezi pekee; hakuna zawadi mpya iliyothibitishwa.'
+                            : 'Practice only; no new reward has been verified.')),
                   if (isCorrect)
                     Text(sw
                         ? 'Kunakili msimbo hakuhakikishi punguzo. Masharti yatathibitishwa kwenye malipo.'
                         : 'Copying a code does not guarantee a discount. Eligibility is checked at checkout.'),
-                  if (isCorrect &&
-                      (!EnvConfig.hasSupabaseCredentials ||
-                          (_serverCorrect && !widget.alreadyPlayed)))
+                  if (isCorrect && !EnvConfig.hasSupabaseCredentials)
                     OutlinedButton.icon(
                       onPressed: () {
                         Clipboard.setData(

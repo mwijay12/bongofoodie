@@ -41,15 +41,15 @@ drop policy if exists "Users can insert their own quiz attempts" on public.quiz_
 revoke insert, update, delete on public.quiz_attempts from anon, authenticated;
 
 create function public.reward_quiz_status() returns boolean
-language sql stable security definer set search_path = '' as $$
+language sql security definer set search_path = '' as $$
   select exists(select 1 from public.reward_quiz_attempts where profile_id = auth.uid()
-    and quiz_date = (now() at time zone 'Africa/Dar_es_Salaam')::date);
+    and quiz_date = (clock_timestamp() at time zone 'Africa/Dar_es_Salaam')::date);
 $$;
 create function public.submit_reward_quiz(p_question_id integer, p_answer_index integer) returns boolean
 language plpgsql security definer set search_path = '' as $$
 declare
   u uuid := auth.uid();
-  d date := (now() at time zone 'Africa/Dar_es_Salaam')::date;
+  d date := (clock_timestamp() at time zone 'Africa/Dar_es_Salaam')::date;
   q integer;
   result boolean;
 begin
@@ -111,7 +111,7 @@ begin
     raise exception 'reward_limit_reached';
   end if;
   if c.requires_quiz and not exists(select 1 from public.reward_quiz_attempts where profile_id = u
-      and quiz_date = (now() at time zone 'Africa/Dar_es_Salaam')::date and is_correct) then
+      and quiz_date = (clock_timestamp() at time zone 'Africa/Dar_es_Salaam')::date and is_correct) then
     raise exception 'reward_quiz_required';
   end if;
   subtotal := public.reward_basket_subtotal(p_items);

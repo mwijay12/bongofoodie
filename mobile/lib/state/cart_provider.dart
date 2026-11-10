@@ -270,7 +270,9 @@ class CartNotifier extends StateNotifier<CartState> {
         !settings.promoActive ||
         !settings.promoDiscount.isFinite ||
         settings.promoDiscount <= 0 ||
-        normalized != settings.promoCode.trim().toUpperCase()) return false;
+        normalized != settings.promoCode.trim().toUpperCase()) {
+      return false;
+    }
     state = state.copyWith(
         appliedPromoCode: normalized, promoDiscount: settings.promoDiscount);
     return true;

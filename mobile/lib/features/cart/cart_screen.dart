@@ -99,8 +99,12 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     BranchSettingsModel branch,
     String deliveryAddress,
   ) async {
-    if (cart.restoring || cart.items.isEmpty || _placingOrder || _checkingPromo)
+    if (cart.restoring ||
+        cart.items.isEmpty ||
+        _placingOrder ||
+        _checkingPromo) {
       return;
+    }
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     setState(() {
       _placingOrder = true;
@@ -359,6 +363,7 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
                   minimumSize: const Size(AppSpace.huge, AppSpace.v56),
                 ),
                 onPressed: _placingOrder ||
+                        _checkingPromo ||
                         !branchAsync.hasValue ||
                         branchAsync.hasError
                     ? null
