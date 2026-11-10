@@ -21,6 +21,9 @@ final deliveryAddressProvider =
 });
 
 class DeliveryAddressNotifier extends StateNotifier<String> {
+  static String get selectionSource => EnvConfig.hasSupabaseCredentials
+      ? 'live:${EnvConfig.supabaseUrl}'
+      : 'demo:dar-reference-v1';
   static const _prefKey = 'bongo_delivery_address_v2';
 
   DeliveryAddressNotifier() : super('') {
@@ -68,6 +71,7 @@ class DeliveryAddressNotifier extends StateNotifier<String> {
         'bongo_location_selection_v1',
         jsonEncode({
           'version': 1,
+          'source': selectionSource,
           'region': region,
           'district': district,
           'ward': ward,

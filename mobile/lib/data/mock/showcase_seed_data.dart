@@ -1,3 +1,4 @@
+import 'dar_location_reference.dart';
 import '../models/models.dart';
 import '../../core/l10n/daily_copy.dart';
 
@@ -496,12 +497,7 @@ class ShowcaseSeedData {
 
   static const List<TzDistrict> districts = [
     // Dar es Salaam
-    TzDistrict(code: 701, name: 'Kinondoni', regionCode: 7),
-    TzDistrict(code: 702, name: 'Ilala (Dar CBD)', regionCode: 7),
-    TzDistrict(code: 703, name: 'Temeke', regionCode: 7),
-    TzDistrict(code: 704, name: 'Ubungo', regionCode: 7),
-    TzDistrict(code: 705, name: 'Kigamboni', regionCode: 7),
-    // Regional hubs
+    ...DarLocationReference.districts,
     TzDistrict(code: 201, name: 'Arusha Mjini', regionCode: 2),
     TzDistrict(code: 202, name: 'Arumeru', regionCode: 2),
     TzDistrict(code: 1901, name: 'Nyamagana', regionCode: 19),
@@ -519,37 +515,7 @@ class ShowcaseSeedData {
   ];
 
   static const List<TzWard> wards = [
-    // Kinondoni
-    TzWard(code: 70101, name: 'Kijitonyama', districtCode: 701),
-    TzWard(code: 70102, name: 'Mikocheni', districtCode: 701),
-    TzWard(
-        code: 70103, name: 'Msasani (Masaki / Oysterbay)', districtCode: 701),
-    TzWard(code: 70104, name: 'Makumbusho', districtCode: 701),
-    TzWard(code: 70105, name: 'Mwananyamala', districtCode: 701),
-    TzWard(code: 70107, name: 'Kawe', districtCode: 701),
-    TzWard(code: 70108, name: 'Mbezi Juu', districtCode: 701),
-    // Ilala
-    TzWard(code: 70201, name: 'Kariakoo', districtCode: 702),
-    TzWard(code: 70202, name: 'Upanga Mashariki', districtCode: 702),
-    TzWard(code: 70204, name: 'Kisutu', districtCode: 702),
-    TzWard(code: 70205, name: 'Kivukoni (Posta)', districtCode: 702),
-    TzWard(code: 70208, name: 'Tabata', districtCode: 702),
-    TzWard(code: 70209, name: 'Segerea', districtCode: 702),
-    // Temeke
-    TzWard(code: 70301, name: "Chang'ombe", districtCode: 703),
-    TzWard(code: 70303, name: 'Kurasini', districtCode: 703),
-    TzWard(code: 70304, name: 'Temeke', districtCode: 703),
-    TzWard(code: 70306, name: 'Mbagala', districtCode: 703),
-    // Ubungo
-    TzWard(code: 70401, name: 'Sinza', districtCode: 704),
-    TzWard(code: 70402, name: 'Ubungo', districtCode: 704),
-    TzWard(code: 70405, name: 'Kimara', districtCode: 704),
-    TzWard(code: 70406, name: 'Mbezi', districtCode: 704),
-    TzWard(code: 70407, name: 'Goba', districtCode: 704),
-    // Kigamboni
-    TzWard(code: 70501, name: 'Kigamboni (Ferry)', districtCode: 705),
-    TzWard(code: 70504, name: 'Mjimwema', districtCode: 705),
-    TzWard(code: 70505, name: 'Gezaulole', districtCode: 705),
+    ...DarLocationReference.wards,
     // Other regions
     TzWard(code: 20101, name: 'Sekei', districtCode: 201),
     TzWard(code: 20102, name: 'Kaloleni', districtCode: 201),

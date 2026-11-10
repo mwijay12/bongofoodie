@@ -57,8 +57,11 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
     });
     try {
       final repo = ref.read(locationRepositoryProvider);
-      final saved =
+      final stored =
           await ref.read(deliveryAddressProvider.notifier).readSelection();
+      final saved = stored?['source'] == DeliveryAddressNotifier.selectionSource
+          ? stored
+          : null;
       final regions = await repo.getRegions();
       TzRegion? region;
       for (final r in regions) {
@@ -202,8 +205,12 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
       if (mounted) {
         setState(() {
           _saving = false;
-          _error = true;
         });
+        final sw = ref.read(appStringsProvider).isSw;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(sw
+                ? 'Anwani haijahifadhiwa. Jaribu tena.'
+                : 'Could not save address. Please retry.')));
       }
     }
   }
