@@ -1,3 +1,5 @@
+import 'location_map_card.dart';
+import '../utils/map_links.dart';
 import '../../data/repositories/foreground_location_repository.dart';
 import '../theme/app_tokens.dart';
 import '../theme/app_colors.dart';
@@ -428,6 +430,20 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
                           ? 'Mtaa / jengo / alama ya karibu'
                           : 'Street / building / landmark')),
             ],
+            LocationMapCard(
+                sw: sw,
+                target: _fix?.outcome == LocationOutcome.available
+                    ? MapTarget(
+                        latitude: _fix!.latitude, longitude: _fix!.longitude)
+                    : MapTarget(
+                        address: _manualMode
+                            ? _manual.text.trim()
+                            : [
+                                _street.text.trim(),
+                                if (_ward != null) _ward!.name,
+                                if (_district != null) _district!.name,
+                                if (_region != null) _region!.name
+                              ].where((s) => s.isNotEmpty).join(', '))),
             const SizedBox(height: AppSpace.lg),
             SizedBox(
                 width: double.infinity,
