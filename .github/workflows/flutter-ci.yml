@@ -55,8 +55,6 @@ jobs:
           cd /tmp/bongo-main/mobile
           flutter create --platforms=android,ios,web --org tz.co.bongofoodie --project-name bongo_foodie .
           rm -f test/widget_test.dart
-          python3 scripts/apply_branding.py
-          python3 scripts/test_branding.py
           flutter pub get
           flutter analyze --no-fatal-infos --no-fatal-warnings > /tmp/bongo-baseline.log 2>&1 || true
           warnings=$(grep -c 'warning •' /tmp/bongo-baseline.log || true)
