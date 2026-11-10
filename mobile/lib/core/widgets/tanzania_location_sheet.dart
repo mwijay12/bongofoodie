@@ -255,8 +255,9 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
                     ? null
                     : (value) => setState(() {
                           _manualMode = value;
-                          if (value && _manual.text.isEmpty)
+                          if (value && _manual.text.isEmpty) {
                             _manual.text = ref.read(deliveryAddressProvider);
+                          }
                         })),
             if (_manualMode)
               TextField(

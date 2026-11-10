@@ -83,8 +83,9 @@ class DeliveryAddressNotifier extends StateNotifier<String> {
     final revision = _revision + 1;
     await setAddress(address);
     final prefs = await SharedPreferences.getInstance();
-    if (revision == _revision)
+    if (revision == _revision) {
       await prefs.remove('bongo_location_selection_v1');
+    }
   }
 
   Future<void> clearPrivateAddress() async {
