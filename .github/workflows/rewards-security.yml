@@ -35,3 +35,9 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20261109020000_achievement_events.sql
       - name: Compete for last campaign redemption
         run: bash supabase/tests/rewards_concurrency.sh
+      - name: Test checkout quote and direct mutation lockdown
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/checkout_fixture.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20261109030000_checkout_quote_foundation.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/checkout_assertions.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20261109030000_checkout_quote_foundation.sql
