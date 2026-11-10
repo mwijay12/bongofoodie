@@ -124,7 +124,13 @@ class CartNotifier extends StateNotifier<CartState> {
               i.id.isNotEmpty &&
               i.price.isFinite &&
               i.price >= 0 &&
-              i.customizations.every((c) => c.price.isFinite && c.price >= 0))
+              i.customizations.every((c) =>
+                  c.id.trim().isNotEmpty &&
+                  c.name.trim().isNotEmpty &&
+                  c.price.isFinite &&
+                  c.price >= 0) &&
+              i.customizations.map((c) => c.id).toSet().length ==
+                  i.customizations.length)
           .map((i) => i.copyWith(quantity: i.quantity.clamp(1, 20)))
           .toList();
       if (mounted && owner == _owner && revision == _revision) {
@@ -200,8 +206,8 @@ class CartNotifier extends StateNotifier<CartState> {
     if (existingIdx >= 0) {
       final updated = List<CartItemModel>.from(state.items);
       final current = updated[existingIdx];
-      updated[existingIdx] = current.copyWith(
-          quantity: (current.quantity + quantity).clamp(1, 20));
+      updated[existingIdx] = candidate.copyWith(
+          quantity: (current.quantity + candidate.quantity).clamp(1, 20));
       state = state.copyWith(items: updated);
     } else {
       state = state.copyWith(items: [...state.items, candidate]);

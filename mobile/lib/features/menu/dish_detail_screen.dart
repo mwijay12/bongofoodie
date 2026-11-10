@@ -138,15 +138,14 @@ class DishDetailScreenState extends ConsumerState<DishDetailScreen>
 
   Widget _buildStickyBar(MenuItemModel item) {
     final customizations = _selectedCustomizationsFor(item);
+    final options = ref.watch(dishCustomizationsProvider(item.id));
     return _DishStickyBar(
       quantity: _quantity,
       total: _totalFor(item, _quantity, customizations),
       added: _added,
       onIncrement: _incrementQuantity,
       onDecrement: _decrementQuantity,
-      onAdd: ref.watch(dishCustomizationsProvider(item.id)).hasValue &&
-              !ref.watch(dishCustomizationsProvider(item.id)).isLoading &&
-              !ref.watch(dishCustomizationsProvider(item.id)).hasError
+      onAdd: options.hasValue && !options.isLoading && !options.hasError
           ? () => _onAdd(item)
           : null,
     );

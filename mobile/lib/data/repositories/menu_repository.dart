@@ -193,19 +193,7 @@ class MenuRepository {
             final catObj = r['categories'];
             final catMap =
                 catObj is Map ? Map<String, dynamic>.from(catObj) : null;
-            final rawLinks = r['menu_customizations'];
-            final custList = <CustomizationOption>[];
-            if (rawLinks is List) {
-              for (final link in rawLinks) {
-                if (link is Map && link['customizations'] is Map) {
-                  custList.add(
-                    CustomizationOption.fromJson(
-                      Map<String, dynamic>.from(link['customizations'] as Map),
-                    ),
-                  );
-                }
-              }
-            }
+            final custList = linkedAddonsFromRows(r['menu_customizations']);
 
             return MenuItemModel(
               id: (r['id'] ?? '').toString(),
@@ -267,13 +255,7 @@ class MenuRepository {
           .eq('menu_id', dishId)
           .order('created_at', ascending: true)
           .timeout(_dishReadTimeout);
-      return validatedAddons(rows.map((row) {
-        final nested = row['customizations'];
-        if (nested is! Map || nested['price'] is! num) {
-          throw const FormatException('Invalid linked addon');
-        }
-        return CustomizationOption.fromJson(Map<String, dynamic>.from(nested));
-      }));
+      return linkedAddonsFromRows(rows);
     }
     if (EnvConfig.hasSupabaseCredentials)
       throw StateError('addon_catalog_unavailable');

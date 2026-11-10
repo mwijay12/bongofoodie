@@ -23,3 +23,17 @@ List<CustomizationOption> validatedAddons(
   }
   return List.unmodifiable(byId.values);
 }
+
+/// Supabase join rows. Empty is valid; missing/malformed joins are not.
+List<CustomizationOption> linkedAddonsFromRows(dynamic rows) {
+  if (rows is! List) throw const FormatException('Missing addon links');
+  return validatedAddons(rows.map((row) {
+    if (row is! Map || row['customizations'] is! Map) {
+      throw const FormatException('Invalid addon link');
+    }
+    final nested = Map<String, dynamic>.from(row['customizations'] as Map);
+    if (nested['price'] is! num)
+      throw const FormatException('Missing addon price');
+    return CustomizationOption.fromJson(nested);
+  }));
+}
