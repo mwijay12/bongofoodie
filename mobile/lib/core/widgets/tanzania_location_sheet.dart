@@ -85,15 +85,24 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
         _district = district;
         _wards = wards;
         _ward = ward;
-        if (ward != null) _street.text = (saved?['street'] ?? '').toString();
+        if (ward != null) {
+          _street.text = (saved?['street'] ?? '').toString();
+        } else if (_manual.text.isEmpty) {
+          final address = ref.read(deliveryAddressProvider);
+          if (address.isNotEmpty) {
+            _manualMode = true;
+            _manual.text = address;
+          }
+        }
         _loading = false;
       });
     } catch (_) {
-      if (mounted && request == _request)
+      if (mounted && request == _request) {
         setState(() {
           _error = true;
           _loading = false;
         });
+      }
     }
   }
 
@@ -113,17 +122,19 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
       final rows = value == null
           ? <TzDistrict>[]
           : await ref.read(locationRepositoryProvider).getDistricts(value.code);
-      if (mounted && request == _request)
+      if (mounted && request == _request) {
         setState(() {
           _districts = rows;
           _loading = false;
         });
+      }
     } catch (_) {
-      if (mounted && request == _request)
+      if (mounted && request == _request) {
         setState(() {
           _loading = false;
           _error = true;
         });
+      }
     }
   }
 
@@ -141,17 +152,19 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
       final rows = value == null
           ? <TzWard>[]
           : await ref.read(locationRepositoryProvider).getWards(value.code);
-      if (mounted && request == _request)
+      if (mounted && request == _request) {
         setState(() {
           _wards = rows;
           _loading = false;
         });
+      }
     } catch (_) {
-      if (mounted && request == _request)
+      if (mounted && request == _request) {
         setState(() {
           _loading = false;
           _error = true;
         });
+      }
     }
   }
 
@@ -164,7 +177,9 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
             _region == null ||
             _district == null ||
             _ward == null ||
-            _street.text.trim().isEmpty)) return;
+            _street.text.trim().isEmpty)) {
+      return;
+    }
     final notifier = ref.read(deliveryAddressProvider.notifier);
     setState(() => _saving = true);
     final address = _manualMode
@@ -184,11 +199,12 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
       }
       if (mounted) Navigator.pop(context, address);
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _saving = false;
           _error = true;
         });
+      }
     }
   }
 

@@ -104,8 +104,9 @@ class DeliveryAddressNotifier extends StateNotifier<String> {
 class LocationRepository {
   static const _timeout = Duration(seconds: 10);
   void _requireDemo() {
-    if (EnvConfig.hasSupabaseCredentials)
+    if (EnvConfig.hasSupabaseCredentials) {
       throw StateError('location_catalog_unavailable');
+    }
   }
 
   Future<List<TzRegion>> getRegions() async {
