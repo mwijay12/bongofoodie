@@ -1,3 +1,4 @@
+import '../../data/repositories/foreground_location_repository.dart';
 import '../theme/app_tokens.dart';
 import '../theme/app_colors.dart';
 import 'app_sheet.dart';
@@ -33,6 +34,8 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
   bool _loading = true;
   bool _error = false;
   bool _saving = false;
+  bool _locating = false;
+  LocationFix? _fix;
   int _request = 0;
 
   @override
@@ -171,6 +174,52 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
     }
   }
 
+  Future<void> _locate() async {
+    if (_locating || _saving) return;
+    setState(() {
+      _locating = true;
+      _fix = null;
+    });
+    final fix = await ref.read(foregroundLocationProvider).locate();
+    if (!mounted) return;
+    setState(() {
+      _locating = false;
+      _fix = fix;
+    });
+  }
+
+  String _fixMessage(bool sw) {
+    switch (_fix!.outcome) {
+      case LocationOutcome.available:
+        final coords =
+            '${_fix!.latitude!.toStringAsFixed(5)}, ${_fix!.longitude!.toStringAsFixed(5)}';
+        final accuracy = _fix!.accuracy!.ceil();
+        return sw
+            ? 'Mahali pa kifaa: $coords (usahihi takriban mita $accuracy). Jaza anwani mwenyewe; kata na huduma ya kufikisha bado hazijathibitishwa.'
+            : 'Device location: $coords (reported accuracy about $accuracy m). Enter your address; ward and delivery coverage are still unverified.';
+      case LocationOutcome.denied:
+        return sw
+            ? 'Ruhusa haijatolewa. Unaweza kujaribu tena au kuandika anwani.'
+            : 'Permission denied. Retry or enter your address manually.';
+      case LocationOutcome.deniedForever:
+        return sw
+            ? 'Ruhusa imezuiwa. Badili ruhusa kwenye mipangilio ya kifaa au andika anwani.'
+            : 'Permission blocked. Change device settings or enter your address manually.';
+      case LocationOutcome.servicesOff:
+        return sw
+            ? 'Huduma ya mahali imezimwa. Iwashe kwenye kifaa kisha jaribu tena, au andika anwani.'
+            : 'Location services are off. Enable them on your device and retry, or enter your address manually.';
+      case LocationOutcome.inaccurate:
+        return sw
+            ? 'Usahihi wa mahali ni mdogo. Jaribu tena au andika anwani; hakuna kata iliyochaguliwa.'
+            : 'Location accuracy is low. Retry or enter your address; no ward was selected.';
+      case LocationOutcome.unavailable:
+        return sw
+            ? 'Mahali hapajapatikana. Jaribu tena au andika anwani.'
+            : 'Location unavailable. Retry or enter your address manually.';
+    }
+  }
+
   Future<void> _save() async {
     if (_saving) return;
     if (_manualMode
@@ -219,6 +268,7 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
   Widget build(BuildContext context) {
     final sw = ref.watch(appStringsProvider).isSw;
     final canSave = !_saving &&
+        !_locating &&
         (_manualMode
             ? _manual.text.trim().length >= 10
             : !_loading &&
@@ -240,12 +290,42 @@ class _LocationState extends ConsumerState<TanzaniaLocationSheet> {
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSpace.sm),
             Text(sw
-                ? 'Anwani si uthibitisho wa eneo la huduma. Hakuna GPS au ruhusa ya mahali inayotumika hapa.'
-                : 'An address does not confirm delivery coverage. This picker does not use GPS or request location permission.'),
+                ? 'Anwani si uthibitisho wa eneo la huduma. Mahali pa kifaa ni hiari; ruhusa itaombwa ukibonyeza hapa chini.'
+                : 'An address does not confirm delivery coverage. Device location is optional and only requested when you tap below.'),
             if (!EnvConfig.hasSupabaseCredentials)
               Text(sw
                   ? 'Orodha ya Dar ni sehemu tu; namba ni za ndani ya programu.'
                   : 'Partial Dar reference list; IDs are internal app identifiers.'),
+            OutlinedButton.icon(
+                key: const Key('use-current-location'),
+                onPressed: _locating || _saving ? null : _locate,
+                style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(AppSpace.huge, AppSpace.huge)),
+                icon: const Icon(Icons.my_location_outlined),
+                label:
+                    Text(sw ? 'Tumia mahali nilipo' : 'Use current location')),
+            if (_locating)
+              const Padding(
+                  padding: EdgeInsets.symmetric(vertical: AppSpace.md),
+                  child: SkeletonLines(count: 2)),
+            if (_fix != null) ...[
+              Semantics(liveRegion: true, child: Text(_fixMessage(sw))),
+              if (_fix!.outcome == LocationOutcome.deniedForever)
+                TextButton(
+                    onPressed: () async {
+                      final opened = await ref
+                          .read(foregroundLocationProvider)
+                          .openSettings();
+                      if (!mounted || opened) return;
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(sw
+                              ? 'Fungua mipangilio ya kifaa mwenyewe.'
+                              : 'Please open device settings manually.')));
+                    },
+                    style: TextButton.styleFrom(
+                        minimumSize: const Size(AppSpace.huge, AppSpace.huge)),
+                    child: Text(sw ? 'Fungua mipangilio' : 'Open settings')),
+            ],
             SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(
