@@ -118,11 +118,11 @@ export default function SignInPage() {
         <div className="flex items-center gap-2">
           <Sparkles className="size-4 text-primary fill-primary" />
           <h3 className="font-heading text-sm font-extrabold text-foreground-dark">
-            Instant Portfolio Showcase Access (1-Click)
+            Instant Demo Access
           </h3>
         </div>
         <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">
-          Explore the complete Bongo Foodie ecosystem immediately as a Customer, Waiter Dispatch operator, or Restaurant Admin:
+          Choose a demo role to explore BongoFoodie right away. Demo activity uses local showcase data; it is not a live restaurant account.
         </p>
         <div className="grid grid-cols-3 gap-2 pt-1">
           <button
@@ -132,7 +132,7 @@ export default function SignInPage() {
           >
             <User className="size-4 text-primary" />
             <span className="text-[11px] font-bold text-foreground-dark">Customer</span>
-            <span className="text-[9px] text-muted-foreground">Order & Track</span>
+            <span className="text-[10px] text-muted-foreground">Browse demo</span>
           </button>
           <button
             type="button"
@@ -141,7 +141,7 @@ export default function SignInPage() {
           >
             <Bell className="size-4 text-emerald-600" />
             <span className="text-[11px] font-bold text-foreground-dark">Waiter POS</span>
-            <span className="text-[9px] text-muted-foreground">Live Dispatch</span>
+            <span className="text-[10px] text-muted-foreground">Demo dispatch</span>
           </button>
           <button
             type="button"
@@ -150,7 +150,7 @@ export default function SignInPage() {
           >
             <ShieldCheck className="size-4 text-amber-600" />
             <span className="text-[11px] font-bold text-foreground-dark">Admin</span>
-            <span className="text-[9px] text-muted-foreground">Full Console</span>
+            <span className="text-[10px] text-muted-foreground">Demo tools</span>
           </button>
         </div>
       </div>

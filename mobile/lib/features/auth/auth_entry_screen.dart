@@ -327,6 +327,7 @@ class _AuthEntryScreenState extends ConsumerState<AuthEntryScreen> {
                               'Huna akaunti? Fungua akaunti'))),
                   if (!widget.signUp && !EnvConfig.hasSupabaseCredentials)
                     ExpansionTile(
+                        initiallyExpanded: true,
                         title: Text(tr(
                             'Demo role previews', 'Jaribu majukumu ya demo')),
                         subtitle: Text(tr(

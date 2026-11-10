@@ -177,6 +177,16 @@ void main() {
     expect(find.text('Guest Home'), findsNothing);
     await disposeTree(tester);
   });
+  testWidgets('demo role options are visible without expanding a menu',
+      (tester) async {
+    await _pumpAuth(tester, const SignInScreen(), repo: _Auth());
+    expect(find.text('Demo role previews'), findsOneWidget);
+    expect(find.text('Customer Showcase'), findsOneWidget);
+    expect(find.text('Waiter Dispatch Demo'), findsOneWidget);
+    expect(find.text('Restaurant Admin Demo'), findsOneWidget);
+    await disposeTree(tester);
+  });
+
   test('offline signup cannot assign admin by email', () async {
     SharedPreferences.setMockInitialValues({});
     final user = await AuthRepository().signUpWithEmail(
