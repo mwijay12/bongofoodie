@@ -140,7 +140,11 @@ void main() {
     await tester.pumpAndSettle();
     final district = tester.widget<DropdownButtonFormField<TzDistrict>>(
         find.byKey(const Key('location-district')));
-    expect(district.items!.single.value!.regionCode, 8);
+    final dropdown = tester.widget<DropdownButton<TzDistrict>>(find.descendant(
+        of: find.byKey(const Key('location-district')),
+        matching:
+            find.byWidgetPredicate((w) => w is DropdownButton<TzDistrict>)));
+    expect(dropdown.items!.single.value!.regionCode, 8);
     expect(district.initialValue, isNull);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
