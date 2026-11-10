@@ -1,3 +1,4 @@
+import '../../state/achievements_provider.dart';
 import '../../core/config/env_config.dart';
 import '../../data/repositories/reward_repository.dart';
 import '../../core/l10n/dish_copy.dart';
@@ -141,6 +142,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
       // The notifier is captured before awaiting because WidgetRef can be disposed.
       cartNotifier.clearCart();
       if (!mounted) return;
+      ref.invalidate(achievementsProvider);
       _showReceiptDialog(confirmed, branch);
     } catch (_) {
       if (mounted) setState(() => _orderFailed = true);

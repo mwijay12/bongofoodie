@@ -29,6 +29,7 @@ flutter:
     - assets/dishes/
     - assets/images/
     - assets/icons/
+    - assets/badges/
 
   fonts:
     - family: Quicksand

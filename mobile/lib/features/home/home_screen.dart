@@ -1,3 +1,4 @@
+import '../../state/achievements_provider.dart';
 import 'dart:async';
 import '../../core/l10n/daily_copy.dart';
 import '../../core/utils/daily_selection.dart';
@@ -993,6 +994,7 @@ class _SpiceTriviaSheetState extends ConsumerState<_SpiceTriviaSheet> {
         _serverCorrect = correct;
         _submitted = true;
       });
+      ref.invalidate(achievementsProvider);
     } catch (_) {
       if (mounted) setState(() => _saveFailed = true);
     } finally {

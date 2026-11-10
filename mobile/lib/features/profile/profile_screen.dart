@@ -1,7 +1,9 @@
+import '../../state/achievements_provider.dart';
+import '../../core/widgets/achievement_cards.dart';
+import '../../core/widgets/skeleton/skeleton_box.dart';
+import '../../core/config/env_config.dart';
 import '../../core/l10n/dish_copy.dart';
 import '../../core/widgets/app_sheet.dart';
-import '../../core/icons/app_icon_key.dart';
-import '../../core/widgets/app_icon.dart';
 import '../../core/widgets/state_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -120,44 +122,9 @@ class ProfileScreen extends ConsumerWidget {
     final user = auth.user;
     final orders = ordersAsync.valueOrNull ?? const <OrderModel>[];
 
-    final achievements = [
-      (
-        icon: AppIconKey.fire,
-        title: 'Mkaa Connoisseur',
-        unlocked: orders.isNotEmpty,
-        desc: 'Placed a Swahili order',
-      ),
-      (
-        icon: AppIconKey.fire,
-        title: 'Pilipili Shujaa',
-        unlocked: favorites.length >= 2,
-        desc: 'Saved 2+ favorite dishes',
-      ),
-      (
-        icon: AppIconKey.restaurant,
-        title: 'Chef AI Co-Creator',
-        unlocked: orders.any((o) => o.items.any((i) => i.isCustomAiDish)),
-        desc: 'Ordered a Chef AI dish',
-      ),
-      (
-        icon: AppIconKey.eco,
-        title: 'Pwani Explorer',
-        unlocked: true,
-        desc: 'Explored coastal menu',
-      ),
-      (
-        icon: AppIconKey.trophy,
-        title: 'Spice Scholar',
-        unlocked: true,
-        desc: 'Daily Trivia participant',
-      ),
-      (
-        icon: AppIconKey.gem,
-        title: 'Bongo VIP',
-        unlocked: orders.length >= 3,
-        desc: '3+ orders completed',
-      ),
-    ];
+    final achievements = ref.watch(achievementsProvider);
+    final preview =
+        user == null || user.isDemo || !EnvConfig.hasSupabaseCredentials;
 
     return Scaffold(
       body: SafeArea(
@@ -302,9 +269,10 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: AppSpace.v10),
                 _StatCard(
-                  title: 'Badges',
-                  value:
-                      '${achievements.where((a) => a.unlocked).length}/${achievements.length}',
+                  title: t.isSw ? 'Beji' : 'Badges',
+                  value: achievements.hasValue
+                      ? '${achievements.requireValue.unlockedCount}/3'
+                      : '—',
                   icon: Icons.workspace_premium_rounded,
                   onTap: null,
                 ),
@@ -413,58 +381,30 @@ class ProfileScreen extends ConsumerWidget {
                   ),
             ),
             const SizedBox(height: AppSpace.v10),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.98,
-              ),
-              itemCount: achievements.length,
-              itemBuilder: (_, idx) {
-                final badge = achievements[idx];
-                return Opacity(
-                  opacity: badge.unlocked ? 1.0 : 0.45,
-                  child: Container(
-                    padding: const EdgeInsets.all(AppSpace.v10),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkCard : AppColors.surface,
-                      borderRadius: BorderRadius.circular(AppRadius.v16),
-                      border: Border.all(
-                        color: badge.unlocked
-                            ? AppColors.primary.withOpacity(0.4)
-                            : (isDark
-                                ? AppColors.darkBorder
-                                : AppColors.lightBorder),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AppIcon(
-                          iconKey: badge.icon,
-                          size: 24,
-                          color: AppColors.primary,
-                          tinted: true,
-                        ),
-                        const SizedBox(height: AppSpace.v6),
-                        Text(
-                          badge.title,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 11.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+            Text(preview
+                ? (t.isSw
+                    ? 'Huu ni mwonekano wa mfano. Ingia kuhifadhi beji zako.'
+                    : 'Preview only. Sign in to save your milestones.')
+                : (t.isSw
+                    ? 'Oda zinazohesabiwa ni zilizotumwa baada ya mfumo wa beji kuanza. Beji si uthibitisho wa malipo au kufikishwa.'
+                    : 'Order progress counts submissions recorded since badges launched. Badges do not confirm payment or delivery.')),
+            const SizedBox(height: AppSpace.sm),
+            achievements.when(
+              skipLoadingOnRefresh: false,
+              data: (progress) =>
+                  AchievementCards(progress: progress, isSw: t.isSw),
+              loading: () => const SkeletonLines(count: 3),
+              error: (_, __) => StateMessage.error(
+                  compact: true,
+                  onRetry: () => ref.invalidate(achievementsProvider)),
             ),
+            if (!preview)
+              TextButton.icon(
+                  onPressed: () => ref.invalidate(achievementsProvider),
+                  style: TextButton.styleFrom(
+                      minimumSize: const Size(AppSpace.huge, AppSpace.huge)),
+                  icon: const Icon(Icons.refresh),
+                  label: Text(t.isSw ? 'Sasisha beji' : 'Refresh badges')),
             const SizedBox(height: AppSpace.v24),
 
             // 6. Sign Out / Switch Account Button

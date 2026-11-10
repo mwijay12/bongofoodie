@@ -119,7 +119,7 @@ class AppStrings {
   String get darkMode => isSw ? 'Mwonekano wa Giza' : 'Dark Mode';
   String get languageLabel => isSw ? 'Lugha ya Programu' : 'App Language';
   String get achievements =>
-      isSw ? 'Tuzo za Mla Chakula Bora' : 'Swahili Foodie Badges';
+      isSw ? 'Beji zako' : 'Your food milestones';
   String get signOut => isSw ? 'Ondoka / Badili Akaunti' : 'Sign Out / Switch Role';
 
   String spiceLevelSemantics(int level) => isSw
