@@ -1,3 +1,4 @@
+import '../core/utils/addon_selection.dart';
 import '../core/config/env_config.dart';
 import '../data/repositories/reward_repository.dart';
 import 'dart:convert';
@@ -189,7 +190,7 @@ class CartNotifier extends StateNotifier<CartState> {
       price: dish.price,
       imageUrl: dish.imageUrl,
       quantity: quantity.clamp(1, 20),
-      customizations: customizations,
+      customizations: validatedAddons(customizations),
       isAiCreated: isCustomAiDish,
     );
 

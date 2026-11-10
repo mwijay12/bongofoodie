@@ -64,50 +64,36 @@ class ShowcaseSeedData {
     ),
   ];
 
-  static const List<CustomizationOption> defaultSwahiliSides = [
-    CustomizationOption(
-      id: 'cust-kachumbari',
-      name: 'Kachumbari Extra',
-      price: 1000,
-      type: 'topping',
-    ),
-    CustomizationOption(
-      id: 'cust-pilipili',
-      name: 'Pili Pili Kali',
-      price: 500,
-      type: 'topping',
-    ),
-    CustomizationOption(
-      id: 'cust-ndimu',
-      name: 'Ndimu (Fresh Lime)',
-      price: 300,
-      type: 'topping',
-    ),
-    CustomizationOption(
-      id: 'cust-ugali',
-      name: 'Ugali Kipande',
-      price: 1500,
-      type: 'side',
-    ),
-    CustomizationOption(
-      id: 'cust-chapati',
-      name: 'Chapati Moja',
-      price: 1000,
-      type: 'side',
-    ),
-    CustomizationOption(
-      id: 'cust-avocado',
-      name: 'Avocado Slices',
-      price: 1000,
-      type: 'topping',
-    ),
-    CustomizationOption(
-      id: 'cust-stoney',
-      name: 'Stoney Tangawizi',
-      price: 1500,
-      type: 'drink',
-    ),
+  static const kachumbari = CustomizationOption(
+      id: 'cust-kachumbari', name: 'Kachumbari Extra', price: 1000);
+  static const pilipili = CustomizationOption(
+      id: 'cust-pilipili', name: 'Pili Pili Kali', price: 500);
+  static const ndimu = CustomizationOption(
+      id: 'cust-ndimu', name: 'Ndimu (Fresh Lime)', price: 300);
+  static const ugali = CustomizationOption(
+      id: 'cust-ugali', name: 'Ugali Kipande', price: 1500, type: 'side');
+  static const chapati = CustomizationOption(
+      id: 'cust-chapati', name: 'Chapati Moja', price: 1000, type: 'side');
+  static const avocado = CustomizationOption(
+      id: 'cust-avocado', name: 'Avocado Slices', price: 1000);
+  static const stoney = CustomizationOption(
+      id: 'cust-stoney', name: 'Stoney Tangawizi', price: 1500, type: 'drink');
+  // Catalog inventory only, NEVER a fallback for an unlinked product.
+  static const defaultSwahiliSides = [
+    kachumbari,
+    pilipili,
+    ndimu,
+    ugali,
+    chapati,
+    avocado,
+    stoney
   ];
+  static const chipsiAddons = [kachumbari, pilipili, ndimu, stoney];
+  static const grillAddons = [kachumbari, pilipili, ndimu, ugali, stoney];
+  static const riceAddons = [kachumbari, pilipili, avocado, stoney];
+  static const fishAddons = [ndimu, ugali, chapati, stoney];
+  static const snackAddons = [pilipili];
+  static const fastFoodAddons = [avocado, pilipili, stoney];
 
   static const List<MenuItemModel> menuItems = [
     MenuItemModel(
@@ -124,7 +110,7 @@ class ShowcaseSeedData {
       prepTimeMins: 12,
       categoryId: 'cat-bites',
       categoryName: 'Swahili Bites',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: chipsiAddons,
       spiceLevel: 2,
       ingredients: [
         'French fries',
@@ -154,7 +140,7 @@ class ShowcaseSeedData {
       prepTimeMins: 25,
       categoryId: 'cat-choma',
       categoryName: 'Nyama Choma',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: grillAddons,
       spiceLevel: 2,
       ingredients: [
         'beef',
@@ -186,7 +172,7 @@ class ShowcaseSeedData {
       prepTimeMins: 20,
       categoryId: 'cat-pilau',
       categoryName: 'Rice & Pilau',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: riceAddons,
       spiceLevel: 3,
       ingredients: [
         'basmati rice',
@@ -216,7 +202,7 @@ class ShowcaseSeedData {
       prepTimeMins: 25,
       categoryId: 'cat-stews',
       categoryName: 'Traditional Stews',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: fishAddons,
       spiceLevel: 2,
       ingredients: [
         'snapper',
@@ -245,7 +231,7 @@ class ShowcaseSeedData {
       prepTimeMins: 15,
       categoryId: 'cat-choma',
       categoryName: 'Nyama Choma',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: grillAddons,
       spiceLevel: 3,
       ingredients: ['beef', 'papaya', 'ginger', 'garlic', 'black pepper'],
       allergens: <String>[],
@@ -267,7 +253,7 @@ class ShowcaseSeedData {
       prepTimeMins: 15,
       categoryId: 'cat-pilau',
       categoryName: 'Rice & Pilau',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: riceAddons,
       spiceLevel: 1,
       ingredients: ['rice', 'coconut milk', 'red kidney beans', 'cardamom'],
       allergens: ['coconut'],
@@ -288,7 +274,7 @@ class ShowcaseSeedData {
       prepTimeMins: 18,
       categoryId: 'cat-stews',
       categoryName: 'Traditional Stews',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: fishAddons,
       spiceLevel: 2,
       ingredients: ['chicken', 'coconut milk', 'wheat flour', 'ghee', 'spices'],
       allergens: ['gluten', 'milk'],
@@ -310,7 +296,7 @@ class ShowcaseSeedData {
       prepTimeMins: 10,
       categoryId: 'cat-bites',
       categoryName: 'Swahili Bites',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: snackAddons,
       spiceLevel: 2,
       ingredients: ['plantain', 'black pepper', 'sea salt', 'tamarind'],
       allergens: <String>[],
@@ -331,7 +317,7 @@ class ShowcaseSeedData {
       prepTimeMins: 15,
       categoryId: 'cat-specials',
       categoryName: 'Gourmet Specials',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: fastFoodAddons,
       spiceLevel: 3,
       ingredients: [
         'beef',
@@ -361,7 +347,7 @@ class ShowcaseSeedData {
       prepTimeMins: 22,
       categoryId: 'cat-specials',
       categoryName: 'Gourmet Specials',
-      availableCustomizations: defaultSwahiliSides,
+      availableCustomizations: fastFoodAddons,
       spiceLevel: 2,
       ingredients: [
         'sourdough crust',

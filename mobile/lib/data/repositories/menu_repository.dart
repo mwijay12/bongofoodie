@@ -1,3 +1,4 @@
+import '../../core/utils/addon_selection.dart';
 import '../../core/utils/daily_selection.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -219,9 +220,7 @@ class MenuRepository {
               prepTimeMins: (r['prep_time_mins'] as num?)?.toInt() ?? 20,
               categoryId: (catMap?['id'] ?? r['category_id'] ?? '').toString(),
               categoryName: (catMap?['name'] ?? 'Swahili Bites').toString(),
-              availableCustomizations: custList.isNotEmpty
-                  ? custList
-                  : ShowcaseSeedData.defaultSwahiliSides,
+              availableCustomizations: validatedAddons(custList),
               spiceLevel: (r['spice_level'] as num?)?.toInt(),
               ingredients: _asStringList(r['ingredients']),
               allergens: _asStringList(r['allergens']),
@@ -261,37 +260,30 @@ class MenuRepository {
 
   Future<List<CustomizationOption>> getDishCustomizations(String dishId) async {
     final sb = SupabaseService.client;
-    if (sb == null && _showcaseLatency > Duration.zero) {
-      await Future<void>.delayed(_showcaseLatency);
-    }
-    if (sb != null && !dishId.startsWith('menu-')) {
-      try {
-        final rows = await sb
-            .from('menu_customizations')
-            .select('customizations ( id, name, price, type )')
-            .eq('menu_id', dishId)
-            .order('created_at', ascending: true)
-            .timeout(_dishReadTimeout);
-        final options = <CustomizationOption>[];
-        for (final row in rows) {
-          final customization = row['customizations'];
-          if (customization is Map) {
-            options.add(CustomizationOption.fromJson(
-              Map<String, dynamic>.from(customization),
-            ));
-          }
+    if (sb != null) {
+      final rows = await sb
+          .from('menu_customizations')
+          .select('customizations ( id, name, price, type )')
+          .eq('menu_id', dishId)
+          .order('created_at', ascending: true)
+          .timeout(_dishReadTimeout);
+      return validatedAddons(rows.map((row) {
+        final nested = row['customizations'];
+        if (nested is! Map || nested['price'] is! num) {
+          throw const FormatException('Invalid linked addon');
         }
-        if (options.isNotEmpty) return options;
-      } catch (_) {}
+        return CustomizationOption.fromJson(Map<String, dynamic>.from(nested));
+      }));
     }
-
-    final matches =
-        ShowcaseSeedData.menuItems.where((item) => item.id == dishId).toList();
-    if (matches.isNotEmpty &&
-        matches.first.availableCustomizations.isNotEmpty) {
-      return matches.first.availableCustomizations;
+    if (EnvConfig.hasSupabaseCredentials)
+      throw StateError('addon_catalog_unavailable');
+    if (_showcaseLatency > Duration.zero)
+      await Future<void>.delayed(_showcaseLatency);
+    for (final item in ShowcaseSeedData.menuItems) {
+      if (item.id == dishId)
+        return validatedAddons(item.availableCustomizations);
     }
-    return ShowcaseSeedData.defaultSwahiliSides;
+    return const [];
   }
 
   Future<List<MenuReviewModel>> getDishReviews(String dishId) async {
