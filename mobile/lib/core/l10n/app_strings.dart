@@ -53,8 +53,8 @@ class AppStrings {
       ? 'Uliza siri za viungo au unda sahani yako maalum ya Kiswahili na uiagize!'
       : 'Ask for spice pairings or design a custom Swahili fusion dish to order now!';
   String get dailyDiscovery =>
-      isSw ? 'UGUNDUZI WA KISWAHILI LEO' : 'DAILY SWAHILI DISCOVERY';
-  String get playSpiceTrivia => isSw ? 'Cheza Trivia' : 'Spice Trivia';
+      isSw ? 'DOKEZO LA LEO' : 'TODAY’S FOOD STORY';
+  String get playSpiceTrivia => isSw ? 'Swali la leo' : 'Food quiz';
   String get popularDishes => isSw ? 'Sahani Pendwa' : 'Signature Dishes';
   String get searchPlaceholder => isSw
       ? 'Tafuta Nyama Choma, Pilau, Samaki wa Kupaka...'
