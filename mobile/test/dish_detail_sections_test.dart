@@ -394,7 +394,7 @@ void main() {
           await _scrollToBottom(tester);
           expect(find.byKey(const Key('dish-add-ons-section')), findsNothing);
           expect(find.text('Pili Pili Kali'), findsNothing);
-          final add = find.byWidgetPredicate((w) => w is FilledButton);
+          final add = find.byKey(const Key('dish-add-to-cart'));
           expect(tester.widget<FilledButton>(add).onPressed, isNotNull);
           await tester.tap(add);
           await tester.pump(AppMotion.fast);
@@ -413,7 +413,7 @@ void main() {
       (tester) async {
     final repo = _SectionsRepository(menu: [_richItem])..failAddons = true;
     await _pump(tester, item: _richItem, repo: repo);
-    final add = find.byWidgetPredicate((w) => w is FilledButton);
+    final add = find.byKey(const Key('dish-add-to-cart'));
     expect(tester.widget<FilledButton>(add).onPressed, isNull);
     await _revealFinder(tester, find.text(_en.retry));
     repo.failAddons = false;

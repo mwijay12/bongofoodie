@@ -447,6 +447,7 @@ class _DishStickyBar extends ConsumerWidget {
             const SizedBox(width: AppSpace.v14),
             Expanded(
               child: FilledButton.icon(
+                key: const Key('dish-add-to-cart'),
                 onPressed: onAdd,
                 icon: AnimatedSwitcher(
                   duration: MediaQuery.disableAnimationsOf(context)
