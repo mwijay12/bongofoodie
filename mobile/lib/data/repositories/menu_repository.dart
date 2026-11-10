@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import '../../core/utils/local_snapshot.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/supabase_service.dart';
@@ -30,18 +31,88 @@ List<String> _asStringList(dynamic value) {
 
 final showcaseLatencyProvider = Provider<Duration>((ref) {
   if (SupabaseService.isLive) return Duration.zero;
-  const configuredMs = int.fromEnvironment('SHOWCASE_LATENCY_MS', defaultValue: 700);
+  const configuredMs =
+      int.fromEnvironment('SHOWCASE_LATENCY_MS', defaultValue: 700);
   return Duration(milliseconds: configuredMs < 0 ? 0 : configuredMs);
 });
 
+enum CatalogSource { live, saved, stale }
+
+final catalogSourcesProvider =
+    StateProvider<Map<String, CatalogSource>>((ref) => {});
+
 final menuRepositoryProvider = Provider<MenuRepository>((ref) {
-  return MenuRepository(showcaseLatency: ref.watch(showcaseLatencyProvider));
+  return MenuRepository(
+      showcaseLatency: ref.watch(showcaseLatencyProvider),
+      onSource: (key, source) => ref
+          .read(catalogSourcesProvider.notifier)
+          .update((current) => {...current, key: source}));
 });
 
 class MenuRepository {
-  MenuRepository({Duration? showcaseLatency})
+  MenuRepository({Duration? showcaseLatency, this.onSource})
       : _showcaseLatency = showcaseLatency ?? EnvConfig.showcaseLatency;
   final Duration _showcaseLatency;
+  final void Function(String, CatalogSource)? onSource;
+  final _snapshots = LocalSnapshot();
+
+  Future<List<T>> _cached<T>(
+      String key,
+      Future<List<T>> Function() fetch,
+      Map<String, dynamic> Function(T) encode,
+      T Function(Map<String, dynamic>) decode) async {
+    if (!SupabaseService.isLive) return fetch();
+    final storageKey = '${Uri.encodeComponent(EnvConfig.supabaseUrl)}:$key';
+    try {
+      final values = await fetch().timeout(_dishReadTimeout);
+      onSource?.call(key, CatalogSource.live);
+      try {
+        await _snapshots.write(storageKey, values.map(encode).toList());
+      } catch (_) {}
+      return values;
+    } catch (_) {
+      final snapshot = await _snapshots.read(storageKey);
+      if (snapshot == null) rethrow;
+      final values = (snapshot.data as List)
+          .map((r) => decode(Map<String, dynamic>.from(r as Map)))
+          .toList();
+      onSource?.call(
+          key, snapshot.stale ? CatalogSource.stale : CatalogSource.saved);
+      return values;
+    }
+  }
+
+  Future<List<CategoryModel>> getCategories() => _cached(
+      'categories',
+      _fetchCategories,
+      (c) => {'id': c.id, 'name': c.name, 'description': c.description},
+      CategoryModel.fromJson);
+
+  Future<List<MenuItemModel>> getMenu(
+          {String category = '', String query = ''}) =>
+      _cached(
+          'menu:${Uri.encodeComponent(category)}:${Uri.encodeComponent(query)}',
+          () => _fetchMenu(category: category, query: query),
+          (m) => m.toJson(),
+          MenuItemModel.fromJson);
+
+  Future<List<PromotionModel>> getPromotions() => _cached(
+      'promotions',
+      _fetchPromotions,
+      (p) => {
+            'id': p.id,
+            'title': p.title,
+            'subtitle': p.subtitle,
+            'discount_badge': p.discountBadge,
+            'promo_code': p.promoCode,
+            'image_key': p.imageKey,
+            'bg_hex': p.bgHex,
+            'is_active': p.isActive
+          },
+      PromotionModel.fromJson);
+
+  Future<List<DiscoveryModel>> getDailyDiscoveries() => _cached('discoveries',
+      _fetchDiscoveries, (d) => d.toJson(), DiscoveryModel.fromJson);
 
   static const _dishReadTimeout = Duration(seconds: 10);
   static const _favPrefKey = 'bongo_favorites_v2';
@@ -49,7 +120,7 @@ class MenuRepository {
   static const _quizDatePrefKey = 'bongo_quiz_date_v2';
   static const _quizWinsPrefKey = 'bongo_quiz_wins_v2';
 
-  Future<List<CategoryModel>> getCategories() async {
+  Future<List<CategoryModel>> _fetchCategories() async {
     final sb = SupabaseService.client;
     if (sb == null && _showcaseLatency > Duration.zero) {
       await Future<void>.delayed(_showcaseLatency);
@@ -66,12 +137,15 @@ class MenuRepository {
                   (r) => CategoryModel.fromJson(Map<String, dynamic>.from(r)))
               .toList();
         }
-      } catch (_) {}
+        return [];
+      } catch (_) {
+        rethrow;
+      }
     }
     return ShowcaseSeedData.categories;
   }
 
-  Future<List<MenuItemModel>> getMenu({
+  Future<List<MenuItemModel>> _fetchMenu({
     String category = '',
     String query = '',
   }) async {
@@ -115,7 +189,8 @@ class MenuRepository {
           items = rows.map<MenuItemModel>((raw) {
             final r = Map<String, dynamic>.from(raw);
             final catObj = r['categories'];
-            final catMap = catObj is Map ? Map<String, dynamic>.from(catObj) : null;
+            final catMap =
+                catObj is Map ? Map<String, dynamic>.from(catObj) : null;
             final rawLinks = r['menu_customizations'];
             final custList = <CustomizationOption>[];
             if (rawLinks is List) {
@@ -154,10 +229,12 @@ class MenuRepository {
             );
           }).toList();
         }
-      } catch (_) {}
+      } catch (_) {
+        rethrow;
+      }
     }
 
-    if (items.isEmpty) {
+    if (items.isEmpty && sb == null) {
       items = List<MenuItemModel>.from(ShowcaseSeedData.menuItems);
       if (query.trim().isNotEmpty) {
         final q = query.trim().toLowerCase();
@@ -207,9 +284,8 @@ class MenuRepository {
       } catch (_) {}
     }
 
-    final matches = ShowcaseSeedData.menuItems
-        .where((item) => item.id == dishId)
-        .toList();
+    final matches =
+        ShowcaseSeedData.menuItems.where((item) => item.id == dishId).toList();
     if (matches.isNotEmpty &&
         matches.first.availableCustomizations.isNotEmpty) {
       return matches.first.availableCustomizations;
@@ -245,7 +321,7 @@ class MenuRepository {
         .toList();
   }
 
-  Future<List<PromotionModel>> getPromotions() async {
+  Future<List<PromotionModel>> _fetchPromotions() async {
     final sb = SupabaseService.client;
     if (sb == null && _showcaseLatency > Duration.zero) {
       await Future<void>.delayed(_showcaseLatency);
@@ -271,7 +347,10 @@ class MenuRepository {
             return PromotionModel.fromJson(json);
           }).toList();
         }
-      } catch (_) {}
+        return [];
+      } catch (_) {
+        rethrow;
+      }
     }
     return ShowcaseSeedData.promotions;
   }
@@ -291,7 +370,10 @@ class MenuRepository {
         if (row != null) {
           return BranchSettingsModel.fromJson(Map<String, dynamic>.from(row));
         }
-      } catch (_) {}
+        throw StateError('Branch settings unavailable');
+      } catch (_) {
+        rethrow;
+      }
     }
     return const BranchSettingsModel();
   }
@@ -340,9 +422,9 @@ class MenuRepository {
     }
 
     final prefs = await SharedPreferences.getInstance();
-    final current =
-        (prefs.getStringList(_favPrefKey) ?? ['menu-nyama-choma', 'menu-pilau-kuku'])
-            .toSet();
+    final current = (prefs.getStringList(_favPrefKey) ??
+            ['menu-nyama-choma', 'menu-pilau-kuku'])
+        .toSet();
     final added = !current.contains(menuId);
     if (added) {
       current.add(menuId);
@@ -375,7 +457,7 @@ class MenuRepository {
     return double.parse((((currentRating * 8) + stars) / 9).toStringAsFixed(1));
   }
 
-  Future<List<DiscoveryModel>> getDailyDiscoveries() async {
+  Future<List<DiscoveryModel>> _fetchDiscoveries() async {
     final sb = SupabaseService.client;
     if (sb == null && _showcaseLatency > Duration.zero) {
       await Future<void>.delayed(_showcaseLatency);
@@ -398,7 +480,10 @@ class MenuRepository {
             return DiscoveryModel.fromJson(json);
           }).toList();
         }
-      } catch (_) {}
+        return [];
+      } catch (_) {
+        rethrow;
+      }
     }
 
     final prefs = await SharedPreferences.getInstance();
@@ -410,7 +495,9 @@ class MenuRepository {
             .whereType<Map>()
             .map((e) => DiscoveryModel.fromJson(Map<String, dynamic>.from(e)))
             .toList();
-      } catch (_) {}
+      } catch (_) {
+        rethrow;
+      }
     }
     return ShowcaseSeedData.discoveries;
   }

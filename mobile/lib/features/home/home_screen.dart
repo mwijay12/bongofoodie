@@ -1,3 +1,4 @@
+import '../../core/widgets/catalog_cache_notice.dart';
 import '../../core/widgets/promo_dish_image.dart';
 import '../../core/utils/dish_image_cache.dart';
 import '../../core/l10n/dish_copy.dart';
@@ -116,6 +117,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
+              const SliverToBoxAdapter(child: CatalogCacheNotice()),
               // 1. Top Location + Role/Mode Header
               SliverToBoxAdapter(
                 child: Padding(

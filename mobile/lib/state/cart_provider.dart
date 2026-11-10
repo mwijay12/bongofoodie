@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/models.dart';
 
@@ -47,15 +50,114 @@ class CartState {
 }
 
 final cartProvider = StateNotifierProvider<CartNotifier, CartState>((ref) {
-  return CartNotifier();
+  final notifier = CartNotifier(
+      persist: true, owner: ref.read(authProvider).user?.id ?? 'guest');
+  ref.listen<String?>(authProvider.select((a) => a.user?.id), (previous, next) {
+    if (previous != next) notifier.changeOwner(next ?? 'guest');
+  });
+  return notifier;
 });
 
 class CartNotifier extends StateNotifier<CartState> {
-  CartNotifier() : super(const CartState());
+  CartNotifier({bool persist = false, String owner = 'guest'})
+      : _persist = persist,
+        _owner = owner,
+        super(const CartState()) {
+    _restoring = persist;
+    ready = persist ? _restore() : Future<void>.value();
+  }
+  final bool _persist;
+  String _owner;
+  int _revision = 0;
+  Future<void> _writes = Future<void>.value();
+  late Future<void> ready;
+  bool _restoring = false;
+  String? _pendingOwner;
+  Future<void> get flushed => _writes;
+  String get _key => 'bongo_cart_v1:$_owner';
+
+  @override
+  set state(CartState value) {
+    super.state = value;
+    _revision++;
+    if (!_persist) return;
+    final key = _key;
+    // Discounts and fees are deliberately not restored as live entitlements.
+    final payload = jsonEncode(
+        {'version': 1, 'items': value.items.map((i) => i.toJson()).toList()});
+    _writes = _writes.then((_) async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(key, payload);
+    }).catchError((Object _) {
+      /* Keep in-memory editing usable on disk failure. */
+    });
+  }
+
+  Future<void> _restore() async {
+    final revision = _revision;
+    final owner = _owner;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_key);
+      if (raw == null) return;
+      final json = jsonDecode(raw) as Map<String, dynamic>;
+      if (json['version'] != 1) return;
+      final rows = json['items'] as List;
+      final items = rows
+          .map((r) =>
+              CartItemModel.fromJson(Map<String, dynamic>.from(r as Map)))
+          .where((i) =>
+              i.id.isNotEmpty &&
+              i.price.isFinite &&
+              i.price >= 0 &&
+              i.customizations.every((c) => c.price.isFinite && c.price >= 0))
+          .map((i) => i.copyWith(quantity: i.quantity.clamp(1, 20)))
+          .toList();
+      if (mounted && owner == _owner && revision == _revision) {
+        super.state = CartState(items: items, deliveryFee: state.deliveryFee);
+      }
+    } catch (_) {
+      /* Corrupt or unavailable local data is not an order failure. */
+    } finally {
+      _restoring = false;
+    }
+  }
+
+  /// Carry guest selections into login; never expose a previous account's cart.
+  void changeOwner(String next) {
+    if (_restoring) {
+      _pendingOwner = next;
+      ready.then((_) {
+        if (mounted && _pendingOwner == next) changeOwner(next);
+      });
+      return;
+    }
+    if (next == _owner) return;
+    final previousKey = _key;
+    final wasGuest = _owner == 'guest';
+    _owner = next;
+    _revision++;
+    if (_persist) {
+      _writes = _writes.then((_) async {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove(previousKey);
+      }).catchError((Object _) {});
+    }
+    if (wasGuest && next != 'guest' && state.items.isNotEmpty) {
+      state = state; // Preserve the current guest cart on optional sign-in.
+    } else {
+      super.state = const CartState();
+      if (_persist) {
+        _restoring = true;
+        ready = _restore();
+      }
+    }
+  }
 
   void syncDeliveryFee(double fee) {
     if (fee >= 0 && fee != state.deliveryFee) {
-      state = state.copyWith(deliveryFee: fee);
+      // A fee refresh must not overwrite a cart while its disk restore is pending.
+      super.state = state.copyWith(deliveryFee: fee);
     }
   }
 

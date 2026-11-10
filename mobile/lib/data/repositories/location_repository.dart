@@ -1,3 +1,5 @@
+import 'dart:convert';
+import '../../state/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/supabase_service.dart';
@@ -10,7 +12,11 @@ final locationRepositoryProvider = Provider<LocationRepository>((ref) {
 
 final deliveryAddressProvider =
     StateNotifierProvider<DeliveryAddressNotifier, String>((ref) {
-  return DeliveryAddressNotifier();
+  final notifier = DeliveryAddressNotifier();
+  ref.listen<String?>(authProvider.select((a) => a.user?.id), (old, next) {
+    if (old != null && old != next) notifier.clearPrivateAddress();
+  });
+  return notifier;
 });
 
 class DeliveryAddressNotifier extends StateNotifier<String> {
@@ -23,9 +29,47 @@ class DeliveryAddressNotifier extends StateNotifier<String> {
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString(_prefKey);
-    if (saved != null && saved.trim().isNotEmpty) {
+    if (mounted && saved != null && saved.trim().isNotEmpty) {
       state = saved;
     }
+  }
+
+  Future<Map<String, dynamic>?> readSelection() async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      final raw = prefs.getString('bongo_location_selection_v1');
+      if (raw == null) return null;
+      final data = jsonDecode(raw) as Map<String, dynamic>;
+      return data['version'] == 1 ? data : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> saveSelection(
+      {required int region,
+      required int district,
+      required int ward,
+      required String street,
+      required String address}) async {
+    await setAddress(address);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+        'bongo_location_selection_v1',
+        jsonEncode({
+          'version': 1,
+          'region': region,
+          'district': district,
+          'ward': ward,
+          'street': street,
+        }));
+  }
+
+  Future<void> clearPrivateAddress() async {
+    state = 'Kijitonyama, Kinondoni, Dar es Salaam';
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_prefKey);
+    await prefs.remove('bongo_location_selection_v1');
   }
 
   Future<void> setAddress(String address) async {
