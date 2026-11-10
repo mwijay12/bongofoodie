@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/services/supabase_service.dart';
-import '../mock/showcase_seed_data.dart';
 import '../models/models.dart';
 
 final orderRepositoryProvider = Provider<OrderRepository>((ref) {
@@ -62,9 +61,7 @@ class OrderRepository {
             .toList();
       } catch (_) {}
     }
-    final seeded = ShowcaseSeedData.initialOrders();
-    await _saveLocalOrders(seeded);
-    return seeded;
+    return [];
   }
 
   Future<void> _saveLocalOrders(List<OrderModel> orders) async {
@@ -87,14 +84,17 @@ class OrderRepository {
     if (!CheckoutValidation.validName(order.customerName) ||
         CheckoutValidation.normalizeTzPhone(order.customerPhone) == null ||
         !CheckoutValidation.validAddress(order.deliveryLocation) ||
-        order.items.isEmpty || !order.totalPrice.isFinite || order.totalPrice < 0 ||
+        order.items.isEmpty ||
+        !order.totalPrice.isFinite ||
+        order.totalPrice < 0 ||
         order.status != OrderStatus.pending) {
       throw ArgumentError('invalid_demo_checkout');
     }
     final local = await _loadLocalOrders();
     for (final previous in local) {
       if (previous.id == order.id) {
-        if (jsonEncode(previous.toLocalJson()) != jsonEncode(order.toLocalJson())) {
+        if (jsonEncode(previous.toLocalJson()) !=
+            jsonEncode(order.toLocalJson())) {
           throw StateError('order_id_payload_mismatch');
         }
         return previous;

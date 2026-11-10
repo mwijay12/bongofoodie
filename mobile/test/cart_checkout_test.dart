@@ -1,3 +1,4 @@
+import 'package:bongo_foodie/data/repositories/location_repository.dart';
 import 'dart:async';
 import 'package:bongo_foodie/core/l10n/app_strings.dart';
 import 'package:bongo_foodie/core/theme/app_theme.dart';
@@ -74,6 +75,26 @@ Future<ProviderContainer> _pump(
   return container;
 }
 
+Future<void> _fillDetails(
+    WidgetTester tester, ProviderContainer container) async {
+  await container
+      .read(deliveryAddressProvider.notifier)
+      .setAddress('House 14, Kijitonyama, Kinondoni, Dar es Salaam');
+  await tester.ensureVisible(find.byKey(const Key('checkout-name')));
+  await tester.enterText(find.byKey(const Key('checkout-name')), 'Asha Juma');
+  await tester.ensureVisible(find.byKey(const Key('checkout-phone')));
+  await tester.enterText(find.byKey(const Key('checkout-phone')), '0712345678');
+  tester.testTextInput.hide();
+  await tester.pumpAndSettle();
+}
+
+Future<void> _confirm(WidgetTester tester) async {
+  await tester.tap(find.byKey(const ValueKey('place-order')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(const Key('confirm-demo-order')));
+  await tester.pump(const Duration(milliseconds: 100));
+}
+
 void main() {
   for (final size in [const Size(360, 640), const Size(430, 932)]) {
     for (final dark in [false, true]) {
@@ -118,12 +139,32 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
   });
   testWidgets(
+      'invalid details and review cancellation never write or clear cart',
+      (tester) async {
+    final orders = _Orders();
+    final container = await _pump(tester, orders: orders);
+    await tester.tap(find.byKey(const ValueKey('place-order')));
+    await tester.pumpAndSettle();
+    expect(orders.writes, 0);
+    expect(find.textContaining('valid TZ mobile'), findsOneWidget);
+    await _fillDetails(tester, container);
+    await tester.tap(find.byKey(const ValueKey('place-order')));
+    await tester.pumpAndSettle();
+    expect(find.text('Review demo order'), findsOneWidget);
+    await tester.tap(find.text('Back'));
+    await tester.pumpAndSettle();
+    expect(orders.writes, 0);
+    expect(container.read(cartProvider).items, isNotEmpty);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+  testWidgets(
       'pending write rejects double tap; failure retains cart; retry clears only on success',
       (tester) async {
     final orders = _Orders();
     final container = await _pump(tester, orders: orders);
     final button = find.byKey(const ValueKey('place-order'));
-    await tester.tap(button);
+    await _fillDetails(tester, container);
+    await _confirm(tester);
     await tester.tap(button);
     await tester.pump(const Duration(milliseconds: 100));
     expect(orders.writes, 1);
@@ -136,14 +177,13 @@ void main() {
     expect(container.read(cartProvider).items, isNotEmpty);
     expect(find.textContaining('Your cart is saved'), findsOneWidget);
     orders.pending = Completer<OrderModel>();
-    await tester.tap(button);
-    await tester.pump(const Duration(milliseconds: 100));
+    await _confirm(tester);
     expect(orders.writes, 2);
     orders.pending.complete(orders.submitted!);
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 300));
     expect(container.read(cartProvider).items, isEmpty);
-    expect(find.text('Track Order'), findsOneWidget);
+    expect(find.text('Close simulation'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(milliseconds: 50));

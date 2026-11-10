@@ -112,43 +112,77 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     }
     final t = ref.read(appStringsProvider);
     final phone = CheckoutValidation.normalizeTzPhone(_phoneCtrl.text);
-    if (!CheckoutValidation.validName(_nameCtrl.text) || phone == null ||
+    if (!CheckoutValidation.validName(_nameCtrl.text) ||
+        phone == null ||
         !CheckoutValidation.validAddress(deliveryAddress)) {
       setState(() => _validationError = t.isSw
-        ? 'Weka jina lako, namba halali ya simu ya TZ na anwani kamili.'
-        : 'Enter your name, a valid TZ mobile number and a full address.');
+          ? 'Weka jina lako, namba halali ya simu ya TZ na anwani kamili.'
+          : 'Enter your name, a valid TZ mobile number and a full address.');
       return;
     }
     if (EnvConfig.hasSupabaseCredentials) return;
-    setState(() { _placingOrder = true; _validationError = null; _orderFailed = false; });
+    setState(() {
+      _placingOrder = true;
+      _validationError = null;
+      _orderFailed = false;
+    });
     final name = _nameCtrl.text.trim();
     final notes = _notesCtrl.text.trim();
     final payment = _paymentMethod;
     final cartNotifier = ref.read(cartProvider.notifier);
-    final reviewed = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
-      title: Text(t.isSw ? 'Hakiki mfano wa oda' : 'Review demo order'),
-      content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('$name\n$phone\n$deliveryAddress'),
-          const SizedBox(height: AppSpace.md),
-          ...cart.items.map((i) => Text('${i.quantity} × ${dishName(i.id, i.name, isSw: t.isSw)} — ${AppStrings.formatTzs(i.lineTotal)}')),
-          Text('${t.total}: ${AppStrings.formatTzs(cart.grandTotal)}'),
-          Text(payment == PaymentMethod.lipaNamba ? 'Lipa Namba' : (t.isSw ? 'Taslimu' : 'Cash on delivery')),
-          if (notes.isNotEmpty) Text(notes),
-          const SizedBox(height: AppSpace.md),
-          Text(t.isSw ? 'Mfano wa ndani tu. Hakuna malipo, uthibitisho wa eneo la huduma au oda inayotumwa jikoni.'
-            : 'Local simulation only. No payment, delivery-area verification or order sent to a kitchen.'),
-        ])),
-      actions: [TextButton(onPressed: () => Navigator.pop(ctx, false),
-        style: TextButton.styleFrom(minimumSize: const Size(AppSpace.huge, AppSpace.huge)),
-        child: Text(t.isSw ? 'Rudi' : 'Back')),
-        FilledButton(key: const Key('confirm-demo-order'), onPressed: () => Navigator.pop(ctx, true),
-          style: FilledButton.styleFrom(minimumSize: const Size(AppSpace.huge, AppSpace.huge)),
-          child: Text(t.isSw ? 'Thibitisha mfano' : 'Confirm simulation'))],
-    ));
+    final reviewed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              title: Text(t.isSw ? 'Hakiki mfano wa oda' : 'Review demo order'),
+              content: SingleChildScrollView(
+                  child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    Text('$name\n$phone\n$deliveryAddress'),
+                    const SizedBox(height: AppSpace.md),
+                    ...cart.items.map((i) => Text(
+                        '${i.quantity} × ${dishName(i.id, i.name, isSw: t.isSw)} — ${AppStrings.formatTzs(i.lineTotal)}')),
+                    ...cart.items.where((i) => i.customizations.isNotEmpty).map(
+                        (i) => Text(
+                            '${i.name}: ${i.customizations.map((c) => '${c.name} (+${AppStrings.formatTzs(c.price)})').join(', ')}')),
+                    Text(
+                        '${t.isSw ? 'Jumla ndogo' : 'Subtotal'}: ${AppStrings.formatTzs(cart.subtotal)}'),
+                    Text(
+                        '${t.isSw ? 'Usafirishaji' : 'Delivery'}: ${AppStrings.formatTzs(cart.effectiveDeliveryFee)}'),
+                    Text(
+                        '${t.isSw ? 'Punguzo' : 'Discount'}: ${AppStrings.formatTzs(cart.promoDiscount)}'),
+                    Text(
+                        '${t.total}: ${AppStrings.formatTzs(cart.grandTotal)}'),
+                    Text(payment == PaymentMethod.lipaNamba
+                        ? 'Lipa Namba'
+                        : (t.isSw ? 'Taslimu' : 'Cash on delivery')),
+                    if (notes.isNotEmpty) Text(notes),
+                    const SizedBox(height: AppSpace.md),
+                    Text(t.isSw
+                        ? 'Mfano wa ndani tu. Hakuna malipo, uthibitisho wa eneo la huduma au oda inayotumwa jikoni.'
+                        : 'Local simulation only. No payment, delivery-area verification or order sent to a kitchen.'),
+                  ])),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    style: TextButton.styleFrom(
+                        minimumSize: const Size(AppSpace.huge, AppSpace.huge)),
+                    child: Text(t.isSw ? 'Rudi' : 'Back')),
+                FilledButton(
+                    key: const Key('confirm-demo-order'),
+                    onPressed: () => Navigator.pop(ctx, true),
+                    style: FilledButton.styleFrom(
+                        minimumSize: const Size(AppSpace.huge, AppSpace.huge)),
+                    child: Text(
+                        t.isSw ? 'Thibitisha mfano' : 'Confirm simulation'))
+              ],
+            ));
     if (!mounted) return;
     final current = ref.read(cartProvider);
-    if (reviewed != true || !identical(current.items, cart.items) || current.grandTotal != cart.grandTotal ||
+    if (reviewed != true ||
+        !identical(current.items, cart.items) ||
+        current.grandTotal != cart.grandTotal ||
         ref.read(deliveryAddressProvider) != deliveryAddress) {
       setState(() => _placingOrder = false);
       return;
@@ -176,10 +210,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
           await ref.read(userOrdersProvider.notifier).placeOrder(order);
       // A navigation away must not prevent clearing a confirmed order's cart.
       // The notifier is captured before awaiting because WidgetRef can be disposed.
-      final latest = cartNotifier.state;
-      if (identical(latest.items, cart.items) && latest.grandTotal == cart.grandTotal) {
-        cartNotifier.clearCart();
-      }
+      cartNotifier.clearConfirmedSnapshot(cart);
       if (!mounted) return;
       ref.invalidate(achievementsProvider);
       _showReceiptDialog(confirmed, branch);
@@ -199,7 +230,7 @@ ${t.isSw ? 'Mteja' : 'Customer'}: ${order.customerName}
 ${t.deliverTo}: ${order.deliveryAddress}
 ${order.items.map((i) => '${i.quantity}x ${dishName(i.id, i.name, isSw: t.isSw)} (${AppStrings.formatTzs(i.lineTotal)})').join('\n')}
 ${t.total}: ${AppStrings.formatTzs(order.totalAmount)}
-${t.isSw ? 'Malipo' : 'Payment'}: ${order.paymentMethodType == PaymentMethod.lipaNamba ? 'Lipa Namba (${branch.lipaNamba})' : (t.isSw ? 'Taslimu' : 'Cash on delivery')}
+${t.isSw ? 'Malipo' : 'Payment'}: ${order.paymentMethodType == PaymentMethod.lipaNamba ? 'Lipa Namba — ${t.isSw ? 'mfano tu, usilipe' : 'simulation only, do not pay'}' : (t.isSw ? 'Taslimu' : 'Cash on delivery')}
 ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing BongoFoodie TZ!'}
 ''';
 
@@ -211,7 +242,7 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
         title: Row(
           children: [
             const Icon(Icons.verified_rounded,
-                color: AppColors.success, size: AppRadius.lg),
+                color: AppColors.success, size: AppSpace.xxl),
             const SizedBox(width: AppSpace.v10),
             Expanded(
               child: Text(
@@ -257,7 +288,9 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
                   const SizedBox(height: AppSpace.v4),
                   Text(
                     order.paymentMethodType == PaymentMethod.lipaNamba
-                        ? 'Lipa Namba: ${branch.lipaNamba} (${branch.lipaName})'
+                        ? (t.isSw
+                            ? 'Lipa Namba — mfano tu, usilipe'
+                            : 'Lipa Namba — simulation only, do not pay')
                         : t.isSw
                             ? 'Malipo: Pesa taslimu'
                             : 'Payment: Cash on Delivery',
@@ -285,9 +318,8 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              context.go('/profile');
             },
-            child: Text(t.isSw ? 'Fuatilia Oda' : 'Track Order'),
+            child: Text(t.isSw ? 'Funga mfano' : 'Close simulation'),
           ),
         ],
       ),
@@ -382,10 +414,16 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (EnvConfig.hasSupabaseCredentials) Text(t.isSw
-              ? 'Kutuma oda halisi bado hakupatikani: uthibitisho wa bei na eneo la huduma kwenye seva haujakamilika. Akaunti haitatatua hili.'
-              : 'Live checkout is unavailable: server pricing and delivery-area validation are not ready. Signing in will not bypass this.'),
-            if (_validationError != null) Semantics(liveRegion: true, child: Text(_validationError!)),
+            if (!EnvConfig.hasSupabaseCredentials)
+              Text(t.isSw
+                  ? 'Mfano tu — usitume malipo. Hakuna oda inayotumwa jikoni.'
+                  : 'Simulation only — do not pay. No order is sent to a kitchen.'),
+            if (EnvConfig.hasSupabaseCredentials)
+              Text(t.isSw
+                  ? 'Kutuma oda halisi bado hakupatikani: uthibitisho wa bei na eneo la huduma kwenye seva haujakamilika. Akaunti haitatatua hili.'
+                  : 'Live checkout is unavailable: server pricing and delivery-area validation are not ready. Signing in will not bypass this.'),
+            if (_validationError != null)
+              Semantics(liveRegion: true, child: Text(_validationError!)),
             if (_orderFailed) ...[
               Semantics(
                 liveRegion: true,
@@ -410,7 +448,8 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
                 onPressed: _placingOrder ||
                         _checkingPromo ||
                         !branchAsync.hasValue ||
-                        branchAsync.hasError || EnvConfig.hasSupabaseCredentials
+                        branchAsync.hasError ||
+                        EnvConfig.hasSupabaseCredentials
                     ? null
                     : () => _submitOrder(cart, branch, address),
                 child: Text(
@@ -658,9 +697,14 @@ ${t.isSw ? 'Asante kwa kuchagua BongoFoodie TZ!' : 'Thank you for choosing Bongo
               const SizedBox(height: AppSpace.v12),
 
               // Contact Phone + Kitchen Notes
-              TextField(key: const Key('checkout-name'), controller: _nameCtrl,
-                textCapitalization: TextCapitalization.words, maxLength: 100,
-                decoration: InputDecoration(labelText: t.isSw ? 'Jina la mpokeaji' : 'Recipient name')),
+              TextField(
+                  key: const Key('checkout-name'),
+                  controller: _nameCtrl,
+                  textCapitalization: TextCapitalization.words,
+                  maxLength: 100,
+                  decoration: InputDecoration(
+                      labelText:
+                          t.isSw ? 'Jina la mpokeaji' : 'Recipient name')),
               const SizedBox(height: AppSpace.md),
               TextField(
                 key: const Key('checkout-phone'),

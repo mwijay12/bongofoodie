@@ -316,6 +316,14 @@ class CartNotifier extends StateNotifier<CartState> {
     state = state.copyWith(appliedPromoCode: '', promoDiscount: 0);
   }
 
+  void clearConfirmedSnapshot(CartState snapshot) {
+    if (mounted &&
+        identical(state.items, snapshot.items) &&
+        state.grandTotal == snapshot.grandTotal) {
+      clearCart();
+    }
+  }
+
   void clearCart() {
     state = state.copyWith(
       items: const [],
