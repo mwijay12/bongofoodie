@@ -1299,7 +1299,7 @@ set ward_name = excluded.ward_name, district_id = excluded.district_id;
 
 -- Incremental reward authority (also shipped as migration 20261109010000).
 -- Prompt 7: no campaign is activated by this migration. Deploy before the client.
-create table public.reward_campaigns (
+create table if not exists public.reward_campaigns (
   code text primary key check (code = upper(btrim(code)) and length(code) between 1 and 40),
   active boolean not null default false,
   starts_at timestamptz not null,
@@ -1310,7 +1310,7 @@ create table public.reward_campaigns (
   total_limit integer not null check (total_limit > 0),
   requires_quiz boolean not null default true
 );
-create table public.reward_quiz_attempts (
+create table if not exists public.reward_quiz_attempts (
   profile_id uuid not null references public.profiles(id) on delete cascade,
   quiz_date date not null,
   question_id integer not null,
@@ -1319,33 +1319,35 @@ create table public.reward_quiz_attempts (
   primary key (profile_id, quiz_date)
 );
 alter table public.orders add column if not exists promo_code text not null default '';
-create table public.reward_redemptions (
+create table if not exists public.reward_redemptions (
   order_id text primary key references public.orders(id) deferrable initially deferred,
   profile_id uuid not null references public.profiles(id),
   code text not null references public.reward_campaigns(code),
   discount numeric not null check (discount > 0),
   created_at timestamptz not null default now()
 );
-create index reward_redemptions_user_code on public.reward_redemptions(profile_id, code);
-create index reward_redemptions_code on public.reward_redemptions(code);
+create index if not exists reward_redemptions_user_code on public.reward_redemptions(profile_id, code);
+create index if not exists reward_redemptions_code on public.reward_redemptions(code);
 alter table public.reward_campaigns enable row level security;
 alter table public.reward_quiz_attempts enable row level security;
 alter table public.reward_redemptions enable row level security;
 -- No browser role may write rewards, even if other broad policies exist.
 revoke all on public.reward_campaigns, public.reward_quiz_attempts, public.reward_redemptions from anon, authenticated;
 grant select on public.reward_quiz_attempts, public.reward_redemptions to authenticated;
+drop policy if exists reward_attempt_owner on public.reward_quiz_attempts;
 create policy reward_attempt_owner on public.reward_quiz_attempts for select to authenticated using (profile_id = auth.uid());
+drop policy if exists reward_redemption_owner on public.reward_redemptions;
 create policy reward_redemption_owner on public.reward_redemptions for select to authenticated using (profile_id = auth.uid());
 -- Old client-asserted results never establish an entitlement.
 drop policy if exists "Users can insert their own quiz attempts" on public.quiz_attempts;
 revoke insert, update, delete on public.quiz_attempts from anon, authenticated;
 
-create function public.reward_quiz_status() returns boolean
+create or replace function public.reward_quiz_status() returns boolean
 language sql security definer set search_path = '' as $$
   select exists(select 1 from public.reward_quiz_attempts where profile_id = auth.uid()
     and quiz_date = (clock_timestamp() at time zone 'Africa/Dar_es_Salaam')::date);
 $$;
-create function public.submit_reward_quiz(p_question_id integer, p_answer_index integer) returns boolean
+create or replace function public.submit_reward_quiz(p_question_id integer, p_answer_index integer) returns boolean
 language plpgsql security definer set search_path = '' as $$
 declare
   u uuid := auth.uid();
@@ -1369,7 +1371,7 @@ $$;
 
 -- Canonical discounted basket pricing; rejects invented dishes/addons, duplicates,
 -- fractional quantities and unavailable products. No client price is authoritative.
-create function public.reward_basket_subtotal(p_items jsonb) returns numeric
+create or replace function public.reward_basket_subtotal(p_items jsonb) returns numeric
 language plpgsql security definer set search_path = '' as $$
 declare line jsonb; addon jsonb; unit numeric; extra numeric; qty integer; subtotal numeric := 0; seen text[];
 begin
@@ -1398,7 +1400,7 @@ begin
 end;
 $$;
 
-create function public.quote_reward(p_code text, p_items jsonb) returns jsonb
+create or replace function public.quote_reward(p_code text, p_items jsonb) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare c public.reward_campaigns%rowtype; u uuid := auth.uid(); subtotal numeric; fee numeric; amount numeric;
 begin
@@ -1424,7 +1426,7 @@ begin
 end;
 $$;
 
-create function public.enforce_order_reward() returns trigger
+create or replace function public.enforce_order_reward() returns trigger
 language plpgsql security definer set search_path = '' as $$
 declare quote jsonb;
 begin
@@ -1452,6 +1454,7 @@ begin
   return new;
 end;
 $$;
+drop trigger if exists orders_reward_guard on public.orders;
 create trigger orders_reward_guard before insert or update on public.orders
 for each row execute function public.enforce_order_reward();
 
