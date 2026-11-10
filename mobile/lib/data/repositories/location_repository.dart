@@ -58,8 +58,9 @@ class DeliveryAddressNotifier extends StateNotifier<String> {
       required int ward,
       required String street,
       required String address}) async {
+    final revision = _revision + 1;
     await setAddress(address);
-    final revision = _revision;
+    if (revision != _revision) return;
     final prefs = await SharedPreferences.getInstance();
     if (revision != _revision) return;
     await prefs.setString(
