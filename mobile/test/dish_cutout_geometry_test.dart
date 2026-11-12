@@ -28,8 +28,8 @@ void main() {
       expect(size, isNotNull, reason: '$id must be a valid PNG');
       expect(size!.width, size.height,
           reason: '$id must be square so contain-scaling is predictable');
-      expect(size.width, greaterThanOrEqualTo(1000),
-          reason: '$id must stay high resolution');
+      expect(size.width, 1600,
+          reason: '$id must keep the canonical 1600px canvas');
 
       // A transparent cutout must actually carry an alpha channel; an opaque
       // PNG would paint a white or black box behind the food.

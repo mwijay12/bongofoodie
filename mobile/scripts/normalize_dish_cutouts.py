@@ -23,9 +23,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-CANVAS = 1200
+CANVAS = 1600  # keep the canonical canvas the asset tests assert
 # Share of the canvas the longest food edge should occupy. Plates are wider
 # than tall, so using the longest edge keeps tall and wide dishes comparable.
+# 0.92 of 1600 keeps the food large while leaving a little breathing room.
 FILL = 0.92
 V_PADDING = 0.06  # keeps a hair of transparent margin so edges never clip
 
