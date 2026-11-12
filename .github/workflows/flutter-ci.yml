@@ -1,8 +1,11 @@
 name: Flutter Mobile CI & APK Showcase Build
 
 on:
+  # Runs on main and on PRs that touch mobile code. It deliberately does NOT
+  # run on every push to a working branch: that burned ~4 min of runner time
+  # per commit with no extra signal. Trigger it by hand when you need a build.
   push:
-    branches: [main, 'arena/**']
+    branches: [main]
     paths:
       - 'mobile/**'
       - '.github/workflows/flutter-ci.yml'
@@ -10,6 +13,11 @@ on:
     paths:
       - 'mobile/**'
   workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Why you are building (shown in the run list)'
+        required: false
+        default: 'manual build'
 
 jobs:
   build-flutter:
