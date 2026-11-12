@@ -7,10 +7,10 @@ on:
         description: Release tag (for example showcase-2026-11)
         required: true
       run_id:
-        description: Successful Flutter CI run ID on main
+        description: Successful Flutter CI run ID
         required: true
       commit:
-        description: Exact main commit built by that CI run
+        description: Exact commit built by that CI run
         required: true
 
 permissions:
@@ -27,15 +27,17 @@ jobs:
       SOURCE_RUN: ${{ inputs.run_id }}
       SOURCE_COMMIT: ${{ inputs.commit }}
     steps:
-      - name: Verify successful main CI build
+      - name: Verify successful CI build
         shell: bash
         run: |
           set -euo pipefail
           [[ "$RELEASE_TAG" =~ ^showcase-[a-zA-Z0-9._-]+$ ]]
           [[ "$SOURCE_RUN" =~ ^[0-9]+$ ]]
           [[ "$SOURCE_COMMIT" =~ ^[a-f0-9]{40}$ ]]
-          gh run view "$SOURCE_RUN" --json conclusion,status,headBranch,headSha,workflowName \
-            | jq -e --arg sha "$SOURCE_COMMIT" '.status == "completed" and .conclusion == "success" and .headBranch == "main" and .headSha == $sha and .workflowName == "Flutter Mobile CI & APK Showcase Build"'
+          # Any branch is acceptable: the point of a showcase build is to let a
+          # human try the app, including from an unmerged branch.
+          gh run view "$SOURCE_RUN" --json conclusion,status,headSha,workflowName \
+            | jq -e --arg sha "$SOURCE_COMMIT" '.status == "completed" and .conclusion == "success" and .headSha == $sha and .workflowName == "Flutter Mobile CI & APK Showcase Build"'
       - name: Download the APK and publish a prerelease
         shell: bash
         run: |
