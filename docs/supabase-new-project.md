@@ -22,7 +22,7 @@ Go to **Settings → Secrets and variables → Actions → New repository secret
 | Name | Value |
 |---|---|
 | `SUPABASE_URL` | `https://ywmjjdfomjeadcghlpjt.supabase.co` |
-| `SUPABASE_ANON_KEY` | `sb_publishable_WlF3MwiJp0Tug1WNRFzVA_l8UvG8Lr` |
+| `SUPABASE_ANON_KEY` | the project's publishable key (`sb_publishable_...`) from **Project Settings → API** |
 | `SUPABASE_ACCESS_TOKEN` | the `sbp_...` token you created |
 | `SUPABASE_PROJECT_REF` | `ywmjjdfomjeadcghlpjt` |
 | `SUPABASE_DB_PASSWORD` | the database password of the new project |
