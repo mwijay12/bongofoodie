@@ -47,12 +47,32 @@ jobs:
           fi
           echo "Secrets present. Host: ${URL#https://}"
 
-      - name: Heartbeat (RPC, with REST fallback)
+      - name: Heartbeat (RPC, then REST, then auth health)
+        id: heartbeat
+        shell: bash
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           KEEPALIVE_SOURCE: github-actions-schedule
-        run: node scripts/keepalive-ping.js
+        run: |
+          set +e
+          node scripts/keepalive-ping.js 2>&1 | tee /tmp/heartbeat.log
+          status=${PIPESTATUS[0]}
+          # Surface the last meaningful line in the job summary and as an
+          # annotation, because run logs are not always downloadable.
+          reason=$(grep -E '^(❌|⚠️|ℹ️|✅)' /tmp/heartbeat.log | tail -4 || true)
+          {
+            echo '### Supabase keep-alive'
+            echo '```'
+            cat /tmp/heartbeat.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$status" -ne 0 ]; then
+            while IFS= read -r line; do
+              [ -n "$line" ] && echo "::error::$line"
+            done <<< "$reason"
+          fi
+          exit "$status"
 
       - name: Confirm the project answered after the heartbeat
         shell: bash
