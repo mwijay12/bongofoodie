@@ -3,45 +3,44 @@ import '../../theme/app_tokens.dart';
 import '../../theme/skeleton_colors.dart';
 import 'skeleton_box.dart';
 
-/// Mirrors PromoOfferCard's image row, full-width copy and action footprint.
+/// Mirrors PromoOfferCard: badge, title, then a copy+artwork row and action.
 class SkeletonPromoCard extends StatelessWidget {
   const SkeletonPromoCard({super.key});
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: PromoCardMetrics.width,
-        height: PromoCardMetrics.height,
-        padding: const EdgeInsets.all(PromoCardMetrics.padding),
-        decoration: BoxDecoration(
-            color: SkeletonColors.of(context).base,
-            borderRadius: BorderRadius.circular(PromoCardMetrics.borderRadius)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          SizedBox(
-              height: PromoCardMetrics.imageSize,
-              child: Row(children: [
-                const Expanded(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SkeletonBox(
-                        width: AppSpace.v80,
-                        height: AppSpace.md,
-                        radius: AppRadius.pill),
-                    SizedBox(height: AppSpace.sm),
-                    SkeletonLines(count: 3),
-                  ],
-                )),
-                const SizedBox(width: PromoCardMetrics.imageGap),
+  Widget build(BuildContext context) => MediaQuery.withClampedTextScaling(
+        maxScaleFactor: PromoCardMetrics.maxTextScale,
+        child: Container(
+          width: PromoCardMetrics.width,
+          height: PromoCardMetrics.heightFor(context),
+          padding: const EdgeInsets.all(PromoCardMetrics.padding),
+          decoration: BoxDecoration(
+              color: SkeletonColors.of(context).base,
+              borderRadius:
+                  BorderRadius.circular(PromoCardMetrics.borderRadius)),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 const SkeletonBox(
-                    width: PromoCardMetrics.imageSize,
-                    height: PromoCardMetrics.imageSize,
-                    radius: PromoCardMetrics.imageRadius),
-              ])),
-          const SizedBox(height: AppSpace.v10),
-          const SkeletonLines(count: 3),
-          const Spacer(),
-          const SkeletonBox(width: AppSpace.v118, height: AppSpace.lg),
-        ]),
+                    width: AppSpace.v80,
+                    height: AppSpace.md,
+                    radius: AppRadius.pill),
+                const SizedBox(height: AppSpace.v4),
+                const SkeletonBox(height: AppSpace.md),
+                const SizedBox(height: AppSpace.v4),
+                Expanded(
+                    child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                      const Expanded(child: SkeletonLines(count: 2)),
+                      const SizedBox(width: PromoCardMetrics.imageGap),
+                      const SkeletonBox(
+                          width: PromoCardMetrics.imageSize,
+                          height: PromoCardMetrics.imageSize,
+                          radius: PromoCardMetrics.imageRadius),
+                    ])),
+                const SkeletonBox(width: AppSpace.v118, height: AppSpace.lg),
+              ]),
+        ),
       );
 }

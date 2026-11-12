@@ -216,8 +216,9 @@ void main() {
   });
 
   test('shared promo and nav metrics stay in sync', () {
-    expect(PromoCardMetrics.height, 320);
-    expect(PromoCardMetrics.imageSize, 148);
+    expect(PromoCardMetrics.height, 220);
+    expect(PromoCardMetrics.imageSize, 112);
+    expect(PromoCardMetrics.width, 285);
     expect(AppSpace.navClearance, AppSpace.navHeight + AppSpace.lg);
   });
 

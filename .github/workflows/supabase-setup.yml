@@ -1,0 +1,82 @@
+name: Supabase database setup
+
+# Applies supabase/schema.sql to the configured project using the Management API.
+# Run this once after creating a new Supabase project, and again whenever
+# supabase/schema.sql changes.
+#
+# Required repository secrets:
+#   SUPABASE_ACCESS_TOKEN  - personal access token (sbp_...) from
+#                            https://supabase.com/dashboard/account/tokens
+#   SUPABASE_PROJECT_REF   - the project ref, e.g. ywmjjdfomjeadcghlpjt
+#   SUPABASE_DB_PASSWORD   - database password for that project
+#
+# These are secrets on purpose: this repository is public.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type APPLY to run schema.sql against the configured project'
+        required: true
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    name: Confirm intent
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation and secrets
+        shell: bash
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+          TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          DBPASS: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          set -euo pipefail
+          [ "$CONFIRM" = "APPLY" ] || { echo "Aborting: type APPLY to confirm."; exit 1; }
+          [ -n "$TOKEN" ] || { echo "::error::Missing secret SUPABASE_ACCESS_TOKEN"; exit 1; }
+          [ -n "$REF" ]   || { echo "::error::Missing secret SUPABASE_PROJECT_REF"; exit 1; }
+          [ -n "$DBPASS" ] || { echo "::error::Missing secret SUPABASE_DB_PASSWORD"; exit 1; }
+          echo "Project ref length: ${#REF} (value not printed)"
+
+  apply:
+    name: Apply schema.sql
+    needs: guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Push schema through the Management API
+        shell: bash
+        env:
+          TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.request, urllib.error
+
+          token = os.environ['TOKEN']
+          ref = os.environ['REF'].strip()
+          sql = pathlib.Path('supabase/schema.sql').read_text()
+
+          url = f'https://api.supabase.com/v1/projects/{ref}/database/query'
+          payload = json.dumps({'query': sql}).encode()
+          req = urllib.request.Request(
+              url, data=payload, method='POST',
+              headers={'Authorization': f'Bearer {token}',
+                       'Content-Type': 'application/json'})
+          try:
+              with urllib.request.urlopen(req, timeout=180) as r:
+                  body = r.read().decode()
+                  print('Schema applied. Response:', body[:2000])
+          except urllib.error.HTTPError as e:
+              detail = e.read().decode()
+              print('::error::Management API rejected the schema')
+              print(detail[:4000])
+              raise SystemExit(1)
+          PY

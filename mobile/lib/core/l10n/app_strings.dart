@@ -15,6 +15,23 @@ class AppStrings {
       ? 'Hatukuweza kupakia. Angalia mtandao kisha jaribu tena.'
       : 'We could not load this. Check your connection and try again.';
   String get retry => isSw ? 'Jaribu tena' : 'Try again';
+
+  // Connection honesty: say what actually happened instead of blaming the user's network.
+  String get offlineTitle =>
+      isSw ? 'Hakuna muunganisho wa data' : 'No data connection';
+  String get offlineBody => isSw
+      ? 'Programu haiwezi kufikia seva kwa sasa. Angalia mtandao wako.'
+      : 'The app cannot reach the server right now. Check your connection.';
+  String get serverTitle =>
+      isSw ? 'Seva haipatikani' : 'Server unavailable';
+  String get serverBody => isSw
+      ? 'Muunganisho wako uko sawa, lakini seva ya BongoFoodie haijajibu. Jaribu tena baada ya muda mfupi.'
+      : 'Your connection is fine, but the BongoFoodie server did not respond. Try again in a moment.';
+  String get showcaseNoticeTitle =>
+      isSw ? 'Hali ya maonyesho' : 'Showcase mode';
+  String get showcaseNoticeBody => isSw
+      ? 'Data ya maonyesho inaonyeshwa. Rekebisha funguo za Supabase kuunganisha data halisi.'
+      : 'Showing showcase data. Configure the Supabase keys to load the live catalog.';
   String get emptyMenuTitle => isSw ? 'Hakuna sahani zilizopatikana' : 'No dishes found';
   String get emptyMenuBody => isSw ? 'Jaribu kutafuta kwa jina jingine.' : 'Try a different search.';
   String get emptyFavoritesTitle => isSw ? 'Bado huna vipendwa' : 'No favorites yet';

@@ -357,7 +357,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     data: (promos) => promos.isEmpty
                         ? const SizedBox.shrink()
                         : SizedBox(
-                            height: PromoCardMetrics.height,
+                            height: PromoCardMetrics.heightFor(context),
                             child: ListView.separated(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: AppSpace.screenH),
@@ -380,7 +380,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             ),
                           ),
                     loading: () => SizedBox(
-                      height: PromoCardMetrics.height,
+                      height: PromoCardMetrics.heightFor(context),
                       child: ListView.separated(
                         padding: const EdgeInsets.symmetric(
                             horizontal: AppSpace.screenH),

@@ -12,6 +12,7 @@ abstract final class AppSpace {
   static const double v80 = 80;
   static const double v92 = 92;
   static const double v118 = 118;
+  static const double v132 = 132;
   static const double v148 = 148;
   static const double v190 = 190;
   static const double v220 = 220;
@@ -111,13 +112,26 @@ extension NavClearance on BuildContext {
 /// Shared card metrics so real widgets and their skeletons stay in sync
 /// with zero visual drift. All values come from AppRadius / AppSpace tokens.
 abstract final class PromoCardMetrics {
-  static const double width = 320;
-  static const double height = 320;
-  static const double padding = AppSpace.lg;
+  /// Original 285x220 footprint kept: only the artwork grows, the card does not.
+  static const double width = 285;
+  static const double height = 220;
+  static const double padding = AppSpace.v10;
   static const double borderRadius = AppRadius.v22;
-  static const double imageSize = AppSpace.v148;
+
+  /// 1.47x the old 76dp slot (76 -> 112): food leads, card stays 285x220.
+  static const double imageSize = 112;
   static const double imageRadius = AppRadius.v16;
-  static const double imageGap = AppSpace.v10;
+  static const double imageGap = AppSpace.v6;
+
+  /// Copy inside the carousel is clamped here; the card itself stays fixed.
+  static const double maxTextScale = 1.3;
+
+  /// Headroom for the clamped scale range only.
+  static double heightFor(BuildContext context) {
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    final clamped = scale.clamp(1.0, maxTextScale);
+    return height + (clamped - 1) * 80;
+  }
 }
 
 abstract final class DiscoveryCardMetrics {

@@ -58,8 +58,13 @@ class AuthRepository {
   }) async {
     final sb = SupabaseService.client;
     if (sb == null) {
-      throw Exception(
-        'Live Supabase keys are not set yet. Tap any 1-Click Showcase Role above to explore immediately!',
+      // Distinguish "never configured" from "configured but failed to start".
+      // Saying "keys are not set" when they are set is what made a server
+      // failure look like a missing configuration.
+      throw StateError(
+        SupabaseService.status == SupabaseStatus.failed
+            ? 'The Supabase client could not start: ${SupabaseService.failureReason}'
+            : 'Live Supabase keys are not set yet. Tap any demo role above to explore immediately.',
       );
     }
 
