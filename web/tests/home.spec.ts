@@ -21,6 +21,43 @@ for (const viewport of [{ width: 360, height: 640 }, { width: 430, height: 932 }
   });
 }
 
+test('top navigation drops Home and the empty Flutter preview tab', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/');
+  const nav = page.getByRole('banner');
+  await expect(nav.getByRole('link', { name: 'Search', exact: true })).toHaveAttribute('href', '/search');
+  await expect(nav.getByRole('link', { name: 'Chef AI', exact: true })).toHaveAttribute('href', '/chef-ai');
+  await expect(nav.getByRole('link', { name: 'Home', exact: true })).toHaveCount(0);
+  await expect(nav.getByRole('link', { name: 'Flutter App', exact: true })).toHaveCount(0);
+});
+
+test('the real Flutter APK is downloadable from the footer', async ({ page, request }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/');
+  const download = page.getByRole('contentinfo').getByRole('link', { name: 'Download APK' });
+  await expect(download).toBeVisible();
+  const href = await download.getAttribute('href');
+  expect(href).toBe(
+    'https://github.com/mwijay12/bongofoodie/releases/download/showcase-v3/app-release.apk',
+  );
+
+  // A hand-maintained tag can drift from what is actually published, which would
+  // hand every visitor a 404. Ask the releases API whether that exact asset exists.
+  const release = await request.get(
+    'https://api.github.com/repos/mwijay12/bongofoodie/releases/tags/showcase-v3',
+    { headers: { Accept: 'application/vnd.github+json' } },
+  );
+  expect(release.status()).toBe(200);
+  const asset = (await release.json()).assets.find(
+    (candidate: { name: string }) => candidate.name === 'app-release.apk',
+  );
+  expect(asset).toBeTruthy();
+  expect(asset.state).toBe('uploaded');
+  expect(asset.size).toBe(50_403_653);
+  expect(asset.browser_download_url).toBe(href);
+});
+
+
 test('keyboard selection, reduced motion and trivia feedback', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');

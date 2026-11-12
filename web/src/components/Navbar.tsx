@@ -4,14 +4,12 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Home,
   Search,
   Sparkles,
   ShoppingCart,
   User,
   Settings,
   Bell,
-  Smartphone,
 } from 'lucide-react';
 import cn from 'clsx';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
@@ -54,10 +52,8 @@ export default function Navbar() {
   const showWaiter = role === 'admin' || role === 'waiter' || role === 'kitchen';
 
   const navItems = [
-    { name: 'Home', href: '/', icon: Home },
     { name: 'Search', href: '/search', icon: Search },
     { name: 'Chef AI', href: '/chef-ai', icon: Sparkles },
-    { name: 'Flutter App', href: '/mobile', icon: Smartphone },
     { name: 'Cart', href: '/cart', icon: ShoppingCart, badge: totalItems },
     ...(showWaiter ? [{ name: 'Waiter', href: '/waiter', icon: Bell }] : []),
     ...(showAdmin ? [{ name: 'Admin', href: '/admin', icon: Settings }] : []),

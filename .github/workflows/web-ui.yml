@@ -22,7 +22,16 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
       - name: Lint customer Home changes
-        run: npx eslint src/app/page.tsx src/app/layout.tsx src/components/SwahiliTrivia.tsx src/lib/imageMap.ts tests/home.spec.ts playwright.config.ts
+        run: >-
+          npx eslint
+          src/app/page.tsx
+          src/app/layout.tsx
+          src/components/Navbar.tsx
+          src/components/SwahiliTrivia.tsx
+          src/lib/imageMap.ts
+          src/lib/appRelease.ts
+          tests/home.spec.ts
+          playwright.config.ts
       - run: npm run build
       - run: npx tsc --noEmit
       - run: npx playwright install --with-deps chromium
