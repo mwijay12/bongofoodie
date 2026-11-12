@@ -68,16 +68,18 @@ void main() {
             final art = tester.getRect(find.byType(PromoDishImage));
             final title = tester.getRect(find.text(promo.title));
             final subtitle = tester.getRect(find.text(promo.subtitle));
-            expect(art.width, 148);
-            expect(art.height, 148);
+            expect(art.width, 112);
+            expect(art.height, 112);
             expect(card.contains(art.topLeft) && card.contains(art.bottomRight),
                 isTrue);
             expect(title.overlaps(art), isFalse);
-            expect(subtitle.top, greaterThanOrEqualTo(art.bottom));
+            // Compact tile: copy sits beside the artwork, never underneath it.
+            expect(subtitle.overlaps(art), isFalse);
+            expect(subtitle.left, lessThan(art.left));
             final image = tester.widget<Image>(find.descendant(
                 of: find.byType(PromoDishImage), matching: find.byType(Image)));
             expect(image.fit, BoxFit.contain);
-            expect((image.image as ResizeImage).width, 296);
+            expect((image.image as ResizeImage).width, 224);
             expect(
                 find.descendant(
                     of: find.byType(PromoDishImage),
@@ -103,7 +105,7 @@ void main() {
         home: Scaffold(body: Center(child: SkeletonPromoCard()))));
     final size = tester.getSize(find.byType(SkeletonPromoCard));
     expect(size, const Size(PromoCardMetrics.width, PromoCardMetrics.height));
-    expect(PromoCardMetrics.imageSize, greaterThanOrEqualTo(148));
+    expect(PromoCardMetrics.imageSize, 112);
     expect(tester.takeException(), isNull);
   });
 }

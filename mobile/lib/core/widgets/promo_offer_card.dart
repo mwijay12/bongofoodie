@@ -35,86 +35,88 @@ class PromoOfferCard extends StatelessWidget {
           .where((s) => s.isNotEmpty)
           .join('. '),
       onTap: onTap,
-      child: ExcludeSemantics(
+      // Compact carousel tile: clamp copy scaling so the card never balloons.
+      child: MediaQuery.withClampedTextScaling(
+        maxScaleFactor: PromoCardMetrics.maxTextScale,
+        child: ExcludeSemantics(
           child: InkWell(
-        borderRadius: BorderRadius.circular(PromoCardMetrics.borderRadius),
-        onTap: onTap,
-        child: Ink(
-          width: PromoCardMetrics.width,
-          height: PromoCardMetrics.height,
-          padding: const EdgeInsets.all(PromoCardMetrics.padding),
-          decoration: BoxDecoration(
-              gradient: green ? AppColors.promoGreen : AppColors.promoOrange,
-              borderRadius:
-                  BorderRadius.circular(PromoCardMetrics.borderRadius)),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            SizedBox(
-                height: PromoCardMetrics.imageSize,
-                child: Row(children: [
-                  Expanded(
-                      child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+            borderRadius: BorderRadius.circular(PromoCardMetrics.borderRadius),
+            onTap: onTap,
+            child: Ink(
+              width: PromoCardMetrics.width,
+              height: PromoCardMetrics.heightFor(context),
+              padding: const EdgeInsets.all(PromoCardMetrics.padding),
+              decoration: BoxDecoration(
+                  gradient: green ? AppColors.promoGreen : AppColors.promoOrange,
+                  borderRadius:
+                      BorderRadius.circular(PromoCardMetrics.borderRadius)),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
                       if (badge.isNotEmpty) ...[
-                        Row(children: [
-                          AppIcon(
-                              iconKey: promotion.iconKey ??
-                                  appIconKeyForText(
-                                      '${promotion.title} ${promotion.badgeText}',
-                                      fallback: AppIconKey.fire),
-                              color: foreground),
-                          const SizedBox(width: AppSpace.v6),
+                        AppIcon(
+                            iconKey: promotion.iconKey ??
+                                appIconKeyForText(
+                                    '${promotion.title} ${promotion.badgeText}',
+                                    fallback: AppIconKey.fire),
+                            color: foreground,
+                            size: AppSpace.v16),
+                        const SizedBox(width: AppSpace.v6),
+                        Expanded(
+                            child: Text(badge,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: foreground,
+                                    fontSize: 11,
+                                    height: 1.2,
+                                    fontWeight: FontWeight.w800))),
+                      ],
+                    ]),
+                    if (badge.isNotEmpty) const SizedBox(height: AppSpace.v4),
+                    Text(title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: foreground,
+                            fontSize: 14,
+                            height: 1.15,
+                            fontWeight: FontWeight.w800)),
+                    const SizedBox(height: AppSpace.v4),
+                    Expanded(
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
                           Expanded(
-                              child: Text(badge,
+                              child: Text(subtitle,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                       color: foreground,
                                       fontSize: 12,
-                                      height: 1.2,
-                                      fontWeight: FontWeight.w800))),
-                        ]),
-                        const SizedBox(height: AppSpace.sm),
-                      ],
-                      Text(title,
-                          maxLines: 4,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              color: foreground,
-                              fontSize: 15,
-                              height: 1.15,
-                              fontWeight: FontWeight.w800)),
-                    ],
-                  )),
-                  const SizedBox(width: PromoCardMetrics.imageGap),
-                  PromoDishImage(imageRef: promotion.imageKey),
-                ])),
-            const SizedBox(height: AppSpace.v10),
-            Text(subtitle,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    color: foreground,
-                    fontSize: 14,
-                    height: 1.25,
-                    fontWeight: FontWeight.w600)),
-            const Spacer(),
-            Row(children: [
-              Expanded(
-                  child: Text(actionLabel,
-                      maxLines: 2,
-                      style: TextStyle(
-                          color: foreground,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800))),
-              Icon(Icons.arrow_forward_rounded,
-                  color: foreground, size: AppSpace.lg),
-            ]),
-          ]),
+                                      height: 1.25,
+                                      fontWeight: FontWeight.w600))),
+                          const SizedBox(width: PromoCardMetrics.imageGap),
+                          PromoDishImage(imageRef: promotion.imageKey),
+                        ])),
+                    Row(children: [
+                      Expanded(
+                          child: Text(actionLabel,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  color: foreground,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800))),
+                      Icon(Icons.arrow_forward_rounded,
+                          color: foreground, size: AppSpace.lg),
+                    ]),
+                  ]),
+            ),
+          ),
         ),
-      )),
+      ),
     );
   }
 }

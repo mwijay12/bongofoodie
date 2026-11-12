@@ -1,8 +1,11 @@
 name: Flutter Mobile CI & APK Showcase Build
 
 on:
+  # Runs on main and on PRs that touch mobile code. It deliberately does NOT
+  # run on every push to a working branch: that burned ~4 min of runner time
+  # per commit with no extra signal. Trigger it by hand when you need a build.
   push:
-    branches: [main, 'arena/**']
+    branches: [main]
     paths:
       - 'mobile/**'
       - '.github/workflows/flutter-ci.yml'
@@ -10,6 +13,11 @@ on:
     paths:
       - 'mobile/**'
   workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Why you are building (shown in the run list)'
+        required: false
+        default: 'manual build'
 
 jobs:
   build-flutter:
@@ -48,6 +56,13 @@ jobs:
 
       - name: Emoji guard (UI copy and showcase seed)
         run: bash "$GITHUB_WORKSPACE/scripts/check_emoji.sh"
+
+      - name: Verify dish cutouts are normalised
+        run: |
+          if ! command -v convert >/dev/null 2>&1; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq imagemagick
+          fi
+          python3 scripts/normalize_dish_cutouts.py --check
 
       - name: Record main analyzer baseline
         run: |
@@ -94,11 +109,27 @@ jobs:
           --dart-define=SUPABASE_URL=https://checkout-test.supabase.co
           --dart-define=SUPABASE_PUBLISHABLE_KEY=test-only-non-secret-publishable
 
+      - name: Resolve Supabase build configuration
+        id: sb
+        shell: bash
+        env:
+          SB_URL: ${{ secrets.SUPABASE_URL }}
+          SB_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SB_URL" ] || [ -z "$SB_KEY" ]; then
+            echo "::error::SUPABASE_URL / SUPABASE_ANON_KEY secrets are missing. Refusing to build an APK that would silently run in showcase mode."
+            exit 1
+          fi
+          echo "host=${SB_URL#https://}" >> "$GITHUB_OUTPUT"
+
       - name: Build Release Android APK
+        env:
+          SB_URL: ${{ secrets.SUPABASE_URL }}
+          SB_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           flutter build apk --release \
-            --dart-define=SUPABASE_URL=https://ovdozsryglkljcugdnkz.supabase.co \
-            --dart-define=SUPABASE_PUBLISHABLE_KEY=sb_publishable_Mgy_bwv99mDM-2-O1S07Nw_-53184VK \
+            --dart-define=SUPABASE_URL="$SB_URL" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$SB_KEY" \
             --dart-define=WEB_API_BASE_URL=${{ secrets.WEB_API_BASE_URL }}
 
       - name: Upload Release APK Artifact
@@ -109,10 +140,13 @@ jobs:
           retention-days: 30
 
       - name: Build Flutter Web Showcase
+        env:
+          SB_URL: ${{ secrets.SUPABASE_URL }}
+          SB_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           flutter build web --release \
-            --dart-define=SUPABASE_URL=https://ovdozsryglkljcugdnkz.supabase.co \
-            --dart-define=SUPABASE_PUBLISHABLE_KEY=sb_publishable_Mgy_bwv99mDM-2-O1S07Nw_-53184VK \
+            --dart-define=SUPABASE_URL="$SB_URL" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$SB_KEY" \
             --dart-define=WEB_API_BASE_URL=${{ secrets.WEB_API_BASE_URL }}
 
       - name: Upload Flutter Web Artifact

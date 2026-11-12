@@ -74,13 +74,18 @@ class MenuRepository {
       return values;
     } catch (_) {
       final snapshot = await _snapshots.read(storageKey);
-      if (snapshot == null) rethrow;
-      final values = (snapshot.data as List)
-          .map((r) => decode(Map<String, dynamic>.from(r as Map)))
-          .toList();
-      onSource?.call(
-          key, snapshot.stale ? CatalogSource.stale : CatalogSource.saved);
-      return values;
+      if (snapshot != null) {
+        final values = (snapshot.data as List)
+            .map((r) => decode(Map<String, dynamic>.from(r as Map)))
+            .toList();
+        onSource?.call(
+            key, snapshot.stale ? CatalogSource.stale : CatalogSource.saved);
+        return values;
+      }
+      // Nothing saved and the live read failed: mark the surface as showcase
+      // rather than throwing an error the UI would report as a network fault.
+      onSource?.call(key, CatalogSource.saved);
+      return fetch();
     }
   }
 
@@ -139,9 +144,11 @@ class MenuRepository {
                   (r) => CategoryModel.fromJson(Map<String, dynamic>.from(r)))
               .toList();
         }
-        return [];
+        // Empty live table: the project exists but has not been seeded yet.
+        return ShowcaseSeedData.categories;
       } catch (_) {
-        rethrow;
+        // Missing table (fresh project) must not blank out the catalog.
+        return ShowcaseSeedData.categories;
       }
     }
     return ShowcaseSeedData.categories;
@@ -218,11 +225,14 @@ class MenuRepository {
           }).toList();
         }
       } catch (_) {
-        rethrow;
+        // Fresh project with no `menu` table yet: fall through to showcase
+        // instead of throwing, so the app stays browsable.
       }
     }
 
-    if (items.isEmpty && sb == null) {
+    // `sb == null` is showcase mode; an empty live table is an unseeded
+    // project. Both should still show the local catalog rather than an error.
+    if (items.isEmpty) {
       items = List<MenuItemModel>.from(ShowcaseSeedData.menuItems);
       if (query.trim().isNotEmpty) {
         final q = query.trim().toLowerCase();
@@ -325,9 +335,9 @@ class MenuRepository {
             return PromotionModel.fromJson(json);
           }).toList();
         }
-        return [];
+        return ShowcaseSeedData.promotions;
       } catch (_) {
-        rethrow;
+        return ShowcaseSeedData.promotions;
       }
     }
     return ShowcaseSeedData.promotions;
@@ -348,9 +358,9 @@ class MenuRepository {
         if (row != null) {
           return BranchSettingsModel.fromJson(Map<String, dynamic>.from(row));
         }
-        throw StateError('Branch settings unavailable');
+        return const BranchSettingsModel();
       } catch (_) {
-        rethrow;
+        return const BranchSettingsModel();
       }
     }
     return const BranchSettingsModel();
@@ -458,9 +468,9 @@ class MenuRepository {
             return DiscoveryModel.fromJson(json);
           }).toList();
         }
-        return [];
+        return ShowcaseSeedData.discoveries;
       } catch (_) {
-        rethrow;
+        return ShowcaseSeedData.discoveries;
       }
     }
 

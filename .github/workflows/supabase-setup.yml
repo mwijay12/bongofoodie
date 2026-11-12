@@ -1,0 +1,164 @@
+name: Supabase database setup
+
+# Applies supabase/schema.sql to your project through the Supabase Management
+# API, then verifies the app's real queries work. Safe to run repeatedly:
+# schema.sql is written with "if not exists" / "create or replace" throughout.
+#
+# Required repository secrets:
+#   SUPABASE_ACCESS_TOKEN - personal access token (sbp_...) from
+#                           https://supabase.com/dashboard/account/tokens
+#   SUPABASE_PROJECT_REF  - project ref, e.g. ywmjjdfomjeadcghlpjt
+#   SUPABASE_URL          - https://<ref>.supabase.co
+#   SUPABASE_ANON_KEY     - publishable key (also used to verify the result)
+#
+# This is the only place the PAT is used. It is never written to disk and
+# never echoed; the script prints only status codes and short error snippets.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type APPLY to run schema.sql against the configured project'
+        required: true
+        default: ''
+  # Also verify automatically when someone edits the workflow or the schema.
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/schema.sql'
+      - '.github/workflows/supabase-setup.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-setup
+  cancel-in-progress: false
+
+jobs:
+  setup:
+    name: Apply schema and verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check configuration
+        shell: bash
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+          EVENT: ${{ github.event_name }}
+          TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          URL: ${{ secrets.SUPABASE_URL }}
+          KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          # A push to main runs the verification only; applying needs intent.
+          if [ "$EVENT" = "workflow_dispatch" ] && [ "$CONFIRM" != "APPLY" ]; then
+            echo "::error::Type APPLY in the confirm field to run this."
+            exit 1
+          fi
+          missing=""
+          [ -n "$TOKEN" ] || missing="$missing SUPABASE_ACCESS_TOKEN"
+          [ -n "$REF" ]   || missing="$missing SUPABASE_PROJECT_REF"
+          [ -n "$URL" ]   || missing="$missing SUPABASE_URL"
+          [ -n "$KEY" ]   || missing="$missing SUPABASE_ANON_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secret(s):$missing"
+            echo "Add them in Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          echo "All four secrets present."
+
+      - name: Apply supabase/schema.sql
+        id: apply
+        shell: bash
+        env:
+          TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          set +e
+          python3 - <<'PY' 2>&1 | tee /tmp/apply.log
+          import json, os, pathlib, urllib.request, urllib.error
+
+          token = os.environ['TOKEN'].strip()
+          ref = os.environ['REF'].strip()
+          sql = pathlib.Path('supabase/schema.sql').read_text()
+          print(f'Project ref: {ref[:4]}...{ref[-3:]} (length {len(ref)})')
+          print(f'schema.sql: {len(sql)} chars, {sql.count(";")} statements (approx)')
+
+          url = f'https://api.supabase.com/v1/projects/{ref}/database/query'
+          body = json.dumps({'query': sql}).encode()
+          req = urllib.request.Request(
+              url, data=body, method='POST',
+              headers={'Authorization': f'Bearer {token}',
+                       'Content-Type': 'application/json'})
+          try:
+              with urllib.request.urlopen(req, timeout=300) as r:
+                  payload = r.read().decode()
+                  print(f'HTTP {r.status}')
+                  print('Schema applied successfully.')
+                  print(payload[:500])
+          except urllib.error.HTTPError as e:
+              detail = e.read().decode()
+              print(f'::error::Management API returned HTTP {e.code}')
+              print(detail[:3000])
+              raise SystemExit(1)
+          except Exception as e:
+              print(f'::error::Request failed: {type(e).__name__}: {e}')
+              raise SystemExit(1)
+          PY
+          status=${PIPESTATUS[0]}
+          {
+            echo '### Supabase schema apply'
+            echo '```'
+            tail -20 /tmp/apply.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
+
+      - name: Verify the queries the app actually runs
+        if: success()
+        shell: bash
+        env:
+          URL: ${{ secrets.SUPABASE_URL }}
+          KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -uo pipefail
+          fails=0
+          check () {
+            local label="$1" path="$2"
+            local code
+            code=$(curl -sS -o /tmp/b.txt -w '%{http_code}' -m 30 "$URL$path" \
+              -H "apikey: $KEY" -H "Authorization: Bearer $KEY")
+            printf '%-22s HTTP %s' "$label" "$code"
+            if [ "$code" = "200" ]; then
+              echo "  ok"
+            else
+              echo "  FAILED :: $(head -c 160 /tmp/b.txt | tr -d '\n\r')"
+              fails=$((fails + 1))
+            fi
+          }
+          check "categories"   '/rest/v1/categories?select=id,name&limit=1'
+          check "menu"         '/rest/v1/menu?select=id,name,price&limit=1'
+          check "promotions"   '/rest/v1/promotions?select=id,title&limit=1'
+          check "settings"     '/rest/v1/settings?select=*&limit=1'
+          echo
+          code=$(curl -sS -o /tmp/k.txt -w '%{http_code}' -m 30 \
+            -X POST "$URL/rest/v1/rpc/ping_keepalive" \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
+            -H 'Content-Type: application/json' -d '{"p_source":"setup-verify"}')
+          printf '%-22s HTTP %s' "ping_keepalive" "$code"
+          if [ "$code" = "200" ]; then
+            echo "  ok :: $(head -c 120 /tmp/k.txt | tr -d '\n\r')"
+          else
+            echo "  FAILED :: $(head -c 160 /tmp/k.txt | tr -d '\n\r')"
+            fails=$((fails + 1))
+          fi
+          echo
+          if [ "$fails" -gt 0 ]; then
+            echo "::error::$fails verification check(s) failed. See above."
+            exit 1
+          fi
+          echo "All app queries and the keep-alive RPC returned 200."
