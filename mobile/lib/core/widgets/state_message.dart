@@ -24,7 +24,7 @@ class StateMessage extends ConsumerWidget {
     super.key,
     this.onRetry,
     this.compact = false,
-    this.kind,
+    ErrorKind? kind,
   })  : title = null,
         body = null,
         actionLabel = null,
