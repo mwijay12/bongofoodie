@@ -284,27 +284,6 @@ class ShowcaseSeedData {
           'Chapati ni mkate bapa wenye tabaka unaopikwa kwenye sufuria moto.',
     ),
     MenuItemModel(
-      id: 'menu-ndizi-mzuzu',
-      name: 'Ndizi za Kukaanga',
-      description:
-          'Caramelized ripe sweet plantain medallions lightly spiced with black pepper and sea salt, served with pili pili ya ukwaju.',
-      imageUrl: '',
-      price: 4000,
-      rating: 4.6,
-      ratingCount: 39,
-      calories: 320,
-      protein: 4,
-      prepTimeMins: 10,
-      categoryId: 'cat-bites',
-      categoryName: 'Swahili Bites',
-      availableCustomizations: snackAddons,
-      spiceLevel: 2,
-      ingredients: ['plantain', 'black pepper', 'sea salt', 'tamarind'],
-      allergens: <String>[],
-      funFactEn: 'Ripe plantains are naturally sweet before they are fried.',
-      funFactSw: 'Ndizi mzuzu mbivu huwa na utamu wa asili kabla ya kukaangwa.',
-    ),
-    MenuItemModel(
       id: 'menu-bongo-burger',
       name: 'Bongo Pili-Pili Smash Burger',
       description:
