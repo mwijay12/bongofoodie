@@ -47,7 +47,6 @@ void main() {
     for (final id in [
       'menu-wali-nazi',
       'menu-kuku-chapati',
-      'menu-ndizi-mzuzu',
       'menu-passion-juice',
       'menu-stoney'
     ]) {
@@ -55,8 +54,6 @@ void main() {
           ShowcaseSeedData.menuItems.firstWhere((item) => item.id == id);
       expect(item.imageUrl, isEmpty, reason: '$id needs its own photograph');
     }
-    expect(dishName('menu-ndizi-mzuzu', '', isSw: true), 'Ndizi za Kukaanga');
-    expect(dishName('menu-ndizi-mzuzu', '', isSw: false), 'Fried Plantains');
     expect(dishDescription('menu-passion-juice', '', isSw: false),
         contains('passion fruit and mango'));
     expect(dishName('live-uuid', 'Kitchen special', isSw: true),

@@ -38,9 +38,13 @@ void main() {
         (await repo.getDishCustomizations('menu-bongo-burger'))
             .map((c) => c.id),
         isNot(contains('cust-ugali')));
+    // Chipsi mayai has four valid addons; the point is that they are the
+    // curated ones for that dish, not the grill list.
     expect(
-        (await repo.getDishCustomizations('menu-ndizi-mzuzu')).map((c) => c.id),
-        ['cust-pilipili']);
+        (await repo.getDishCustomizations('menu-chipsi-mayai'))
+            .map((c) => c.id)
+            .toSet(),
+        {'cust-kachumbari', 'cust-pilipili', 'cust-ndimu', 'cust-stoney'});
   });
   test('seed product options each have unique IDs and valid prices', () {
     for (final item in ShowcaseSeedData.menuItems) {

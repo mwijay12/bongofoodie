@@ -22,7 +22,6 @@ void main() {
     for (final pair in [
       ('Juisi ya Passion & Embe', 'orangeJuiceIcon'),
       ('Stoney Tangawizi', 'orangeJuiceIcon'),
-      ('Ndizi Mzuzu Kaanga', 'fries'),
       ('Kuku na Chapati', 'samakiWaKupaka'),
       ('Wali wa Nazi na Maharage', 'pilauYaKuku'),
     ]) {

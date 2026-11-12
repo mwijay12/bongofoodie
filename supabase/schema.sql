@@ -900,13 +900,6 @@ values
     (select id from public.categories where name = 'Traditional Stews')
   ),
   (
-    'Ndizi Mzuzu Kaanga',
-    'Caramelized ripe sweet plantain medallions lightly spiced with black pepper and sea salt, served with pili pili ya ukwaju.',
-    'fries',
-    4000, 4.6, 39, 320, 4, 10,
-    (select id from public.categories where name = 'Swahili Bites')
-  ),
-  (
     'Bongo Pili-Pili Smash Burger',
     'Double flame-seared Tanzanian beef patty, melted cheddar, smoky pili-pili aioli, avocado, and crispy onions on a toasted brioche bun.',
     'burgerOne',
@@ -943,6 +936,16 @@ set
   protein = excluded.protein,
   prep_time_mins = excluded.prep_time_mins,
   category_id = excluded.category_id;
+
+-- 13C1b. Retire dishes that were removed from the catalogue.
+-- Seeding uses "on conflict do update", so a dish dropped from this file would
+-- otherwise linger in an already-provisioned database. Remove it explicitly.
+-- Order history stores items as a JSON string in public.orders.items, not as a
+-- foreign key, so past orders keep their snapshot and are unaffected.
+-- favorites, menu_reviews and menu_customizations all reference
+-- public.menu(id) with "on delete cascade", so one delete removes the dish and
+-- its dependent rows.
+delete from public.menu where name = 'Ndizi Mzuzu Kaanga';
 
 -- 13C2. Premium dish-detail seed values (idempotent, admin setup path only)
 with menu_details(name, spice_level, ingredients, allergens, fun_fact_en, fun_fact_sw) as (
@@ -1004,14 +1007,6 @@ with menu_details(name, spice_level, ingredients, allergens, fun_fact_en, fun_fa
     'Chapati ni mkate bapa wenye tabaka unaopikwa kwenye sufuria moto.'
   ),
   (
-    'Ndizi Mzuzu Kaanga',
-    2,
-    array['plantain', 'black pepper', 'sea salt', 'tamarind']::text[],
-    '{}'::text[],
-    'Ripe plantains are naturally sweet before they are fried.',
-    'Ndizi mzuzu mbivu huwa na utamu wa asili kabla ya kukaangwa.'
-  ),
-  (
     'Bongo Pili-Pili Smash Burger',
     3,
     array['beef', 'cheddar', 'aioli', 'avocado', 'onions', 'brioche bun']::text[],
@@ -1062,7 +1057,7 @@ join public.customizations c on (
   (m.name in ('Chipsi Mayai', 'Nyama Choma & Ugali', 'Mishkaki ya Ng''ombe') and c.name in ('Kachumbari Extra', 'Pili Pili Kali', 'Ndimu (Fresh Lime)', 'Ugali Kipande', 'Stoney Tangawizi'))
   or (m.name in ('Pilau ya Kuku', 'Wali wa Nazi na Maharage') and c.name in ('Kachumbari Extra', 'Pili Pili Kali', 'Avocado Slices', 'Ndizi Mzuzu Extra', 'Juisi ya Passion'))
   or (m.name in ('Samaki wa Kupaka', 'Mchuzi wa Kuku na Chapati') and c.name in ('Chapati Moja', 'Mchicha wa Nazi', 'Ndimu (Fresh Lime)', 'Ugali Kipande', 'Juisi ya Passion'))
-  or (m.name in ('Bongo Pili-Pili Smash Burger', 'Zanzibar Spice Wood-Fired Pizza', 'Ndizi Mzuzu Kaanga') and c.name in ('Cheese Slice', 'Avocado Slices', 'Chips Kaanga', 'Pili Pili Kali', 'Stoney Tangawizi'))
+  or (m.name in ('Bongo Pili-Pili Smash Burger', 'Zanzibar Spice Wood-Fired Pizza') and c.name in ('Cheese Slice', 'Avocado Slices', 'Chips Kaanga', 'Pili Pili Kali', 'Stoney Tangawizi'))
 )
 on conflict (menu_id, customization_id) do nothing;
 

@@ -59,14 +59,6 @@ const _copy = <String,
     descriptionSw:
         'Mchuzi wa kuku wa nazi, ukitolewa na chapati mbili za tabaka zilizopakwa samli.',
   ),
-  'menu-ndizi-mzuzu': (
-    en: 'Fried Plantains',
-    sw: 'Ndizi za Kukaanga',
-    descriptionEn:
-        'Ripe plantain slices fried until golden, served with tamarind chilli sauce.',
-    descriptionSw:
-        'Vipande vya ndizi mzuzu mbivu vilivyokaangwa hadi kuwa vya dhahabu, vikitolewa na pilipili ya ukwaju.',
-  ),
   'menu-bongo-burger': (
     en: 'Bongo Chilli Beef Burger',
     sw: 'Baga ya Nyama na Pilipili',
