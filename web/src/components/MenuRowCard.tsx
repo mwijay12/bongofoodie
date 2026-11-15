@@ -31,16 +31,16 @@ export default function MenuRowCard({ item }: MenuRowCardProps) {
                   name.toLowerCase().includes('beverage');
 
   return (
-    <div className="flex flex-row bg-white border border-border p-3 rounded-2xl items-center gap-4 shadow-sm hover:shadow-md transition-shadow duration-200 w-full mb-3">
+    <div className="flex flex-row bg-white border border-border p-3 sm:p-3.5 rounded-2xl items-center gap-3.5 sm:gap-4 shadow-sm hover:shadow-md transition-shadow duration-200 w-full">
       {/* Left Image or Fallback Icon */}
-      <div className="size-20 rounded-xl bg-card border border-border flex items-center justify-center relative overflow-hidden shrink-0">
+      <div className="size-[76px] sm:size-20 rounded-xl bg-gradient-to-br from-[#F4EEE6] to-[#EFE6DA] flex items-center justify-center relative overflow-hidden shrink-0">
         {hasPic ? (
           <Image
             src={foodImg}
             alt={name}
-            width={72}
-            height={72}
-            className="object-contain drop-shadow-sm"
+            width={160}
+            height={160}
+            className="size-full object-contain p-1.5 drop-shadow-sm"
           />
         ) : (
           <div className="size-16 rounded-full bg-orange-100 flex items-center justify-center shadow-xs">
@@ -56,18 +56,18 @@ export default function MenuRowCard({ item }: MenuRowCardProps) {
       {/* Middle Details */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <h3 className="font-heading font-bold text-foreground-dark text-base truncate">
+          <h3 className="font-heading font-bold text-foreground-dark text-[15px] sm:text-base truncate">
             {name}
           </h3>
-          <span className="flex items-center gap-0.5 text-xs font-bold text-secondary shrink-0">
+          <span className="flex items-center gap-0.5 text-[13px] font-bold text-amber-600 shrink-0">
             <Star className="size-3 fill-secondary stroke-none" />
             {rating.toFixed(1)}
           </span>
         </div>
-        <p className="text-xs text-muted-foreground line-clamp-2 mb-1.5 font-medium leading-relaxed">
+        <p className="text-[13px] text-muted-foreground line-clamp-2 mb-1.5 font-medium leading-relaxed">
           {description}
         </p>
-        <span className="font-heading font-extrabold text-primary text-sm">
+        <span className="font-heading font-extrabold text-primary text-[15px]">
           TSh {price.toLocaleString()}
         </span>
       </div>
@@ -75,7 +75,8 @@ export default function MenuRowCard({ item }: MenuRowCardProps) {
       {/* Right Action */}
       <button
         onClick={() => addItem({ id: $id, name, price, image_url })}
-        className="size-10 rounded-xl bg-primary text-white flex items-center justify-center hover:bg-secondary transition-colors duration-200 shrink-0 shadow-sm shadow-primary/20"
+        aria-label={`Add ${name} to cart`}
+        className="size-11 rounded-xl bg-primary text-white flex items-center justify-center hover:bg-primary-soft active:scale-95 transition-all duration-200 shrink-0 shadow-sm shadow-primary/25"
       >
         <Plus className="size-5" />
       </button>

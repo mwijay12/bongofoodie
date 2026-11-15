@@ -1,17 +1,18 @@
 @import "tailwindcss";
 
 /*
- * ONE palette. Every orange below is a role, not a different brand colour:
- *   primary      the readable orange — text, icons, links on cream
- *   primary-soft the accent surface thrown behind text — buttons, chips
- *   secondary    the warm neutral that used to be an unrelated yellow
+ * ONE palette, bold warm. Every orange is a role, not a different brand colour:
+ *   primary      hot orange — actions, price, active state
+ *   primary-soft the lighter orange used only for hover on a filled button
+ *   secondary    amber, for highlights on dark surfaces
+ *   ember        the near-black that 3D and glow read against
  *
- * Before this file was consolidated there were four oranges (#B04A05,
- * #F6821F, #F58220, #FBAD41) spread across @theme and :root, and the light
- * cream text on them failed contrast. Values now come straight from the
- * Flutter app's app_colors.dart so both clients look like one product.
+ * There used to be four oranges (#B04A05, #F6821F, #F58220, #FBAD41) split
+ * across @theme and :root, and cream text on them failed contrast.
  */
 @theme {
+  --breakpoint-xs: 30rem;
+
   /* Bold warm — street-food energy. Primary is hot orange; ember is the
      editorial dark that makes 3D and glow read properly. */
   --color-primary: #F26522;
@@ -90,12 +91,26 @@ html {
   scroll-behavior: smooth;
 }
 
+html {
+  font-size: 16px;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Nothing in the product should render below 12px — it was the single biggest
+   cause of the "fonts are too small" complaint. */
+[class*='text-\\[10px\\]'],
+[class*='text-\\[11px\\]'] {
+  font-size: 0.75rem !important;
 }
 
 ::selection {
