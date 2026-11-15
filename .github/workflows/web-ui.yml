@@ -26,10 +26,12 @@ jobs:
           npx eslint
           src/app/page.tsx
           src/app/layout.tsx
+          src/components/HeatShader.tsx
           src/components/Navbar.tsx
           src/components/SwahiliTrivia.tsx
-          src/lib/imageMap.ts
           src/lib/appRelease.ts
+          src/lib/contact.ts
+          src/lib/imageMap.ts
           tests/home.spec.ts
           playwright.config.ts
       - run: npm run build

@@ -1,10 +1,15 @@
+import { repoUrl } from '@/lib/repo';
+
 /**
  * Where the real Flutter showcase build is handed out.
  *
  * The APK is published by `.github/workflows/showcase-release.yml` as a
  * GitHub **prerelease**, so `/releases/latest` never resolves and must not be
- * used here. Bump `tag` when a new showcase release is published, and keep it
- * recorded on the release page so the origin of the file stays auditable.
+ * used here. Bump `tag` when a new showcase release is published; the release
+ * page keeps the build auditable.
+ *
+ * Owner/name come from `lib/repo.ts`, which is the only place a repo rename
+ * needs to be reflected.
  */
 export const appRelease = {
   tag: 'showcase-v3',
@@ -18,6 +23,8 @@ export const appRelease = {
   minAndroid: 'Android 7.0+',
 } as const;
 
-export const appReleaseUrl = `https://github.com/mwijay12/bongofoodie/releases/download/${appRelease.tag}/${appRelease.fileName}`;
+export const appReleaseUrl = `${repoUrl}/releases/download/${appRelease.tag}/${appRelease.fileName}`;
 
-export const appReleasePageUrl = `https://github.com/mwijay12/bongofoodie/releases/tag/${appRelease.tag}`;
+export const appReleasePageUrl = `${repoUrl}/releases/tag/${appRelease.tag}`;
+
+export { repoUrl };
