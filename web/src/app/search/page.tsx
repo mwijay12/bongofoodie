@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getMenu, getCategories } from '@/lib/supabaseDb';
 import { MenuItem, Category } from '@/types';
 import MenuCard from '@/components/MenuCard';
@@ -17,43 +17,47 @@ export default function SearchPage() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
 
+  // Categories load once on mount. The setState happens after the await, inside
+  // an async callback, so it is not a synchronous setState-in-effect (which
+  // React 19's lint rule flags for causing cascading renders).
   useEffect(() => {
-    loadCategories();
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const data = await getCategories();
+        if (!cancelled) setCategories([{ $id: 'all', name: 'All' }, ...data]);
+      } catch (e) {
+        console.error('[Load Categories Error]', e);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Fetch menu dynamically when search query or category filters change (with debounced search query)
+  // Debounced so a typing burst does not fire one request per keystroke.
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      loadMenu(activeCategory, searchQuery);
-    }, 300); // 300ms debounce delay
+    let cancelled = false;
 
-    return () => clearTimeout(delayDebounceFn);
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const data = await getMenu({ category: activeCategory, query: searchQuery });
+        if (!cancelled) setMenuItems(data);
+      } catch (e) {
+        console.error('[Load Menu Error]', e);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [activeCategory, searchQuery]);
-
-  const loadCategories = async () => {
-    try {
-      const data = await getCategories();
-      // Prepend an 'All' category option
-      setCategories([{ $id: 'all', name: 'All' }, ...data]);
-    } catch (e) {
-      console.error('[Load Categories Error]', e);
-    }
-  };
-
-  const loadMenu = async (categoryFilter: string, queryFilter: string) => {
-    setLoading(true);
-    try {
-      const data = await getMenu({
-        category: categoryFilter,
-        query: queryFilter
-      });
-      setMenuItems(data);
-    } catch (e) {
-      console.error('[Load Menu Error]', e);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleClearSearch = () => {
     setSearchQuery('');
