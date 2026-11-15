@@ -4,14 +4,47 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { AnimatePresence, MotionConfig, motion, useReducedMotion } from 'motion/react';
-import { ArrowDown, ArrowRight, Flame, MapPin, MessageCircle, ShoppingBag } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Clock, Flame, MessageCircle, Star } from 'lucide-react';
+import HeatShader from '@/components/HeatShader';
 import SwahiliTrivia from '@/components/SwahiliTrivia';
+import { contact, contactLinks } from '@/lib/contact';
+import { appRelease, appReleaseUrl, repoUrl } from '@/lib/appRelease';
 import styles from './home.module.css';
 
 const dishes = [
-  { name: 'Nyama Choma', detail: '& ugali', image: '/assets/dishes/nyama_choma_ugali.png', note: 'Charcoal, kachumbari, good company.', label: 'From the grill', alt: 'Charcoal-grilled beef with ugali and fresh tomato-onion kachumbari' },
-  { name: 'Chipsi Mayai', detail: 'Dar’s street-food classic', image: '/assets/dishes/chipsi_mayai.png', note: 'Golden chips. Fresh eggs. A little pili pili.', label: 'A Dar favourite', alt: 'Golden potato and egg omelette with fresh kachumbari on a ceramic plate' },
-  { name: 'Zanzibar Pilau', detail: 'with beef & whole spices', image: '/assets/dishes/zanzibar_pilau.png', note: 'Cardamom, cloves and a taste of the coast.', label: 'From the spice coast', alt: 'Beef pilau with long-grain spiced rice and a fresh salad' },
+  {
+    name: 'Nyama Choma',
+    swahili: 'Nyama choma na ugali',
+    price: 'TSh 13,500',
+    minutes: 25,
+    image: '/assets/dishes/nyama_choma_ugali.png',
+    alt: 'Charcoal-grilled beef with ugali and fresh tomato-onion kachumbari',
+    note: 'Charcoal-grilled beef ribs, warm ugali, mchicha wa nazi and kachumbari.',
+  },
+  {
+    name: 'Chipsi Mayai',
+    swahili: 'Chipsi mayai',
+    price: 'TSh 5,500',
+    minutes: 12,
+    image: '/assets/dishes/chipsi_mayai.png',
+    alt: 'Golden potato and egg omelette with fresh kachumbari on a ceramic plate',
+    note: 'Golden chips folded into a fresh egg omelette with tamarind pili pili.',
+  },
+  {
+    name: 'Zanzibar Pilau',
+    swahili: 'Pilau ya nyama',
+    price: 'TSh 10,000',
+    minutes: 20,
+    image: '/assets/dishes/zanzibar_pilau.png',
+    alt: 'Beef pilau with long-grain spiced rice and a fresh salad',
+    note: 'Basmati steamed with beef, cardamom and cloves from the spice coast.',
+  },
+];
+
+const steps = [
+  { number: '01', title: 'Choose your plate', body: 'Browse the Swahili menu, or ask Chef AI what fits your evening.' },
+  { number: '02', title: 'Pay how you like', body: 'Lipa Namba or cash on delivery. No card, no account gymnastics.' },
+  { number: '03', title: 'Follow it live', body: 'Placed, preparing, ready, on the way — four steps you can watch.' },
 ];
 
 export default function Home() {
@@ -24,35 +57,106 @@ export default function Home() {
       <div className={styles.home}>
         <section className={styles.hero} aria-labelledby="home-title">
           <div className={styles.heroCopy}>
-            <p className={styles.eyebrow}><MapPin size={15} aria-hidden="true" /> Dar es Salaam, Tanzania</p>
-            <h1 id="home-title">Karibu.<br />Good food.<br /><span>Our coast.</span></h1>
-            <p className={styles.intro}>From the charcoal grill to the spice markets of Zanzibar. Find your Swahili favourites, all in one place.</p>
+            <p className={styles.eyebrow}>
+              <span className={styles.dot} aria-hidden="true" />
+              {contact.kitchen} · {contact.city.split(',')[0]}
+            </p>
+            <h1 id="home-title">
+              Karibu.
+              <br />
+              Good food,
+              <br />
+              <span>cooked hot.</span>
+            </h1>
+            <p className={styles.intro}>
+              Swahili favourites from the charcoal grill and the spice coast — cooked in
+              Kijitonyama and brought to your door in Dar es Salaam.
+            </p>
             <div className={styles.actions}>
-              <Link href="/search" className={styles.primary}>Explore the menu <ArrowRight size={19} aria-hidden="true" /></Link>
-              <Link href="/chef-ai" className={styles.secondary}>Help me choose <MessageCircle size={18} aria-hidden="true" /></Link>
+              <Link href="/search" className={styles.primary}>
+                Explore the menu
+                <ArrowRight size={18} aria-hidden="true" />
+              </Link>
+              <Link href="/chef-ai" className={styles.secondary}>
+                Ask Chef AI
+                <MessageCircle size={17} aria-hidden="true" />
+              </Link>
             </div>
-            <a href="#coastal-table" className={styles.downLink}><ArrowDown size={16} aria-hidden="true" /> A taste of home</a>
+            <dl className={styles.proof}>
+              <div>
+                <dt>Signature dishes</dt>
+                <dd>11</dd>
+              </div>
+              <div>
+                <dt>Average rating</dt>
+                <dd>
+                  <Star size={15} className={styles.star} aria-hidden="true" />
+                  4.8
+                </dd>
+              </div>
+              <div>
+                <dt>Delivery in Dar</dt>
+                <dd>TSh 2,000</dd>
+              </div>
+            </dl>
           </div>
+
           <div className={styles.heroVisual}>
+            <HeatShader className={styles.shader} />
             <div className={styles.plateHalo} aria-hidden="true" />
             <div className={styles.plateStage}>
               <AnimatePresence mode="wait" initial={false}>
-                <motion.div key={dish.name} className={styles.plate}
-                  initial={reduceMotion ? false : { opacity: 0, rotate: -6, scale: 0.96 }}
+                <motion.div
+                  key={dish.name}
+                  className={styles.plate}
+                  initial={reduceMotion ? false : { opacity: 0, rotate: -5, scale: 0.97 }}
                   animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                  exit={reduceMotion ? { opacity: 1 } : { opacity: 0, rotate: 5, scale: 0.97 }}
-                  transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 24 }}>
-                  <Image src={dish.image} alt={dish.alt} fill sizes="(max-width: 760px) 92vw, 580px" className={styles.foodImage} priority={selected === 0} />
+                  exit={reduceMotion ? { opacity: 1 } : { opacity: 0, rotate: 4, scale: 0.97 }}
+                  transition={
+                    reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 260, damping: 26 }
+                  }
+                >
+                  <Image
+                    src={dish.image}
+                    alt={dish.alt}
+                    fill
+                    sizes="(max-width: 760px) 88vw, 520px"
+                    className={styles.foodImage}
+                    priority={selected === 0}
+                  />
                 </motion.div>
               </AnimatePresence>
             </div>
+
             <div className={styles.dishCaption} aria-live="polite" aria-atomic="true">
-              <span>{dish.label}</span><h2>{dish.name}</h2><p>{dish.detail}</p>
+              <span className={styles.dishSwahili}>{dish.swahili}</span>
+              <h2>{dish.name}</h2>
+              <div className={styles.dishMeta}>
+                <span className={styles.price}>{dish.price}</span>
+                <span className={styles.minutes}>
+                  <Clock size={13} aria-hidden="true" />
+                  {dish.minutes} min
+                </span>
+              </div>
             </div>
+
             <div className={styles.dishPicker} role="group" aria-label="Preview a Swahili dish">
               {dishes.map((item, index) => (
-                <button key={item.name} aria-pressed={selected === index} onClick={() => setSelected(index)}>
-                  {selected === index && <motion.span className={styles.pickerActive} layoutId="dish-selection" transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 24 }} />}
+                <button
+                  key={item.name}
+                  type="button"
+                  aria-pressed={selected === index}
+                  onClick={() => setSelected(index)}
+                >
+                  {selected === index && (
+                    <motion.span
+                      className={styles.pickerActive}
+                      layoutId="dish-selection"
+                      transition={
+                        reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 320, damping: 28 }
+                      }
+                    />
+                  )}
                   <span className={styles.pickerLabel}>{item.name}</span>
                 </button>
               ))}
@@ -60,30 +164,119 @@ export default function Home() {
           </div>
         </section>
 
+        <section className={styles.how} aria-labelledby="how-title">
+          <div className={styles.sectionHead}>
+            <p className={styles.eyebrow}>From order to doorstep</p>
+            <h2 id="how-title">Three steps, no surprises.</h2>
+          </div>
+          <ol className={styles.steps}>
+            {steps.map((step) => (
+              <li key={step.number}>
+                <span className={styles.stepNumber}>{step.number}</span>
+                <h3>{step.title}</h3>
+                <p>{step.body}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
         <section id="coastal-table" className={styles.table} aria-labelledby="table-title">
           <div className={styles.sectionHeading}>
-            <div><p className={styles.eyebrow}>Made familiar. Made Swahili.</p><h2 id="table-title">The coastal table.</h2></div>
-            <Link href="/search">Browse the menu <ArrowRight size={18} aria-hidden="true" /></Link>
+            <div>
+              <p className={styles.eyebrow}>The coastal table</p>
+              <h2 id="table-title">Made familiar. Made Swahili.</h2>
+            </div>
+            <Link href="/search" className={styles.textLink}>
+              Browse the full menu
+              <ArrowRight size={17} aria-hidden="true" />
+            </Link>
           </div>
           <div className={styles.dishGrid}>
             {dishes.map((item, index) => (
               <Link key={item.name} href="/search" className={styles.dishCard}>
-                <div className={styles.cardImage}><span className={styles.cardNumber}>0{index + 1}</span><Image src={item.image} alt={item.alt} width={480} height={480} sizes="(max-width: 760px) 90vw, 33vw" /></div>
-                <div className={styles.cardTitle}><h3>{item.name}</h3><ArrowRight size={20} aria-hidden="true" /></div>
+                <div className={styles.cardImage}>
+                  <span className={styles.cardNumber}>0{index + 1}</span>
+                  <Image
+                    src={item.image}
+                    alt={item.alt}
+                    width={520}
+                    height={520}
+                    sizes="(max-width: 760px) 90vw, 33vw"
+                  />
+                </div>
+                <div className={styles.cardTitle}>
+                  <h3>{item.name}</h3>
+                  <span className={styles.cardPrice}>{item.price}</span>
+                </div>
                 <p>{item.note}</p>
               </Link>
             ))}
           </div>
-          <p className={styles.menuNote}>A few favourites from Swahili cooking. See the menu for current dishes, prices and availability.</p>
+          <p className={styles.menuNote}>
+            A few favourites. See the menu for current prices and availability.
+          </p>
         </section>
 
         <section className={styles.chefNote} aria-labelledby="chef-title">
-          <div className={styles.chefMark}><Flame size={30} strokeWidth={1.5} aria-hidden="true" /></div>
-          <div><p className={styles.eyebrow}>Your seat at the table</p><h2 id="chef-title">A little help finding your next favourite?</h2><p>Ask Chef AI about ingredients, Swahili recipes or what goes well together.</p></div>
-          <Link href="/chef-ai" className={styles.secondary}>Ask Chef AI <ArrowRight size={18} aria-hidden="true" /></Link>
+          <div className={styles.chefMark}>
+            <Flame size={26} strokeWidth={1.6} aria-hidden="true" />
+          </div>
+          <div>
+            <p className={styles.eyebrow}>Chef Atelier AI</p>
+            <h2 id="chef-title">Not sure what to eat tonight?</h2>
+            <p>
+              Ask about spice pairings, what is good today, or design a Swahili plate that
+              does not exist yet — then order it.
+            </p>
+          </div>
+          <Link href="/chef-ai" className={styles.secondary}>
+            Open Chef AI
+            <ArrowUpRight size={17} aria-hidden="true" />
+          </Link>
         </section>
+
         <SwahiliTrivia />
-        <Link href="/cart" className={styles.cartLink}><ShoppingBag size={20} aria-hidden="true" /><span>Already picked something? <strong>Review your bag</strong></span><ArrowRight size={18} aria-hidden="true" /></Link>
+
+        <section className={styles.appBand} aria-labelledby="app-title">
+          <Image
+            src="/assets/brand/app-icon.png"
+            alt=""
+            width={64}
+            height={64}
+            className={styles.appIcon}
+          />
+          <div>
+            <p className={styles.eyebrow}>The Flutter app</p>
+            <h2 id="app-title">Take BongoFoodie with you.</h2>
+            <p>
+              The full app — Chef AI, live order tracking, Kiswahili and English — as a{' '}
+              {appRelease.size} Android download.
+            </p>
+          </div>
+          <a href={appReleaseUrl} className={styles.primary} download>
+            Download APK
+          </a>
+        </section>
+
+        <section className={styles.contact} aria-labelledby="contact-title">
+          <div>
+            <p className={styles.eyebrow}>Talk to us</p>
+            <h2 id="contact-title">Something not right with an order?</h2>
+            <p>
+              Mail us and a person replies. Open {contact.hours.toLowerCase()}.
+            </p>
+          </div>
+          <div className={styles.contactLinks}>
+            <a href={contactLinks.email}>{contact.email}</a>
+            <a href={contactLinks.phone}>{contact.phoneDisplay}</a>
+            <a href={contactLinks.whatsapp} rel="noopener noreferrer" target="_blank">
+              WhatsApp
+            </a>
+            <a href={repoUrl} rel="noopener noreferrer" target="_blank">
+              GitHub
+            </a>
+          </div>
+        </section>
       </div>
     </MotionConfig>
   );

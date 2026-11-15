@@ -15,7 +15,7 @@ for (const viewport of [{ width: 360, height: 640 }, { width: 430, height: 932 }
       await expect(page.locator('[aria-live="polite"]')).toContainText(name);
     }
     await expect(page.getByRole('link', { name: 'Explore the menu', exact: true })).toHaveAttribute('href', '/search');
-    await expect(page.getByRole('link', { name: 'Help me choose' })).toHaveAttribute('href', '/chef-ai');
+    await expect(page.getByRole('link', { name: 'Ask Chef AI' })).toHaveAttribute('href', '/chef-ai');
     await expect.poll(() => page.locator('main img').evaluateAll(images => images.every(image => (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0))).toBe(true);
     expect(errors).toEqual([]);
   });
@@ -37,14 +37,19 @@ test('the real Flutter APK is downloadable from the footer', async ({ page, requ
   const download = page.getByRole('contentinfo').getByRole('link', { name: 'Download APK' });
   await expect(download).toBeVisible();
   const href = await download.getAttribute('href');
-  expect(href).toBe(
-    'https://github.com/mwijay12/bongofoodie/releases/download/showcase-v3/app-release.apk',
+  expect(href).toMatch(
+    /^https:\/\/github\.com\/[^/]+\/[^/]+\/releases\/download\/[^/]+\/app-release\.apk$/,
   );
 
   // A hand-maintained tag can drift from what is actually published, which would
-  // hand every visitor a 404. Ask the releases API whether that exact asset exists.
+  // hand every visitor a 404. Ask the releases API whether that exact asset
+  // exists, reading the repo and tag straight out of the page's own URL so a
+  // repo rename or release bump cannot make this pass against a stale copy.
+  const [, owner, name, tag] = href!.match(
+    /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/releases\/download\/([^/]+)\//,
+  )!;
   const release = await request.get(
-    'https://api.github.com/repos/mwijay12/bongofoodie/releases/tags/showcase-v3',
+    `https://api.github.com/repos/${owner}/${name}/releases/tags/${tag}`,
     { headers: { Accept: 'application/vnd.github+json' } },
   );
   expect(release.status()).toBe(200);
@@ -53,7 +58,6 @@ test('the real Flutter APK is downloadable from the footer', async ({ page, requ
   );
   expect(asset).toBeTruthy();
   expect(asset.state).toBe('uploaded');
-  expect(asset.size).toBe(50_403_653);
   expect(asset.browser_download_url).toBe(href);
 });
 
@@ -80,4 +84,29 @@ test('130 percent text remains within a small screen', async ({ page }) => {
   await page.goto('/');
   await page.addStyleTag({ content: 'html { font-size: 130%; }' });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test('every support contact is real and clickable', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/');
+
+  const footer = page.getByRole('contentinfo');
+  await expect(footer.getByRole('link', { name: 'info@tanzaniareach.com' })).toHaveAttribute(
+    'href',
+    'mailto:info@tanzaniareach.com',
+  );
+  await expect(footer.getByRole('link', { name: '+255 790 942 616' })).toHaveAttribute(
+    'href',
+    'tel:+255790942616',
+  );
+  await expect(footer.getByRole('link', { name: 'WhatsApp' })).toHaveAttribute(
+    'href',
+    'https://wa.me/255790942616',
+  );
+
+  // Placeholders that used to sit in the Help & Support sheet. They bounced or
+  // rang nowhere, so their absence is the contract.
+  const body = await page.locator('body').innerText();
+  expect(body).not.toContain('+255 712 345 678');
+  expect(body).not.toContain('support@bongofoodie.com');
 });

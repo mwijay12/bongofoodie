@@ -1,72 +1,116 @@
 @import "tailwindcss";
 
+/*
+ * ONE palette. Every orange below is a role, not a different brand colour:
+ *   primary      the readable orange — text, icons, links on cream
+ *   primary-soft the accent surface thrown behind text — buttons, chips
+ *   secondary    the warm neutral that used to be an unrelated yellow
+ *
+ * Before this file was consolidated there were four oranges (#B04A05,
+ * #F6821F, #F58220, #FBAD41) spread across @theme and :root, and the light
+ * cream text on them failed contrast. Values now come straight from the
+ * Flutter app's app_colors.dart so both clients look like one product.
+ */
 @theme {
+  --color-primary: #C2560A;
+  --color-primary-foreground: #FFFFFF;
+  --color-primary-soft: #F58220;
+  --color-primary-deep: #8A3300;
+
+  --color-secondary: #F4EEE6;
+  --color-secondary-foreground: #2B1B12;
+
+  --color-cream: #FAF7F2;
+  --color-ink: #2B1B12;
+  --color-ink-muted: #6F645D;
+  --color-ember: #1A100B;
+  --color-spice: #11543A;
+  --color-gold: #F2B33D;
+  --color-line: #EADFD2;
+
   --color-background-warm: #FAF7F2;
   --color-foreground-dark: #2B1B12;
-  --color-primary: #B04A05;
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #FBAD41;
-  --color-secondary-foreground: #1D1D1D;
   --color-background: #FAF7F2;
-  --color-foreground: #1D1D1D;
-  --color-card: #F8F8F8;
-  --color-card-foreground: #1D1D1D;
-  --color-muted: #F0F0F0;
-  --color-muted-foreground: #6B7280;
-  --color-destructive: #FF4040;
-  --color-destructive-foreground: #ffffff;
-  --color-border: #E2E2E2;
-  --color-input: #E2E2E2;
-  --color-ring: #F6821F;
-  
-  --font-sans: var(--font-quicksand), sans-serif;
-  --font-heading: var(--font-outfit), sans-serif;
+  --color-foreground: #2B1B12;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #2B1B12;
+  --color-muted: #F4EEE6;
+  --color-muted-foreground: #6F645D;
+  --color-destructive: #D64545;
+  --color-destructive-foreground: #FFFFFF;
+  --color-border: #EADFD2;
+  --color-input: #EADFD2;
+  --color-ring: #C2560A;
+
+  --font-sans: var(--font-quicksand), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-quicksand), ui-sans-serif, system-ui, sans-serif;
 
   --animate-slide-in: slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
   @keyframes slide-in {
-    from {
-      transform: translateX(100%);
-    }
-    to {
-      transform: translateX(0);
-    }
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
   }
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.875rem;
   --background: #FAF7F2;
-  --foreground: #1D1D1D;
-  --card: #F8F8F8;
-  --card-foreground: #1D1D1D;
-  --popover: #F8F8F8;
-  --popover-foreground: #1D1D1D;
-  --primary: #F6821F;
-  --primary-foreground: #ffffff;
-  --secondary: #FBAD41;
-  --secondary-foreground: #1D1D1D;
-  --muted: #F0F0F0;
-  --muted-foreground: #6B7280;
-  --accent: #F6821F;
-  --accent-foreground: #ffffff;
-  --destructive: #FF4040;
-  --destructive-foreground: #ffffff;
-  --border: #E2E2E2;
-  --input: #E2E2E2;
-  --ring: #F6821F;
+  --foreground: #2B1B12;
+  --card: #FFFFFF;
+  --card-foreground: #2B1B12;
+  --popover: #FFFFFF;
+  --popover-foreground: #2B1B12;
+  --primary: #C2560A;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F4EEE6;
+  --secondary-foreground: #2B1B12;
+  --muted: #F4EEE6;
+  --muted-foreground: #6F645D;
+  --accent: #C2560A;
+  --accent-foreground: #FFFFFF;
+  --destructive: #D64545;
+  --destructive-foreground: #FFFFFF;
+  --border: #EADFD2;
+  --input: #EADFD2;
+  --ring: #C2560A;
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
-a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
-  outline: 3px solid var(--color-primary);
-  outline-offset: 3px;
+::selection {
+  background: #FDE8D3;
+  color: #2B1B12;
 }
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   .animate-slide-in { animation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

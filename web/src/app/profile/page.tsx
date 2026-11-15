@@ -10,8 +10,9 @@ import {
   getOrdersForProfileWeb,
   getUserFavoritesWeb,
 } from '@/lib/supabaseDb';
-import { User, LogOut, Loader2, Camera, Mail, Save, AlertCircle, Receipt, Heart, MapPin, HelpCircle, FileText, ChevronRight, X, Clock, CheckCircle2, XCircle, Package, ChefHat, Star } from 'lucide-react';
+import { User, LogOut, Loader2, Camera, Mail, Save, AlertCircle, Receipt, Heart, MapPin, HelpCircle, FileText, ChevronRight, X, Clock, CheckCircle2, XCircle, Package, ChefHat, Star, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
+import { contact, contactLinks, supportMailLink } from '@/lib/contact';
 import Achievements from '@/components/Achievements';
 
 export default function ProfilePage() {
@@ -555,35 +556,56 @@ export default function ProfilePage() {
                       <h4 className="font-heading font-bold text-sm text-foreground-dark">Bongo Foodie Support</h4>
                     </div>
                     <p className="text-xs text-muted-foreground font-semibold leading-relaxed mb-4">
-                      Need help with an order or have culinary questions? Contact our Dar es Salaam headquarters directly.
+                      Need help with an order or have culinary questions? Contact our Dar es Salaam
+                      kitchen directly — a person reads every message.
                     </p>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-3 bg-white border border-border rounded-xl">
-                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <div className="space-y-2">
+                      <a
+                        href={supportMailLink('Order help', `Hi BongoFoodie team,\n\nMy order number is: \nWhat happened: \n\nAsante.`)}
+                        className="flex items-center gap-3 p-3 bg-white border border-border rounded-xl hover:border-primary transition-colors"
+                      >
+                        <span className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                          <Mail className="size-4" />
+                        </span>
+                        <span>
+                          <span className="block text-xs font-bold text-foreground-dark">Email</span>
+                          <span className="block text-[11px] text-muted-foreground font-semibold">{contact.email}</span>
+                        </span>
+                      </a>
+                      <a
+                        href={contactLinks.phone}
+                        className="flex items-center gap-3 p-3 bg-white border border-border rounded-xl hover:border-primary transition-colors"
+                      >
+                        <span className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                           <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-foreground-dark">Phone</p>
-                          <p className="text-[11px] text-muted-foreground font-semibold">+255 712 345 678</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-white border border-border rounded-xl">
-                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                          <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-foreground-dark">Email</p>
-                          <p className="text-[11px] text-muted-foreground font-semibold">support@bongofoodie.com</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-white border border-border rounded-xl">
-                        <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                        </span>
+                        <span>
+                          <span className="block text-xs font-bold text-foreground-dark">Phone</span>
+                          <span className="block text-[11px] text-muted-foreground font-semibold">{contact.phoneDisplay}</span>
+                        </span>
+                      </a>
+                      <a
+                        href={contactLinks.whatsapp}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 bg-white border border-border rounded-xl hover:border-primary transition-colors"
+                      >
+                        <span className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                          <MessageCircle className="size-4" />
+                        </span>
+                        <span>
+                          <span className="block text-xs font-bold text-foreground-dark">WhatsApp</span>
+                          <span className="block text-[11px] text-muted-foreground font-semibold">Fastest for order updates</span>
+                        </span>
+                      </a>
+                      <div className="flex items-center gap-3 p-3 bg-muted/60 border border-border rounded-xl">
+                        <span className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                           <Clock className="size-4" />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-foreground-dark">Hours</p>
-                          <p className="text-[11px] text-muted-foreground font-semibold">Daily: 08:00 AM - 10:00 PM</p>
-                        </div>
+                        </span>
+                        <span>
+                          <span className="block text-xs font-bold text-foreground-dark">Hours</span>
+                          <span className="block text-[11px] text-muted-foreground font-semibold">{contact.hours}</span>
+                        </span>
                       </div>
                     </div>
                   </div>
