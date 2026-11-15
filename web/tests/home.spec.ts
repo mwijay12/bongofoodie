@@ -8,11 +8,11 @@ for (const viewport of [{ width: 360, height: 640 }, { width: 430, height: 932 }
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Karibu.');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    const picker = page.getByRole('group', { name: 'Preview a Swahili dish' });
-    for (const name of ['Chipsi Mayai', 'Zanzibar Pilau', 'Nyama Choma']) {
-      await picker.getByRole('button', { name, exact: true }).click();
-      await expect(picker.getByRole('button', { name, exact: true })).toHaveAttribute('aria-pressed', 'true');
-      await expect(page.locator('[aria-live="polite"]')).toContainText(name);
+    // The hero is a live Three.js canvas now; assert it mounted rather than the
+    // old dish picker, which moved into the 3D scene.
+    await expect(page.locator('canvas').first()).toBeVisible();
+    for (const name of ['Nyama Choma', 'Chipsi Mayai', 'Zanzibar Pilau']) {
+      await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
     }
     await expect(page.getByRole('link', { name: 'Explore the menu', exact: true })).toHaveAttribute('href', '/search');
     await expect(page.getByRole('link', { name: 'Ask Chef AI' })).toHaveAttribute('href', '/chef-ai');
@@ -62,14 +62,11 @@ test('the real Flutter APK is downloadable from the footer', async ({ page, requ
 });
 
 
-test('keyboard selection, reduced motion and trivia feedback', async ({ page }) => {
+test('reduced motion still renders the hero and the trivia works', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  const button = page.getByRole('button', { name: 'Chipsi Mayai', exact: true });
-  await button.focus();
-  await page.keyboard.press('Enter');
-  await expect(button).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.locator('[aria-live="polite"]')).toContainText('Chipsi Mayai');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Karibu.');
+  // The shader/marquee must not run, but the content must still be there.
   expect(await page.locator('h1').evaluate(element => getComputedStyle(element.parentElement!).animationName)).toBe('none');
   const quiz = page.getByRole('region', { name: 'Know your spices?' });
   await quiz.getByRole('button').first().click();

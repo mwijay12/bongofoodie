@@ -27,7 +27,10 @@ jobs:
           src/app/page.tsx
           src/app/layout.tsx
           src/components/HeatShader.tsx
+          src/components/Logo.tsx
           src/components/Navbar.tsx
+          src/components/PlateScene.tsx
+          src/components/SmoothScroll.tsx
           src/components/SwahiliTrivia.tsx
           src/lib/appRelease.ts
           src/lib/contact.ts

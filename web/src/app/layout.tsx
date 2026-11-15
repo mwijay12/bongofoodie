@@ -33,6 +33,7 @@ import Image from 'next/image';
 import { Download } from 'lucide-react';
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
+import SmoothScroll from "@/components/SmoothScroll";
 import { appRelease, appReleaseUrl, appReleasePageUrl } from "@/lib/appRelease";
 import { contact, contactLinks } from "@/lib/contact";
 
@@ -44,6 +45,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${outfit.variable} ${quicksand.variable} h-full`}>
       <body className="min-h-full bg-background-warm text-foreground-dark antialiased font-sans flex flex-col">
+        <SmoothScroll />
         <Navbar />
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-6 pb-20 md:pb-12">
           {children}
