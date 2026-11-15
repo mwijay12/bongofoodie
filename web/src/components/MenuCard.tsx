@@ -51,38 +51,55 @@ export default function MenuCard({ item }: MenuCardProps) {
 
   return (
     <>
-      {/* Card - Click to open details */}
-      <div onClick={() => setShowModal(true)} className="bg-white border border-border rounded-2xl pt-16 pb-4 px-4 flex flex-col items-center justify-between relative shadow-sm hover:shadow-md transition-shadow duration-200 h-64 mt-8 cursor-pointer">
-        {/* Rating Badge */}
-        <div className="absolute top-3 right-3 bg-amber-500/10 border border-amber-500/20 text-amber-600 px-2 py-0.5 rounded-lg flex items-center gap-1 text-xs font-extrabold shadow-xs z-10">
-          <Star className="size-3 fill-amber-500 stroke-none" />
-          <span>{rating.toFixed(1)}</span>
-        </div>
-
-        {/* Food Image */}
-        <div className="absolute -top-10 w-28 h-28 flex items-center justify-center">
+      {/* Card. The artwork sits INSIDE the card in its own tinted panel at the
+          top — it used to be absolutely positioned above the card, which drew a
+          rectangle straight through the dish name and left the row overlapping. */}
+      <article
+        onClick={() => setShowModal(true)}
+        className="group bg-white border border-border rounded-2xl overflow-hidden flex flex-col shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full"
+      >
+        {/* Art panel */}
+        <div className="relative bg-gradient-to-br from-[#F4EEE6] to-[#EFE6DA] aspect-[4/3] flex items-center justify-center overflow-hidden">
           {hasPic ? (
-            <Image src={foodImg} alt={name} width={112} height={112} className="object-contain drop-shadow-md rounded-lg" priority />
+            <Image
+              src={foodImg}
+              alt={name}
+              width={260}
+              height={260}
+              sizes="(max-width: 768px) 45vw, 22vw"
+              className="size-full object-contain p-3 drop-shadow-sm transition-transform duration-500 group-hover:scale-105"
+              priority
+            />
           ) : (
-            <div className="size-24 rounded-full bg-orange-100 border-4 border-white flex items-center justify-center shadow-md">
-              {isDrink ? <CupSoda className="size-10 text-primary" /> : <Utensils className="size-10 text-primary" />}
+            <div className="size-20 rounded-full bg-orange-100 border-4 border-white flex items-center justify-center shadow-md">
+              {isDrink ? <CupSoda className="size-9 text-primary" /> : <Utensils className="size-9 text-primary" />}
             </div>
           )}
+
+          {/* Rating — glass pill so it reads on any artwork */}
+          <div className="absolute top-2.5 right-2.5 bg-white/92 backdrop-blur-sm border border-border px-2 py-1 rounded-full flex items-center gap-1 text-xs font-extrabold text-foreground-dark shadow-sm">
+            <Star className="size-3 fill-amber-500 stroke-none" />
+            <span>{rating.toFixed(1)}</span>
+          </div>
         </div>
 
-        <div className="w-full text-center space-y-1 mt-2">
-          <h3 className="font-heading font-bold text-foreground-dark text-base line-clamp-1">{name}</h3>
-          <p className="text-xs text-muted-foreground line-clamp-2 px-1 font-medium leading-relaxed">{description}</p>
-        </div>
+        {/* Body */}
+        <div className="flex flex-col flex-1 p-4">
+          <h3 className="font-heading font-bold text-foreground-dark text-[15px] leading-snug line-clamp-2">{name}</h3>
+          <p className="text-[13px] text-muted-foreground line-clamp-2 mt-1.5 font-medium leading-relaxed">{description}</p>
 
-        <div className="w-full flex items-center justify-between mt-3 pt-3 border-t border-muted">
-          <span className="font-heading font-extrabold text-primary text-sm">TSh {price.toLocaleString()}</span>
-          <button onClick={(e) => { e.stopPropagation(); handleAddToCart(); }}
-            className="size-9 rounded-xl bg-primary text-white flex items-center justify-center hover:bg-secondary transition-colors duration-200 shadow-sm shadow-primary/20">
-            <Plus className="size-5" />
-          </button>
+          <div className="flex items-center justify-between mt-auto pt-3.5">
+            <span className="font-heading font-extrabold text-primary text-base">TSh {price.toLocaleString()}</span>
+            <button
+              onClick={(e) => { e.stopPropagation(); handleAddToCart(); }}
+              aria-label={`Add ${name} to cart`}
+              className="size-10 rounded-xl bg-primary text-white flex items-center justify-center hover:bg-primary-soft active:scale-95 transition-all duration-200 shadow-sm shadow-primary/25"
+            >
+              <Plus className="size-5" />
+            </button>
+          </div>
         </div>
-      </div>
+      </article>
 
       {/* Details Modal - like mobile app */}
       {showModal && (

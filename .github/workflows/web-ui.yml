@@ -28,6 +28,8 @@ jobs:
           src/app/layout.tsx
           src/components/HeatShader.tsx
           src/components/Logo.tsx
+          src/components/MenuCard.tsx
+          src/components/MenuRowCard.tsx
           src/components/Navbar.tsx
           src/components/PlateScene.tsx
           src/components/SmoothScroll.tsx
@@ -35,6 +37,8 @@ jobs:
           src/lib/appRelease.ts
           src/lib/contact.ts
           src/lib/imageMap.ts
+          src/lib/showcaseData.ts
+          src/app/search/page.tsx
           tests/home.spec.ts
           playwright.config.ts
       - run: npm run build

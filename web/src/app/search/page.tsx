@@ -65,8 +65,8 @@ export default function SearchPage() {
       {/* Search Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="font-heading text-3xl font-bold text-foreground-dark">Search Menu</h1>
-          <p className="text-muted-foreground mt-1 font-medium">Browse and discover Swahili food delicacies.</p>
+          <h1 className="font-heading text-3xl md:text-4xl font-bold tracking-tight text-foreground-dark">Menyu</h1>
+          <p className="text-[15px] text-muted-foreground mt-1.5 font-medium">Browse and discover Swahili food delicacies.</p>
         </div>
 
         {/* View Toggle Buttons */}
@@ -106,7 +106,7 @@ export default function SearchPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search food items (e.g., Nyama Choma, Chipsi Mayai)..."
-          className="w-full bg-white border border-border rounded-xl pl-11 pr-10 py-3.5 text-sm font-sans font-medium text-foreground-dark focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+          className="w-full bg-white border border-border rounded-xl pl-11 pr-10 py-3.5 text-[15px] font-sans font-medium text-foreground-dark placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-all shadow-sm"
         />
         {searchQuery && (
           <button
@@ -127,7 +127,7 @@ export default function SearchPage() {
               <button
                 key={cat.$id}
                 onClick={() => setActiveCategory(cat.name)}
-                className={`px-5 py-2.5 rounded-full text-xs font-bold font-sans transition-all shrink-0 border uppercase tracking-wider ${
+                className={`px-5 py-2.5 rounded-full text-[13px] font-bold font-sans transition-all shrink-0 border tracking-wide ${
                   isActive
                     ? 'bg-primary text-white border-primary shadow-sm shadow-primary/20'
                     : 'bg-white text-muted-foreground border-border hover:text-foreground-dark hover:border-muted-foreground/30'
@@ -147,12 +147,12 @@ export default function SearchPage() {
         </div>
       ) : menuItems.length === 0 ? (
         <div className="text-center py-20 bg-white border border-border rounded-3xl">
-          <p className="text-muted-foreground font-semibold">No food items found matching your selection.</p>
+          <p className="text-[15px] text-muted-foreground font-semibold">No food items found matching your selection.</p>
         </div>
       ) : (
-        <div className={viewType === 'grid' 
-          ? "grid grid-cols-2 md:grid-cols-4 gap-6 pt-4" 
-          : "flex flex-col gap-1 w-full max-w-3xl mx-auto"
+        <div className={viewType === 'grid'
+          ? "grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 pt-2 items-stretch"
+          : "flex flex-col gap-3 w-full max-w-3xl mx-auto"
         }>
           {menuItems.map((item) => (
             viewType === 'grid' ? (

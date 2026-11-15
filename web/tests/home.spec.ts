@@ -107,3 +107,60 @@ test('every support contact is real and clickable', async ({ page }) => {
   expect(body).not.toContain('+255 712 345 678');
   expect(body).not.toContain('support@bongofoodie.com');
 });
+
+test('menu cards show real artwork and never overlap the dish name', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/search');
+
+  // Wait for the client-side menu to arrive.
+  const cards = page.locator('article');
+  await expect.poll(() => cards.count(), { timeout: 20_000 }).toBeGreaterThan(5);
+
+  // Every dish image must actually load. The drink cards used to fall back to
+  // /assets/favicon.png (48x48), which rendered as a black rectangle.
+  const broken = await page
+    .locator('article img')
+    .evaluateAll((images) =>
+      images
+        .filter((image) => !(image as HTMLImageElement).complete || (image as HTMLImageElement).naturalWidth === 0)
+        .map((image) => (image as HTMLImageElement).src),
+    );
+  expect(broken).toEqual([]);
+
+  // No card may be small enough to be the favicon thumbnail.
+  const sizes = await page
+    .locator('article img')
+    .evaluateAll((images) => images.map((image) => (image as HTMLImageElement).naturalWidth));
+  for (const width of sizes) expect(width).toBeGreaterThan(200);
+
+  // The artwork must not sit on top of the heading: the two rects may not
+  // intersect. This is the bug from the screenshot.
+  const overlap = await cards.first().evaluate((card) => {
+    const image = card.querySelector('img')?.getBoundingClientRect();
+    const heading = card.querySelector('h3')?.getBoundingClientRect();
+    if (!image || !heading) return false;
+    return !(
+      image.bottom <= heading.top ||
+      image.top >= heading.bottom ||
+      image.right <= heading.left ||
+      image.left >= heading.right
+    );
+  });
+  expect(overlap).toBe(false);
+});
+
+test('menu grid never leaves a dead gutter on the right', async ({ page }) => {
+  for (const width of [390, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/search');
+    await expect.poll(() => page.locator('article').count(), { timeout: 20_000 }).toBeGreaterThan(5);
+    const gutter = await page.evaluate(() => {
+      const cards = Array.from(document.querySelectorAll('article'));
+      if (!cards.length) return 9999;
+      const widest = Math.max(...cards.map((card) => card.getBoundingClientRect().right));
+      return window.innerWidth - widest;
+    });
+    // A dead gutter wider than a third of the screen means the grid collapsed.
+    expect(gutter).toBeLessThan(width / 3);
+  }
+});

@@ -33,6 +33,8 @@ export const imageMap: Record<string, string> = {
   food3dIcon3: '/assets/food-3d-icon-3.png',
   aiChefIcon: '/assets/ai-chef-icon.png',
   orangeJuiceIcon: '/assets/orange-juice-icon.png',
+  stoneyTangawizi: '/assets/drinks/stoney-tangawizi.png',
+  passionMangoJuice: '/assets/drinks/passion-mango-juice.png',
   robotChef: '/assets/robot-chef.png',
 };
 
@@ -62,7 +64,15 @@ export function hasValidImage(url: string | null | undefined): boolean {
     lowerVal.includes('kupaka') ||
     lowerVal.includes('mishkaki') ||
     lowerVal.includes('kebab') ||
-    lowerVal.includes('skewers')
+    lowerVal.includes('skewers') ||
+    lowerVal.includes('stoney') ||
+    lowerVal.includes('tangawizi') ||
+    lowerVal.includes('ginger') ||
+    lowerVal.includes('passion') ||
+    lowerVal.includes('mango') ||
+    lowerVal.includes('juice') ||
+    lowerVal.includes('soda') ||
+    lowerVal.includes('drink')
   ) {
     return true;
   }
@@ -141,7 +151,15 @@ export function resolveFoodImage(url?: string | null): string {
                   lowerVal.includes('beverage');
 
   if (isDrink) {
-    return '/assets/favicon.png';
+    // Specific drinks first, then a sensible glass. Never favicon.png — it is
+    // a 48x48 icon and showed up as a black rectangle on a 260px card.
+    if (lowerVal.includes('stoney') || lowerVal.includes('tangawizi') || lowerVal.includes('ginger')) {
+      return imageMap.stoneyTangawizi;
+    }
+    if (lowerVal.includes('passion') || lowerVal.includes('mango') || lowerVal.includes('juice')) {
+      return imageMap.passionMangoJuice;
+    }
+    return imageMap.passionMangoJuice;
   }
 
   return '/assets/salad.png';
