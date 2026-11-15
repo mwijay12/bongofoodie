@@ -12,20 +12,23 @@
  * Flutter app's app_colors.dart so both clients look like one product.
  */
 @theme {
-  --color-primary: #C2560A;
+  /* Bold warm — street-food energy. Primary is hot orange; ember is the
+     editorial dark that makes 3D and glow read properly. */
+  --color-primary: #F26522;
   --color-primary-foreground: #FFFFFF;
   --color-primary-soft: #F58220;
-  --color-primary-deep: #8A3300;
+  --color-primary-deep: #B04A05;
+  --color-ember: #16100B;
+  --color-ember-soft: #241A12;
 
-  --color-secondary: #F4EEE6;
+  --color-secondary: #FFB347;
   --color-secondary-foreground: #2B1B12;
+  --color-gold: #FFC24B;
 
   --color-cream: #FAF7F2;
   --color-ink: #2B1B12;
   --color-ink-muted: #6F645D;
-  --color-ember: #1A100B;
   --color-spice: #11543A;
-  --color-gold: #F2B33D;
   --color-line: #EADFD2;
 
   --color-background-warm: #FAF7F2;
@@ -40,16 +43,21 @@
   --color-destructive-foreground: #FFFFFF;
   --color-border: #EADFD2;
   --color-input: #EADFD2;
-  --color-ring: #C2560A;
+  --color-ring: #F26522;
 
   --font-sans: var(--font-quicksand), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-quicksand), ui-sans-serif, system-ui, sans-serif;
 
   --animate-slide-in: slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-marquee: marquee 26s linear infinite;
 
   @keyframes slide-in {
     from { transform: translateX(100%); }
     to { transform: translateX(0); }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
   }
 }
 
@@ -61,19 +69,19 @@
   --card-foreground: #2B1B12;
   --popover: #FFFFFF;
   --popover-foreground: #2B1B12;
-  --primary: #C2560A;
+  --primary: #F26522;
   --primary-foreground: #FFFFFF;
-  --secondary: #F4EEE6;
+  --secondary: #FFB347;
   --secondary-foreground: #2B1B12;
   --muted: #F4EEE6;
   --muted-foreground: #6F645D;
-  --accent: #C2560A;
+  --accent: #F26522;
   --accent-foreground: #FFFFFF;
   --destructive: #D64545;
   --destructive-foreground: #FFFFFF;
   --border: #EADFD2;
   --input: #EADFD2;
-  --ring: #C2560A;
+  --ring: #F26522;
   color-scheme: light;
 }
 
@@ -91,8 +99,8 @@ body {
 }
 
 ::selection {
-  background: #FDE8D3;
-  color: #2B1B12;
+  background: #F26522;
+  color: #FFFFFF;
 }
 
 a:focus-visible,

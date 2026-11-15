@@ -12,6 +12,7 @@ import {
   Bell,
 } from 'lucide-react';
 import cn from 'clsx';
+import Logo from '@/components/Logo';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { getActiveUserProfile } from '@/lib/supabaseDb';
 import { useCartStore } from '@/store/cart.store';
@@ -63,10 +64,12 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-white/85 backdrop-blur-md">
       <div className="container mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3">
-        <Link href="/" className="flex items-center gap-2 shrink-0">
-          <span className="font-heading text-lg md:text-xl font-bold text-primary tracking-tight">
-            Bongo<span className="text-destructive">Foodie</span>
-          </span>
+        <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="BongoFoodie home">
+          <Logo
+            size={30}
+            variant="lockup"
+            wordmarkClassName="font-heading text-lg md:text-xl font-bold text-foreground-dark tracking-tight"
+          />
           {(!isSupabaseConfigured || isDemo) && (
             <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/15 text-amber-700 border border-amber-500/30">
               {isDemo ? `Demo: ${role}` : 'Showcase'}
