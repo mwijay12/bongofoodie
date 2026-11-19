@@ -18,7 +18,9 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project uses [`next/font/local`](https://nextjs.org/docs/app/api-reference/components/font) with two self-hosted variable woff2 faces in `src/fonts`: **Fraunces** for editorial headlines and **DM Sans** for body/UI copy. Both are SIL OFL 1.1 (licences alongside the files), so no font CDN is contacted at runtime.
+
+The landing page hero is deliberately **not** WebGL: real dish photography, CSS steam, a ceramic rim and an order ticket keep the first paint small. GSAP/Lenis still handle scroll motion, and every animation has a `prefers-reduced-motion` path. See `docs/premium-webgl-stack.md` for why the Three.js scene was removed.
 
 ## Learn More
 

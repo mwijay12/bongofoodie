@@ -31,7 +31,6 @@ jobs:
           src/components/MenuCard.tsx
           src/components/MenuRowCard.tsx
           src/components/Navbar.tsx
-          src/components/PlateScene.tsx
           src/components/SmoothScroll.tsx
           src/components/SwahiliTrivia.tsx
           src/lib/appRelease.ts

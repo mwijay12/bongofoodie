@@ -5,18 +5,22 @@
  *   primary      hot orange — actions, price, active state
  *   primary-soft the lighter orange used only for hover on a filled button
  *   secondary    amber, for highlights on dark surfaces
- *   ember        the near-black that 3D and glow read against
+ *   ember        the near-black the hero plate and glow read against
  *
  * There used to be four oranges (#B04A05, #F6821F, #F58220, #FBAD41) split
  * across @theme and :root, and cream text on them failed contrast.
+ *
+ * Type: Fraunces (editorial display) + DM Sans (UI/body). Both are local
+ * variable woff2 files declared in layout.tsx — no font CDN, no layout shift.
  */
 @theme {
   --breakpoint-xs: 30rem;
 
   /* Bold warm — street-food energy. Primary is hot orange; ember is the
-     editorial dark that makes 3D and glow read properly. */
+     editorial dark that makes food photography and glow read properly. */
   --color-primary: #F26522;
-  --color-primary-foreground: #FFFFFF;
+  /* Dark ink on hot orange passes AA (5.3:1); white only reached 3.1:1. */
+  --color-primary-foreground: #2B1B12;
   --color-primary-soft: #F58220;
   --color-primary-deep: #B04A05;
   --color-ember: #16100B;
@@ -46,8 +50,12 @@
   --color-input: #EADFD2;
   --color-ring: #F26522;
 
-  --font-sans: var(--font-quicksand), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-quicksand), ui-sans-serif, system-ui, sans-serif;
+  /* `font-display` is a Tailwind utility for the few large editorial headlines;
+     `font-heading` stays sans so small buttons and dense admin labels keep
+     their legibility. */
+  --font-sans: var(--font-dmsans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-dmsans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
 
   --animate-slide-in: slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-marquee: marquee 26s linear infinite;
@@ -63,6 +71,9 @@
 }
 
 :root {
+  /* Exposed to CSS Modules, which cannot read Tailwind's @theme block. */
+  --font-body: var(--font-dmsans), ui-sans-serif, system-ui, sans-serif;
+  --font-editorial: var(--font-fraunces), Georgia, "Times New Roman", serif;
   --radius: 0.875rem;
   --background: #FAF7F2;
   --foreground: #2B1B12;
@@ -71,13 +82,13 @@
   --popover: #FFFFFF;
   --popover-foreground: #2B1B12;
   --primary: #F26522;
-  --primary-foreground: #FFFFFF;
+  --primary-foreground: #2B1B12;
   --secondary: #FFB347;
   --secondary-foreground: #2B1B12;
   --muted: #F4EEE6;
   --muted-foreground: #6F645D;
   --accent: #F26522;
-  --accent-foreground: #FFFFFF;
+  --accent-foreground: #2B1B12;
   --destructive: #D64545;
   --destructive-foreground: #FFFFFF;
   --border: #EADFD2;
@@ -100,17 +111,17 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.65;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Nothing in the product should render below 12px — it was the single biggest
-   cause of the "fonts are too small" complaint. */
+/* Nothing in the product should render below 13px — tiny rounded letterforms
+   were the single biggest cause of the "fonts are too small" complaint. */
 [class*='text-\\[10px\\]'],
 [class*='text-\\[11px\\]'] {
-  font-size: 0.75rem !important;
+  font-size: 0.8125rem !important;
 }
 
 ::selection {

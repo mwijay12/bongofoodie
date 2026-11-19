@@ -155,8 +155,8 @@ flutter build apk --release --dart-define-from-file=.env.json
 
 Supabase pauses free-tier projects after 7 days of database inactivity. BongoFoodie prevents this with three independent layers:
 
-1. **GitHub Actions Cron (`.github/workflows/supabase-keepalive.yml`)**: Runs every 3 days (`0 8 */3 * *`) and executes `public.ping_keepalive()` (real PostgreSQL write + read). Add `SUPABASE_URL` and `SUPABASE_ANON_KEY` under **GitHub Repo → Settings → Secrets and variables → Actions**.
-2. **Vercel Daily Cron (`web/vercel.json` → `/api/keepalive`)**: Pings Supabase daily at `06:00 UTC` — continues running even if the GitHub repository has no new commits for 60+ days.
+1. **GitHub Actions Cron (`.github/workflows/supabase-keepalive.yml`)**: Runs every 12 hours (`0 5,17 * * *`, 08:00 / 20:00 EAT), executes `public.ping_keepalive()` (a real PostgreSQL write + read), then verifies `/auth/v1/health` and a `menu` read both return 200. Add `SUPABASE_URL` and `SUPABASE_ANON_KEY` under **GitHub Repo → Settings → Secrets and variables → Actions**. The job fails loudly if either secret is missing.
+2. **Vercel Daily Cron (`web/vercel.json` → `/api/keepalive`)**: Pings Supabase daily at `06:00 UTC` — an independent second heartbeat if the repository goes quiet.
 3. **Resilient Showcase Fallback**: Even when offline or before keys are configured, every screen on Mobile and Web gracefully serves curated Tanzanian culinary data with zero crashes.
 
 ---

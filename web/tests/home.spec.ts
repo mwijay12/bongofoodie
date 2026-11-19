@@ -8,9 +8,10 @@ for (const viewport of [{ width: 360, height: 640 }, { width: 430, height: 932 }
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Karibu.');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    // The hero is a live Three.js canvas now; assert it mounted rather than the
-    // old dish picker, which moved into the 3D scene.
-    await expect(page.locator('canvas').first()).toBeVisible();
+    // The hero is real food photography on a CSS plate. A canvas here would
+    // mean the heavy WebGL scene came back: this is the performance contract.
+    await expect(page.getByRole('img', { name: /Nyama choma na ugali/i })).toBeVisible();
+    expect(await page.locator('canvas').count()).toBe(0);
     for (const name of ['Nyama Choma', 'Chipsi Mayai', 'Zanzibar Pilau']) {
       await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
     }
@@ -62,11 +63,22 @@ test('the real Flutter APK is downloadable from the footer', async ({ page, requ
 });
 
 
+test('headlines use the editorial face while UI copy stays legible sans', async ({ page }) => {
+  await page.goto('/');
+  const [heading, body] = await page.evaluate(() => [
+    getComputedStyle(document.querySelector('h1')!).fontFamily,
+    getComputedStyle(document.body).fontFamily,
+  ]);
+  expect(heading).not.toBe(body);
+  expect(heading.toLowerCase()).toContain('serif');
+  expect(body.toLowerCase()).toContain('sans-serif');
+});
+
 test('reduced motion still renders the hero and the trivia works', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Karibu.');
-  // The shader/marquee must not run, but the content must still be there.
+  // The CSS steam/marquee must not run, but the content must still be there.
   expect(await page.locator('h1').evaluate(element => getComputedStyle(element.parentElement!).animationName)).toBe('none');
   const quiz = page.getByRole('region', { name: 'Know your spices?' });
   await quiz.getByRole('button').first().click();
