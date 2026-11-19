@@ -97,7 +97,14 @@ every week, full source) and [Awwwards](https://www.awwwards.com) (the target).
 
 ## 6. Related, in this repo
 
+- `web/src/app/page.tsx` — the landing page is deliberately **not** WebGL. A
+  Three.js plate (`fiber` + `drei` + an `Environment` HDR fetched at runtime)
+  cost roughly 700 KB of client JS, a second GPU surface and a per-frame loop
+  on first paint. It was replaced with a CSS/`<Image>` editorial plate built
+  from optimised 85 KB WebP dish cutouts. Keep the stack above for reference,
+  not for the storefront's first screen.
 - `web/src/components/HeatShader.tsx` — a working hand-written GLSL plume: one
-  quad, one fragment shader, reduced-motion and off-screen safe.
+  quad, one fragment shader, reduced-motion and off-screen safe. Reference
+  implementation only; it is not mounted on the landing page.
 - `web/src/app/globals.css` — the single palette all of the above should use.
 - `docs/promo-video-prompt.md` — the code-to-video brief, same design tokens.

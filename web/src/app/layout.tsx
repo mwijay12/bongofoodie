@@ -2,25 +2,30 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-const outfit = localFont({
-  variable: "--font-outfit",
-  src: [
-    { path: "../fonts/Quicksand-Medium.ttf", weight: "500", style: "normal" },
-    { path: "../fonts/Quicksand-SemiBold.ttf", weight: "600", style: "normal" },
-    { path: "../fonts/Quicksand-Bold.ttf", weight: "700", style: "normal" },
-    { path: "../fonts/Quicksand-Bold.ttf", weight: "800", style: "normal" },
-  ],
+/*
+ * Two self-hosted variable woff2 faces (SIL OFL 1.1, licences in src/fonts).
+ *   Fraunces  — warm, soft-serif display built for editorial/menu typography.
+ *               It gives Swahili headlines an appetising, authoritative voice.
+ *   DM Sans   — tall x-height, open apertures, stays readable at 13px on a
+ *               cheap phone. Used for body copy, buttons and dense UI.
+ * Variable files replace five 77KB TTFs, and nothing is fetched from Google.
+ */
+const fraunces = localFont({
+  src: "../fonts/Fraunces-Variable.woff2",
+  variable: "--font-fraunces",
+  weight: "100 900",
+  style: "normal",
+  display: "swap",
+  fallback: ["Georgia", "Times New Roman", "serif"],
 });
 
-const quicksand = localFont({
-  variable: "--font-quicksand",
-  src: [
-    { path: "../fonts/Quicksand-Light.ttf", weight: "300", style: "normal" },
-    { path: "../fonts/Quicksand-Regular.ttf", weight: "400", style: "normal" },
-    { path: "../fonts/Quicksand-Medium.ttf", weight: "500", style: "normal" },
-    { path: "../fonts/Quicksand-SemiBold.ttf", weight: "600", style: "normal" },
-    { path: "../fonts/Quicksand-Bold.ttf", weight: "700", style: "normal" },
-  ],
+const dmSans = localFont({
+  src: "../fonts/DMSans-Variable.woff2",
+  variable: "--font-dmsans",
+  weight: "100 900",
+  style: "normal",
+  display: "swap",
+  fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -43,7 +48,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${outfit.variable} ${quicksand.variable} h-full`}>
+    <html lang="en" className={`${fraunces.variable} ${dmSans.variable} h-full`}>
       <body className="min-h-full bg-background-warm text-foreground-dark antialiased font-sans flex flex-col">
         <SmoothScroll />
         <Navbar />
@@ -64,7 +69,7 @@ export default function RootLayout({
                   className="rounded-2xl shrink-0"
                 />
                 <div className="space-y-1">
-                  <h4 className="font-heading font-extrabold text-base">
+                  <h4 className="font-display font-extrabold text-base">
                     Pata app halisi ya Flutter
                   </h4>
                   <p className="text-xs text-white/65 leading-relaxed max-w-md">
@@ -94,7 +99,7 @@ export default function RootLayout({
 
           <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
             <div className="space-y-3">
-              <span className="font-heading font-extrabold text-base text-foreground-dark tracking-tight">
+              <span className="font-display font-extrabold text-base text-foreground-dark tracking-tight">
                 Bongo Foodie
               </span>
               <p className="text-xs text-muted-foreground leading-relaxed max-w-xs">

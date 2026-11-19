@@ -63,12 +63,12 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-white/85 backdrop-blur-md">
-      <div className="container mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3">
+      <div className="container mx-auto px-4 md:px-6 max-[380px]:px-2 h-14 md:h-16 flex items-center justify-between gap-3">
         <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="BongoFoodie home">
           <Logo
             size={30}
             variant="lockup"
-            wordmarkClassName="font-heading text-lg md:text-xl font-bold text-foreground-dark tracking-tight"
+            wordmarkClassName="font-heading text-lg md:text-xl max-[400px]:text-base font-bold text-foreground-dark tracking-tight"
           />
           {(!isSupabaseConfigured || isDemo) && (
             <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/15 text-amber-700 border border-amber-500/30">
@@ -106,7 +106,7 @@ export default function Navbar() {
         </nav>
 
         {/* Mobile Navigation */}
-        <nav className="md:hidden flex items-center gap-1 overflow-x-auto no-scrollbar">
+        <nav className="md:hidden flex items-center gap-0 overflow-x-auto no-scrollbar">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -115,7 +115,7 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'relative flex flex-col items-center justify-center px-2 py-1 rounded-lg text-[10px] font-semibold transition-colors min-w-[54px]',
+                  'relative flex flex-col items-center justify-center px-1.5 py-1 rounded-lg text-[10px] font-semibold transition-colors min-w-[48px]',
                   isActive ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground',
                 )}
               >

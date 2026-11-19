@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, ArrowUpRight, Clock, Flame, MessageCircle, Star } from 'lucide-react';
@@ -13,12 +12,12 @@ import { contact, contactLinks } from '@/lib/contact';
 import { appRelease, appReleaseUrl, repoUrl } from '@/lib/appRelease';
 import styles from './home.module.css';
 
-/** Three.js is heavy and client-only, so it never enters the server bundle. */
-const PlateScene = dynamic(() => import('@/components/PlateScene'), {
-  ssr: false,
-  loading: () => <div className={styles.sceneSkeleton} aria-hidden="true" />,
-});
-
+/*
+ * The hero used to mount a Three.js plate (fiber + drei + an HDR environment
+ * fetched at runtime). It is now a pure CSS/Image composition: real food
+ * photography, a ceramic rim, steam and a ticket. No WebGL context, no rAF
+ * render loop, no 700KB of 3D JavaScript on the first paint.
+ */
 const dishes = [
   {
     name: 'Nyama Choma',
@@ -95,10 +94,10 @@ export default function Home() {
           { y: 22, opacity: 0, duration: 0.7, stagger: 0.09 },
           '-=0.55',
         )
-        .from(`.${styles.sceneWrap}`, { scale: 0.9, opacity: 0, duration: 1.1 }, '-=0.9');
+        .from(`.${styles.plateWrap}`, { scale: 0.9, opacity: 0, duration: 1.1 }, '-=0.9');
 
-      /* ── Scene drifts and the headline counter-moves on scroll ── */
-      gsap.to(`.${styles.sceneWrap}`, {
+      /* ── Plate drifts and the headline counter-moves on scroll ── */
+      gsap.to(`.${styles.plateWrap}`, {
         yPercent: 14,
         scale: 1.06,
         ease: 'none',
@@ -252,12 +251,53 @@ export default function Home() {
           </dl>
         </div>
 
-        <div className={styles.sceneWrap}>
+        <div className={styles.plateWrap}>
           <div className={styles.glow} aria-hidden="true" />
-          <PlateScene className={styles.scene} />
-          <p className={styles.sceneHint}>
-            <span className={styles.sceneHintDot} aria-hidden="true" />
-            Live 3D · drag to look around
+          <div className={styles.plateStage}>
+            <div className={styles.plateRing} aria-hidden="true">
+              <span className={styles.ringMark} />
+            </div>
+            <div className={styles.steam} aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+            <Image
+              className={styles.heroDish}
+              src="/assets/hero/nyama-choma.webp"
+              alt="Nyama choma na ugali: charcoal-grilled beef, ugali and kachumbari on a ceramic plate"
+              width={760}
+              height={760}
+              sizes="(max-width: 1000px) 90vw, 40vw"
+              priority
+            />
+            <div className={styles.sideDish} aria-hidden="true">
+              <Image
+                src="/assets/hero/chipsi-mayai.webp"
+                alt=""
+                width={360}
+                height={312}
+                sizes="160px"
+                loading="eager"
+              />
+            </div>
+            <div className={styles.ticket}>
+              <span className={styles.ticketLabel}>Sahani ya leo</span>
+              <span className={styles.ticketName}>Nyama Choma</span>
+              <span className={styles.ticketMeta}>
+                <span>
+                  <Star size={13} aria-hidden="true" /> 4.9
+                </span>
+                <span>
+                  <Clock size={13} aria-hidden="true" /> 25 min
+                </span>
+              </span>
+              <span className={styles.ticketPrice}>TSh 13,500</span>
+            </div>
+          </div>
+          <p className={styles.plateCaption}>
+            <span className={styles.plateCaptionDot} aria-hidden="true" />
+            Fresh off the charcoal · Kijitonyama
           </p>
         </div>
       </section>
