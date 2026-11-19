@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import cn from 'clsx';
 import Logo from '@/components/Logo';
+import TextSizeControl from '@/components/TextSizeControl';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { getActiveUserProfile } from '@/lib/supabaseDb';
 import { useCartStore } from '@/store/cart.store';
@@ -68,10 +69,10 @@ export default function Navbar() {
           <Logo
             size={30}
             variant="lockup"
-            wordmarkClassName="font-heading text-lg md:text-xl max-[400px]:text-base font-bold text-foreground-dark tracking-tight"
+            wordmarkClassName="font-heading text-base md:text-xl font-bold text-foreground-dark tracking-tight whitespace-nowrap max-[420px]:hidden"
           />
           {(!isSupabaseConfigured || isDemo) && (
-            <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/15 text-amber-700 border border-amber-500/30">
+            <span className="hidden sm:inline-flex shrink-0 items-center rounded-full border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-700">
               {isDemo ? `Demo: ${role}` : 'Showcase'}
             </span>
           )}
@@ -114,13 +115,14 @@ export default function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-label={item.name}
                 className={cn(
-                  'relative flex flex-col items-center justify-center px-1.5 py-1 rounded-lg text-[10px] font-semibold transition-colors min-w-[48px]',
+                  'relative flex shrink-0 flex-col items-center justify-center rounded-lg px-1.5 py-1 text-[10px] font-semibold transition-colors min-w-[48px]',
                   isActive ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground',
                 )}
               >
                 <Icon className={cn('size-5 mb-0.5', isActive && 'stroke-[2.5px]')} />
-                <span>{item.name}</span>
+                <span className="max-[420px]:hidden">{item.name}</span>
                 {item.badge && item.badge > 0 ? (
                   <span className="absolute top-0.5 right-1 size-4 rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center">
                     {item.badge}
@@ -130,6 +132,15 @@ export default function Navbar() {
             );
           })}
         </nav>
+      </div>
+      <div
+        role="group"
+        aria-label="Reading preferences"
+        className="border-t border-border bg-cream/80"
+      >
+        <div className="container mx-auto flex min-h-12 flex-wrap items-center justify-between gap-2 px-4 py-1.5 md:px-6 max-[380px]:px-2">
+          <TextSizeControl />
+        </div>
       </div>
     </header>
   );

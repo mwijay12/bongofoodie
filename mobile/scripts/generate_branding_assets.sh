@@ -2,14 +2,16 @@
 set -eu
 cd "$(dirname "$0")/../.."
 root=mobile/branding
+# Source art: bongo-mark.svg is the full ember icon; bongo-mark-foreground.svg
+# is the transparent adaptive-icon safe-zone mark. app-icon-master.png and
+# app-icon-foreground.png are their checked-in 1024px raster counterparts.
 src=mobile/assets/brand/app-icon-master.png
-# Isolate the bright mark from the generated dark background; the dark bowl cutout stays transparent.
-convert "$src" -colorspace Gray -level 12%,25% -blur 0x0.3 /tmp/brand-mask.png
-convert "$src" /tmp/brand-mask.png -alpha off -compose CopyOpacity -composite mobile/assets/brand/app-icon-foreground.png
 fg=mobile/assets/brand/app-icon-foreground.png
+cp mobile/assets/brand/bongo-mark.svg web/public/favicon.svg
+cp mobile/assets/brand/bongo-mark.svg mobile/web/favicon.svg
 for entry in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
  d=${entry%:*}; n=${entry#*:}; mkdir -p "$root/android/mipmap-$d"
- convert "$fg" -background '#1A100B' -alpha remove -alpha off -resize "${n}x${n}" "$root/android/mipmap-$d/ic_launcher.png"
+ convert "$src" -resize "${n}x${n}" "$root/android/mipmap-$d/ic_launcher.png"
 done
 mkdir -p "$root/android/drawable-nodpi" "$root/android/mipmap-anydpi-v26" "$root/android/values" "$root/android/drawable" "$root/android/drawable-v21"
 convert "$fg" -resize 432x432 "$root/android/drawable-nodpi/brand_foreground.png"
@@ -69,7 +71,7 @@ for idiom,sizes in [('iphone',[(20,[2,3]),(29,[1,2,3]),(40,[2,3]),(60,[2,3])]),(
  for size,scales in sizes:
   for scale in scales:
    filename=f'icon-{size}-{scale}.png'; pixels=round(size*scale)
-   subprocess.run(['convert','mobile/assets/brand/app-icon-foreground.png','-background','#1A100B','-alpha','remove','-alpha','off','-resize',f'{pixels}x{pixels}',str(icons/filename)],check=True)
+   subprocess.run(['convert','mobile/assets/brand/app-icon-master.png','-resize',f'{pixels}x{pixels}',str(icons/filename)],check=True)
    images.append(dict(idiom=idiom,size=f'{size}x{size}',scale=f'{scale}x',filename=filename))
 (icons/'Contents.json').write_text(json.dumps(dict(images=images,info=dict(version=1,author='BongoFoodie')),indent=2)+'\n')
 launch=root/'LaunchImage.imageset';launch.mkdir(exist_ok=True)
@@ -81,7 +83,7 @@ for scale in [1,2,3]:
 (launch/'Contents.json').write_text(json.dumps(dict(images=images,info=dict(version=1,author='BongoFoodie')),indent=2)+'\n')
 PY
 for n in 192 512; do
- convert "$fg" -background '#1A100B' -alpha remove -alpha off -resize "${n}x${n}" "mobile/web/icons/Icon-$n.png"
+ convert "$src" -resize "${n}x${n}" "mobile/web/icons/Icon-$n.png"
 done
-convert "$fg" -background '#1A100B' -alpha remove -alpha off -resize 180x180 mobile/web/icons/apple-touch-icon.png
-convert "$fg" -background '#1A100B' -alpha remove -alpha off -resize 32x32 mobile/web/favicon.png
+convert "$src" -resize 180x180 mobile/web/icons/apple-touch-icon.png
+convert "$src" -resize 32x32 mobile/web/favicon.png

@@ -44,6 +44,17 @@ class BrandingTests(unittest.TestCase):
             self.assertTrue((ROOT / 'web' / icon['src']).is_file())
             self.assertIn('maskable', icon['purpose'])
 
+    def test_flutter_web_boot_allows_zoom_and_uses_brand_vector(self):
+        html = (ROOT / 'web/index.html').read_text()
+        self.assertNotIn('user-scalable=no', html)
+        self.assertNotIn('maximum-scale=1.0', html)
+        self.assertNotIn('font-size: 12px', html)
+        self.assertIn('viewport-fit=cover', html)
+        self.assertIn('font-size: max(14px', html)
+        self.assertIn(
+            'rel="icon" type="image/svg+xml" href="favicon.svg"', html)
+        self.assertTrue((ROOT / 'web/favicon.svg').is_file())
+
     def test_overlay_survives_regeneration_and_is_idempotent(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

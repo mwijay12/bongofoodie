@@ -66,7 +66,7 @@
   align-items: center;
   gap: 8px;
   color: var(--accent);
-  font-size: 12.5px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -82,7 +82,7 @@
   align-items: center;
   gap: 10px;
   min-height: 48px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -100,7 +100,7 @@
   min-height: 50px;
   padding: 14px 24px;
   border-radius: 14px;
-  font-size: 14.5px;
+  font-size: 0.90625rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   transition:
@@ -163,7 +163,7 @@
 }
 
 .hero h1 {
-  font-size: clamp(48px, 6.2vw, 88px);
+  font-size: clamp(3rem, 6.2vw, 5.5rem);
   letter-spacing: -0.032em;
   line-height: 1.06;
   font-weight: 700;
@@ -186,7 +186,7 @@
 .intro {
   max-width: 410px;
   color: rgba(250, 247, 242, 0.82);
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.7;
 }
 .actions {
@@ -214,7 +214,7 @@
   border-top: 1px solid rgba(250, 247, 242, 0.14);
 }
 .proof dt {
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -225,7 +225,7 @@
   align-items: center;
   gap: 5px;
   margin-top: 6px;
-  font-size: 19px;
+  font-size: 1.1875rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--cream);
@@ -371,7 +371,7 @@
   transform: rotate(2.5deg);
 }
 .ticketLabel {
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -379,7 +379,7 @@
 }
 .ticketName {
   font-family: var(--font-editorial);
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -389,7 +389,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  font-size: 12.5px;
+  font-size: 0.875rem;
   font-weight: 600;
   color: rgba(250, 247, 242, 0.8);
 }
@@ -405,7 +405,7 @@
 .ticketPrice {
   padding-top: 6px;
   border-top: 1px solid rgba(250, 247, 242, 0.14);
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: var(--amber);
 }
@@ -424,7 +424,7 @@
   border: 1px solid rgba(250, 247, 242, 0.14);
   backdrop-filter: blur(8px);
   color: rgba(250, 247, 242, 0.84);
-  font-size: 12.5px;
+  font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -456,7 +456,7 @@
   display: inline-flex;
   align-items: center;
   gap: 34px;
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -481,7 +481,7 @@
 }
 .sectionHead h2,
 .sectionHeading h2 {
-  font-size: clamp(28px, 3.6vw, 42px);
+  font-size: clamp(1.75rem, 3.6vw, 2.625rem);
   font-weight: 700;
   letter-spacing: -0.028em;
   line-height: 1.16;
@@ -511,18 +511,18 @@
   border-radius: 50%;
   background: #fde8d3;
   color: var(--accent-deep);
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
 .steps h3 {
-  font-size: 19px;
+  font-size: 1.1875rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 12px 0 6px;
 }
 .steps p {
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.7;
   color: var(--muted);
 }
@@ -568,7 +568,7 @@
   top: 14px;
   left: 16px;
   z-index: 2;
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--muted);
@@ -585,7 +585,7 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(6px);
-  font-size: 12.5px;
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--ink);
 }
@@ -606,23 +606,23 @@
 }
 .cardTitle h3 {
   font-weight: 700;
-  font-size: 19px;
+  font-size: 1.1875rem;
   letter-spacing: -0.02em;
 }
 .cardPrice {
-  font-size: 14.5px;
+  font-size: 0.90625rem;
   font-weight: 700;
   white-space: nowrap;
   color: var(--accent-deep);
 }
 .cardSwahili {
   margin-top: 3px !important;
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--accent) !important;
 }
 .dishCard p {
-  font-size: 13.5px;
+  font-size: 0.875rem;
   line-height: 1.7;
   color: var(--muted);
   margin-top: 6px;
@@ -632,7 +632,7 @@
   align-items: center;
   gap: 5px;
   margin-top: 12px;
-  font-size: 12.5px;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--muted);
 }
@@ -645,12 +645,12 @@
   border-radius: 999px;
   background: #fde8d3;
   color: var(--accent-deep);
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 700;
   transition: background-color 200ms var(--ease), color 200ms var(--ease);
 }
 .menuNote {
-  font-size: 12.5px;
+  font-size: 0.875rem;
   line-height: 1.7;
   color: var(--muted);
   margin-top: 22px !important;
@@ -694,7 +694,7 @@
   z-index: 1;
 }
 .chefNote h2 {
-  font-size: clamp(22px, 2.6vw, 30px);
+  font-size: clamp(1.375rem, 2.6vw, 1.875rem);
   font-weight: 700;
   letter-spacing: -0.022em;
   line-height: 1.25;
@@ -702,7 +702,7 @@
 }
 .chefNote p:not(.eyebrow) {
   color: rgba(250, 247, 242, 0.78);
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.7;
   margin-top: 7px;
   max-width: 46ch;
@@ -732,18 +732,18 @@
 }
 .trivia p:not(.eyebrow) {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.7;
   margin-top: 12px;
 }
 .trivia h2 {
-  font-size: clamp(24px, 2.8vw, 32px);
+  font-size: clamp(1.5rem, 2.8vw, 2rem);
   font-weight: 700;
   letter-spacing: -0.025em;
   margin-top: 8px;
 }
 .trivia h3 {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 700;
   margin-bottom: 16px;
 }
@@ -764,7 +764,7 @@
   border-radius: 11px;
   text-align: left;
   font: inherit;
-  font-size: 13.5px;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: border-color 180ms var(--ease), transform 180ms var(--ease);
@@ -785,7 +785,7 @@
   color: var(--accent-deep);
 }
 .quizResult {
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.75;
   margin-top: 14px;
 }
@@ -809,7 +809,7 @@
   border: 0;
   cursor: pointer;
   font: inherit;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 /* ── App band ────────────────────────────────────────────────── */
@@ -829,13 +829,13 @@
   color: rgba(255, 255, 255, 0.82);
 }
 .appBand h2 {
-  font-size: clamp(22px, 2.6vw, 30px);
+  font-size: clamp(1.375rem, 2.6vw, 1.875rem);
   font-weight: 700;
   letter-spacing: -0.022em;
   margin: 6px 0;
 }
 .appBand p:not(.eyebrow) {
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.82);
   max-width: 52ch;
@@ -860,13 +860,13 @@
   border-top: 1px solid var(--line);
 }
 .contact h2 {
-  font-size: clamp(24px, 2.8vw, 34px);
+  font-size: clamp(1.5rem, 2.8vw, 2.125rem);
   font-weight: 700;
   letter-spacing: -0.025em;
   margin-top: 8px;
 }
 .contact p:not(.eyebrow) {
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.7;
   color: var(--muted);
   margin-top: 8px;
@@ -883,7 +883,7 @@
   padding: 12px 18px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   transition: border-color 180ms var(--ease), color 180ms var(--ease), transform 180ms var(--ease);
 }
@@ -971,18 +971,18 @@
     border-radius: 20px;
   }
   .hero h1 {
-    font-size: clamp(42px, 12vw, 64px);
+    font-size: clamp(2.625rem, 12vw, 4rem);
     margin-block: 18px;
   }
   .intro {
-    font-size: 14.5px;
+    font-size: 0.90625rem;
   }
   .proof {
     gap: 18px;
     margin-top: 28px;
   }
   .proof dd {
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
   .plateWrap {
     max-width: 380px;
@@ -992,14 +992,14 @@
     padding: 11px 12px 12px;
   }
   .ticketName {
-    font-size: 17px;
+    font-size: 1.0625rem;
   }
   .ticketMeta {
-    font-size: 12px;
+    font-size: 0.875rem;
     gap: 8px;
   }
   .plateCaption {
-    font-size: 11.5px;
+    font-size: 0.875rem;
     padding: 6px 11px;
   }
   .sideDish {

@@ -18,6 +18,18 @@ import '../../state/auth_provider.dart';
 import '../../state/menu_provider.dart';
 import '../../state/orders_provider.dart';
 import '../../state/settings_provider.dart';
+import '../../state/text_size_provider.dart';
+
+String _textSizeLabel(AppStrings t, AppTextSize size) {
+  switch (size) {
+    case AppTextSize.normal:
+      return t.textSizeNormal;
+    case AppTextSize.large:
+      return t.textSizeLarge;
+    case AppTextSize.larger:
+      return t.textSizeLarger;
+  }
+}
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -111,6 +123,7 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = ref.watch(appStringsProvider);
     final settings = ref.watch(appSettingsProvider);
+    final textSize = ref.watch(textSizeProvider);
     final auth = ref.watch(authProvider);
     final ordersAsync = ref.watch(userOrdersProvider);
     final favorites = ref.watch(favoritesProvider);
@@ -147,7 +160,7 @@ class ProfileScreen extends ConsumerWidget {
                   Row(
                     children: [
                       CircleAvatar(
-                        radius: 28,
+                        radius: AppRadius.v28,
                         backgroundColor: AppColors.primary,
                         child: Text(
                           user?.initials ?? 'BF',
@@ -221,7 +234,7 @@ class ProfileScreen extends ConsumerWidget {
                           child: ElevatedButton.icon(
                             onPressed: () => context.push('/staff'),
                             icon: const Icon(Icons.soup_kitchen_rounded,
-                                size: 18),
+                                size: AppSpace.v18),
                             label: Text(t.staffDispatch),
                           ),
                         )
@@ -240,7 +253,7 @@ class ProfileScreen extends ConsumerWidget {
                               if (context.mounted) context.push('/staff');
                             },
                             icon: const Icon(Icons.admin_panel_settings_rounded,
-                                size: 18),
+                                size: AppSpace.v18),
                             label: const Text('Preview Staff/Admin Console'),
                           ),
                         ),
@@ -282,7 +295,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpace.v18),
 
-            // 3. Preferences Card (Dark Mode + Language)
+            // 3. Preferences Card (Dark Mode + Language + Reading size)
             Container(
               decoration: BoxDecoration(
                 color: isDark ? AppColors.darkCard : AppColors.surface,
@@ -316,8 +329,10 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     trailing: SegmentedButton<AppLanguage>(
                       showSelectedIcon: false,
-                      style: const ButtonStyle(
-                        visualDensity: VisualDensity.compact,
+                      style: ButtonStyle(
+                        minimumSize: WidgetStateProperty.all<Size?>(
+                          const Size(AppSpace.huge, AppSpace.huge),
+                        ),
                       ),
                       segments: const [
                         ButtonSegment(
@@ -333,6 +348,52 @@ class ProfileScreen extends ConsumerWidget {
                       onSelectionChanged: (s) => ref
                           .read(appSettingsProvider.notifier)
                           .setLanguage(s.first),
+                    ),
+                  ),
+                  const Divider(height: AppSpace.hairline),
+                  ListTile(
+                    leading: const Icon(Icons.format_size_rounded,
+                        color: AppColors.primary),
+                    title: Text(
+                      t.textSizeLabel,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    subtitle: Text(t.textSizeHint),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpace.md,
+                      AppSpace.v0,
+                      AppSpace.md,
+                      AppSpace.md,
+                    ),
+                    child: SizedBox(
+                      height: AppSpace.huge,
+                      child: DropdownButton<AppTextSize>(
+                        value: textSize,
+                        isExpanded: true,
+                        isDense: true,
+                        itemHeight: AppSpace.huge,
+                        iconSize: AppSpace.v24,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        dropdownColor:
+                            isDark ? AppColors.darkCard : AppColors.surface,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        items: AppTextSize.values
+                            .map(
+                              (size) => DropdownMenuItem<AppTextSize>(
+                                value: size,
+                                child: Text(_textSizeLabel(t, size)),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (size) {
+                          if (size == null) return;
+                          ref
+                              .read(textSizeProvider.notifier)
+                              .setTextSize(size);
+                        },
+                      ),
                     ),
                   ),
                 ],
@@ -354,7 +415,7 @@ class ProfileScreen extends ConsumerWidget {
                   tooltip: t.isSw ? 'Sasisha oda' : 'Refresh orders',
                   onPressed: () =>
                       ref.read(userOrdersProvider.notifier).refresh(),
-                  icon: const Icon(Icons.refresh_rounded, size: 20),
+                  icon: const Icon(Icons.refresh_rounded, size: AppSpace.v20),
                 ),
               ],
             ),
@@ -467,7 +528,7 @@ class _StatCard extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Icon(icon, color: AppColors.primary, size: 22),
+              Icon(icon, color: AppColors.primary, size: AppSpace.v22),
               const SizedBox(height: AppSpace.v6),
               Text(
                 value,

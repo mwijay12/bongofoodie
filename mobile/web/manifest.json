@@ -1,14 +1,31 @@
 {
+  "id": "/",
   "name": "BongoFoodie TZ",
   "short_name": "BongoFoodie",
+  "description": "Authentic Swahili Gastronomy, Chef AI & Tanzania Food Delivery.",
   "start_url": ".",
+  "scope": ".",
   "display": "standalone",
   "background_color": "#1A100B",
   "theme_color": "#1A100B",
-  "description": "Authentic Swahili Gastronomy, Chef AI & Tanzania Food Delivery.",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["food", "lifestyle"],
   "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "icons/Icon-192.png",
       "sizes": "192x192",
