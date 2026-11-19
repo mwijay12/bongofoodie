@@ -38,8 +38,13 @@ class TextSizeNotifier extends StateNotifier<AppTextSize> {
   static const String storageKey = 'bongo_text_size_v1';
 
   TextSizeNotifier() : super(AppTextSize.normal) {
-    _hydrate();
+    _ready = _hydrate();
   }
+
+  late final Future<void> _ready;
+
+  /// Exposed so tests can wait for hydration instead of guessing a delay.
+  Future<void> get ready => _ready;
 
   bool _edited = false;
 

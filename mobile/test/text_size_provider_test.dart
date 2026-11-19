@@ -15,16 +15,15 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
 
-    await Future<void>.delayed(const Duration(milliseconds: 20));
+    final notifier = container.read(textSizeProvider.notifier);
+    await notifier.ready;
     expect(container.read(textSizeProvider), AppTextSize.larger);
     expect(
       container.read(textSizeProvider).scaleFactor,
       AppType.largerTextScale,
     );
 
-    await container
-        .read(textSizeProvider.notifier)
-        .setTextSize(AppTextSize.large);
+    await notifier.setTextSize(AppTextSize.large);
     expect(container.read(textSizeProvider), AppTextSize.large);
 
     final prefs = await SharedPreferences.getInstance();
