@@ -36,6 +36,12 @@ Tokens live in `mobile/lib/core/theme/app_colors.dart`; the light theme is `buil
 
 Use consistent margins, at least 44px touch targets, scalable text and meaningful semantic labels. Prefer theme components and semantic tokens over inline color literals. Larger type and translated text must not be clipped. Remote promotion color fields still exist in the data model; the home UI selects one of the two branded gradients rather than rendering arbitrary remote hex values.
 
+## Accessible type and brand icons
+
+The web storefront uses self-hosted Fraunces for editorial display and DM Sans for UI/body copy; the Flutter app keeps Quicksand. Both surfaces now enforce a readable baseline: web starts at the visitor's browser base size with a 16px floor, applies a 14px minimum to tiny utility classes and CSS Modules, and exposes saved **Kawaida / Kubwa / Kubwa zaidi** choices. Flutter wraps light and dark themes with `AppType` (14dp minimum), applies `ReadableTextScaler` to combine OS accessibility scaling with the saved choice, and offers the same three choices in Profile. Flutter web no longer disables pinch zoom.
+
+The favicon family is one ember field, orange bowl, foot and two cream steam curls. `web/public/favicon.svg` is the vector source for the mirrored Flutter-web SVG, ICO fallback, 16/32/48px tabs, Apple touch icon and 192/512px PWA icons. `layout.tsx`, `site.webmanifest`, `mobile/web/index.html` and `mobile/web/manifest.json` wire those assets explicitly instead of relying on a stale App Router default. Native launcher artwork remains in `mobile/branding` and uses the same bowl-and-steam family.
+
 ## Guardrail and scope
 
 Run `mobile/scripts/check_theme_colors.sh` to catch explicit hex constructors and the specified Material palette colors outside `core/theme`. This check is intentionally narrow: it cannot detect dynamic colors or decide whether a text/background pair has enough contrast. Theme migration does not resolve the separate navigation positioning, skeleton, product details, image transparency or engagement work. Check onboarding, home, sheets and dark mode on an actual device before release.

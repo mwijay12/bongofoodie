@@ -26,6 +26,7 @@ jobs:
           npx eslint
           src/app/page.tsx
           src/app/layout.tsx
+          src/app/api/keepalive/route.ts
           src/components/HeatShader.tsx
           src/components/Logo.tsx
           src/components/MenuCard.tsx
@@ -33,10 +34,12 @@ jobs:
           src/components/Navbar.tsx
           src/components/SmoothScroll.tsx
           src/components/SwahiliTrivia.tsx
+          src/components/TextSizeControl.tsx
           src/lib/appRelease.ts
           src/lib/contact.ts
           src/lib/imageMap.ts
           src/lib/showcaseData.ts
+          src/lib/textSize.ts
           src/app/search/page.tsx
           tests/home.spec.ts
           playwright.config.ts

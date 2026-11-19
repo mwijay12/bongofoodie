@@ -1,5 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import Script from "next/script";
+import { TEXT_SIZE_STORAGE_KEY } from "@/lib/textSize";
 import "./globals.css";
 
 /*
@@ -29,8 +31,36 @@ const dmSans = localFont({
 });
 
 export const metadata: Metadata = {
+  applicationName: "Bongo Foodie",
   title: "Bongo Foodie | Swahili Food in Dar es Salaam",
   description: "Explore Swahili dishes, find recipe advice with Chef AI, and order food in Dar es Salaam.",
+  manifest: "/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
+      { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon.ico", type: "image/x-icon", sizes: "any" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" },
+    ],
+    shortcut: ["/favicon.ico"],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Bongo Foodie",
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: "#1A100B",
+  colorScheme: "light",
 };
 
 import Link from 'next/link';
@@ -48,7 +78,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${dmSans.variable} h-full`}>
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${dmSans.variable} h-full`}
+      suppressHydrationWarning
+    >
+      <head>
+        <Script id="bongo-text-size" strategy="beforeInteractive">{`
+          try {
+            var size = window.localStorage.getItem('${TEXT_SIZE_STORAGE_KEY}');
+            if (size === 'normal' || size === 'large' || size === 'larger') {
+              document.documentElement.dataset.textSize = size;
+            }
+          } catch (_) {}
+        `}</Script>
+      </head>
       <body className="min-h-full bg-background-warm text-foreground-dark antialiased font-sans flex flex-col">
         <SmoothScroll />
         <Navbar />

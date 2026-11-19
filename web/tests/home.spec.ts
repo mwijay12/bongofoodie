@@ -176,3 +176,67 @@ test('menu grid never leaves a dead gutter on the right', async ({ page }) => {
     expect(gutter).toBeLessThan(width / 3);
   }
 });
+
+test('brand favicon set and web manifest are wired to the real mark', async ({ page, request }) => {
+  await page.goto('/');
+
+  await expect(page.locator('link[rel="icon"][type="image/svg+xml"]')).toHaveAttribute('href', /favicon\.svg/);
+  await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', '/site.webmanifest');
+  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href', /apple-touch-icon\.png/);
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#1A100B');
+
+  const viewport = await page.locator('meta[name="viewport"]').getAttribute('content');
+  expect(viewport ?? '').not.toContain('user-scalable=no');
+  expect(viewport ?? '').not.toContain('maximum-scale=1.0');
+
+  for (const path of [
+    '/favicon.svg',
+    '/favicon.ico',
+    '/favicon-16x16.png',
+    '/favicon-32x32.png',
+    '/apple-touch-icon.png',
+    '/android-chrome-192x192.png',
+    '/android-chrome-512x512.png',
+    '/site.webmanifest',
+  ]) {
+    expect((await request.get(path)).status(), path).toBe(200);
+  }
+
+  const manifest = await (await request.get('/site.webmanifest')).json();
+  expect(manifest.icons.length).toBeGreaterThan(4);
+  expect(manifest.icons.some((icon: { src: string }) => icon.src === '/favicon.svg')).toBe(true);
+});
+
+test('saved reading size raises small copy without breaking a 360px screen', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 640 });
+  await page.goto('/');
+
+  const tiny = page
+    .locator('[class*="text-[9px]"], [class*="text-[10px]"], [class*="text-[11px]"], .text-xs')
+    .first();
+  expect(await tiny.count()).toBeGreaterThan(0);
+  const tinySize = await tiny.evaluate((element) =>
+    parseFloat(getComputedStyle(element).fontSize),
+  );
+  expect(tinySize).toBeGreaterThanOrEqual(14);
+
+  const beforeBodySize = await page.evaluate(() =>
+    parseFloat(getComputedStyle(document.body).fontSize),
+  );
+  const select = page.getByRole('combobox', {
+    name: 'Ukubwa wa maandishi / Text size',
+  });
+  await select.selectOption('larger');
+
+  expect(await page.evaluate(() => document.documentElement.dataset.textSize)).toBe('larger');
+  const afterBodySize = await page.evaluate(() =>
+    parseFloat(getComputedStyle(document.body).fontSize),
+  );
+  expect(afterBodySize).toBeGreaterThan(beforeBodySize * 1.2);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+
+  await page.reload();
+  await expect(
+    page.getByRole('combobox', { name: 'Ukubwa wa maandishi / Text size' }),
+  ).toHaveValue('larger');
+});

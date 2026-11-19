@@ -57,6 +57,11 @@
   --font-heading: var(--font-dmsans), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
 
+  /* Tailwind's smallest step was 12px. A 14px floor keeps labels readable
+     when the browser base size and saved reading size are both at normal. */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.45;
+
   --animate-slide-in: slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-marquee: marquee 26s linear infinite;
 
@@ -95,6 +100,15 @@
   --input: #EADFD2;
   --ring: #F26522;
   color-scheme: light;
+  --type-scale: 1;
+}
+
+html[data-text-size='large'] {
+  --type-scale: 1.125;
+}
+
+html[data-text-size='larger'] {
+  --type-scale: 1.25;
 }
 
 html {
@@ -102,8 +116,12 @@ html {
   scroll-behavior: smooth;
 }
 
+/* 100% respects the visitor's browser base size; the floor stops a 12px
+   browser default from shrinking body copy. The saved control scales rem,
+   so Tailwind text, CSS Modules, line-height and focus rings grow together. */
 html {
-  font-size: 16px;
+  font-size: 100%;
+  font-size: calc(max(16px, 1rem) * var(--type-scale));
 }
 
 body {
@@ -117,11 +135,32 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Nothing in the product should render below 13px — tiny rounded letterforms
-   were the single biggest cause of the "fonts are too small" complaint. */
-[class*='text-\\[10px\\]'],
-[class*='text-\\[11px\\]'] {
-  font-size: 0.8125rem !important;
+/* Nothing in the product should render below 14px. These selectors also catch
+   responsive variants such as md:text-[10px] without editing every screen. */
+[class~='text-xs'],
+[class*="text-[9px]"],
+[class*="text-[10px]"],
+[class*="text-[11px]"],
+[class*="text-[12px]"],
+[class*="text-[13px]"],
+[class*="text-[13.5px]"],
+[class*="text-[14px]"] {
+  font-size: 0.875rem !important;
+}
+
+[class*="text-[15px]"] {
+  font-size: 0.9375rem !important;
+}
+
+.logo-steam {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: logo-steam 2.8s ease-in-out infinite;
+}
+
+@keyframes logo-steam {
+  0%, 100% { transform: translateY(0); opacity: 0.9; }
+  50% { transform: translateY(-1.5px); opacity: 1; }
 }
 
 ::selection {

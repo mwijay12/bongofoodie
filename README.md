@@ -49,7 +49,7 @@ bongofoodie/
 │
 └── .github/workflows/       # ⚙️ Automated CI & Database Heartbeat
     ├── flutter-ci.yml       # Runs flutter analyze, flutter test & web build on PRs/pushes
-    └── supabase-keepalive.yml # Pings Supabase every 3 days so Free Tier never pauses
+    └── supabase-keepalive.yml # Pings Supabase every 12 hours so Free Tier never pauses
 ```
 
 ---
@@ -112,7 +112,7 @@ npm run supabase:admin
 ```
 
 ### Step 3 — Connect Web (`web/.env.local` & Vercel)
-Create `web/.env.local` (and add the same variables in **Vercel → Project Settings → Environment Variables**):
+Copy `web/.env.example` to `web/.env.local` (and add the same variables in **Vercel → Project Settings → Environment Variables**):
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...

@@ -135,6 +135,14 @@ class AppStrings {
   String get favorites => isSw ? 'Pendwa' : 'Favorites';
   String get darkMode => isSw ? 'Mwonekano wa Giza' : 'Dark Mode';
   String get languageLabel => isSw ? 'Lugha ya Programu' : 'App Language';
+  String get textSizeLabel =>
+      isSw ? 'Ukubwa wa maandishi' : 'Text size';
+  String get textSizeHint => isSw
+      ? 'Chagua ukubwa unaokusaidia kusoma vizuri.'
+      : 'Choose a comfortable reading size.';
+  String get textSizeNormal => isSw ? 'Kawaida' : 'Normal';
+  String get textSizeLarge => isSw ? 'Kubwa' : 'Large';
+  String get textSizeLarger => isSw ? 'Kubwa zaidi' : 'Larger';
   String get achievements =>
       isSw ? 'Beji zako' : 'Your food milestones';
   String get signOut => isSw ? 'Ondoka / Badili Akaunti' : 'Sign Out / Switch Role';

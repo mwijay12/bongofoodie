@@ -67,7 +67,11 @@ project the same day instead of a week later.
 Trigger it once manually after step 2 to confirm it is green.
 
 The Vercel cron (`/api/keepalive`, daily at 06:00 UTC) is a second, independent
-heartbeat. Its environment variables were updated to the new project.
+heartbeat. Copy the values from `web/.env.example` into the Vercel project's
+environment variables. The route validates its own server-side `SUPABASE_URL` /
+`SUPABASE_*KEY` values instead of depending on the browser-only client flag. If
+`CRON_SECRET` is set, Vercel Cron sends its bearer header automatically; an
+external POST monitor must send the same header.
 
 ---
 
