@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, Loader2, Utensils, Plus, ShoppingBag, Check, Image as ImageIcon, Volume2, VolumeX, Globe } from 'lucide-react';
 import { useCartStore } from '@/store/cart.store';
+import { stripMarkdown } from '@/lib/plainText';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -362,7 +363,7 @@ export default function ChefAiPage() {
                       </button>
                     </>
                   )}
-                  <p className="font-medium">{msg.content}</p>
+                  <p className="font-medium whitespace-pre-line">{stripMarkdown(msg.content)}</p>
                 </div>
               </div>
             );
@@ -494,7 +495,7 @@ export default function ChefAiPage() {
 
                 {/* Swahili recipe note */}
                 <div className="text-[10px] text-primary italic font-semibold leading-snug">
-                  📌 {customDish.recipe}
+                  {customDish.recipe}
                 </div>
               </div>
             </div>

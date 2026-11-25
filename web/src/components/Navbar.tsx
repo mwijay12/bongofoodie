@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import cn from 'clsx';
 import Logo from '@/components/Logo';
-import TextSizeControl from '@/components/TextSizeControl';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { getActiveUserProfile } from '@/lib/supabaseDb';
 import { useCartStore } from '@/store/cart.store';
@@ -132,15 +131,6 @@ export default function Navbar() {
             );
           })}
         </nav>
-      </div>
-      <div
-        role="group"
-        aria-label="Reading preferences"
-        className="border-t border-border bg-cream/80"
-      >
-        <div className="container mx-auto flex min-h-12 flex-wrap items-center justify-between gap-2 px-4 py-1.5 md:px-6 max-[380px]:px-2">
-          <TextSizeControl />
-        </div>
       </div>
     </header>
   );
