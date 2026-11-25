@@ -45,13 +45,14 @@ The web storefront implements the master prompt's animation system on the existi
 | GSAP registry + presets | `web/src/lib/motion.ts` | Plugins registered once; `MOTION_PRESETS` (`fadeUp`, `scaleIn`, `magnetic`, …) shared by all sections |
 | Split-text headings | `splitWords()` in `lib/motion.ts`, `data-split` in `app/page.tsx` | Words rise out of overflow-hidden masks on scroll; original text kept via `aria-label` |
 | Magnetic CTAs | `web/src/components/Magnetic.tsx` | GSAP QuickTo lean toward the pointer, elastic return; fine-pointer only |
-| Custom cursor | `web/src/components/CustomCursor.tsx` | Orange dot + trailing ring that grows over interactive elements; native cursor stays visible |
 | Page transition | `web/src/components/PageTransition.tsx` | Ember curtain with wordmark on every App Router navigation (<1s, never captures clicks) |
 | Scroll progress | `web/src/components/ScrollProgress.tsx` | Warm gradient bar, scrubbed ScrollTrigger synced with Lenis |
 | Count-up stats | `countUp()` in `lib/motion.ts`, `data-count` in `app/page.tsx` | Hero proof numbers animate from 0; final value is in markup for no-JS/reduced-motion |
 | Card tilt + hero parallax | `app/page.tsx` | Dish cards tilt in 3D toward the pointer; hero plate/copy counter-move; float loop on the plate stage |
 
-Every effect checks `prefersReducedMotion()` and `isFinePointer()` first and no-ops on touch devices and for reduced-motion users, so the page falls back to plain native scrolling with all content visible. No effect delays a task: the curtain is visual-only and the cursor never replaces the native pointer.
+The system deliberately ships **no custom cursor**: a decorative dot/ring over the text-size control and form fields read as a rendering glitch and distracted from the content, so the native pointer is used everywhere.
+
+Every effect checks `prefersReducedMotion()` and `isFinePointer()` first and no-ops on touch devices and for reduced-motion users, so the page falls back to plain native scrolling with all content visible. No effect delays a task: the curtain is visual-only.
 
 ## Accessible type and brand icons
 

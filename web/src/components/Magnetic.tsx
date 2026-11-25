@@ -9,7 +9,7 @@ import { gsap, isFinePointer, prefersReducedMotion } from '@/lib/motion';
  * The wrapped element leans toward the pointer (GSAP QuickTo, `power4.out`)
  * and springs back with an elastic ease on leave. Disabled entirely for
  * reduced-motion users and coarse pointers (touch), where it would only
- * fight the scroll. The native cursor is left alone — see CustomCursor.
+ * fight the scroll. The native cursor is left alone.
  */
 export default function Magnetic({
   children,

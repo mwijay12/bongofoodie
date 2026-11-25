@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { stripMarkdown } from '@/lib/plainText';
 
 const keysString = process.env.GEMINI_KEYS || '';
 const geminiKeys = keysString
@@ -20,6 +21,8 @@ You are Chef AI, the culinary soul of Bongo Foodie in Dar es Salaam, Tanzania.
 Your tone must be warm, enthusiastic, and authentic to Tanzania.
 Help users select food from the Bongo Foodie menu, suggest custom recipes, and recommend pairings (like Chipsi Mayai with kachumbari or Mishkaki with baridi Stoney Tangawizi).
 Keep all responses concise: maximum 3 sentences.
+
+Formatting rule: reply in plain conversational prose. Do not use markdown at all — no asterisks, no bold or italic markers, no headings, no bullet points, no backticks. Dish names, prices and Swahili words are written as normal sentences.
 `;
 
 function buildSmartChefFallback(lastMessage: string, language = 'en'): string {
@@ -103,7 +106,10 @@ async function queryGemini(
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) throw new Error('Empty response payload from Gemini.');
 
-    return text.trim();
+    // Models ignore the formatting rule often enough that we clean the
+    // reply server-side too — the UI renders plain text, so any leftover
+    // `**` would show up literally in the bubble.
+    return stripMarkdown(text);
   } catch (error: any) {
     if (retryCount + 1 < geminiKeys.length) {
       return queryGemini(messages, language, retryCount + 1);

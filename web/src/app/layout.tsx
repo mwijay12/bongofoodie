@@ -69,9 +69,9 @@ import { Download } from 'lucide-react';
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import SmoothScroll from "@/components/SmoothScroll";
-import CustomCursor from "@/components/CustomCursor";
 import ScrollProgress from "@/components/ScrollProgress";
 import PageTransition from "@/components/PageTransition";
+import TextSizeControl from "@/components/TextSizeControl";
 import { appRelease, appReleaseUrl, appReleasePageUrl } from "@/lib/appRelease";
 import { contact, contactLinks } from "@/lib/contact";
 
@@ -98,7 +98,6 @@ export default function RootLayout({
       </head>
       <body className="min-h-full bg-background-warm text-foreground-dark antialiased font-sans flex flex-col">
         <SmoothScroll />
-        <CustomCursor />
         <ScrollProgress />
         <PageTransition />
         <Navbar />
@@ -222,6 +221,19 @@ export default function RootLayout({
                 </li>
               </ul>
               <p className="text-[11px] text-muted-foreground/80">{contact.hours}</p>
+            </div>
+          </div>
+
+          {/* Reading size lives here, not in the sticky header: on the home
+              page it sat between the nav and the hero and broke the
+              editorial entrance. It is still one tap from every page. */}
+          <div className="max-w-7xl mx-auto px-4 md:px-8 pt-5 pb-1">
+            <div
+              role="group"
+              aria-label="Reading preferences"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border bg-cream/70 px-4 py-2.5"
+            >
+              <TextSizeControl />
             </div>
           </div>
 

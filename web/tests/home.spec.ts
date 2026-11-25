@@ -223,9 +223,12 @@ test('saved reading size raises small copy without breaking a 360px screen', asy
   const beforeBodySize = await page.evaluate(() =>
     parseFloat(getComputedStyle(document.body).fontSize),
   );
+  // The reading-size control now lives in the footer so it does not sit
+  // between the sticky nav and the hero on the landing page.
   const select = page.getByRole('combobox', {
     name: 'Ukubwa wa maandishi / Text size',
   });
+  await select.scrollIntoViewIfNeeded();
   await select.selectOption('larger');
 
   expect(await page.evaluate(() => document.documentElement.dataset.textSize)).toBe('larger');
