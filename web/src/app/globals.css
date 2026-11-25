@@ -187,3 +187,96 @@ textarea:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Motion system (see src/lib/motion.ts + DESIGN.md) ─────────────────── */
+
+/* Split-text masks: each word rises out of its own overflow-hidden mask. */
+.split-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.split-word {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Warm gradient text for headline accent words. */
+.text-gradient-warm {
+  background: linear-gradient(100deg, #ffb347 0%, #f26522 55%, #f58220 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Custom cursor accent — dot tracks 1:1, ring eases behind it. The native
+   cursor stays visible; these are brand accents, not a replacement. */
+.custom-cursor-dot,
+.custom-cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: 999px;
+}
+.custom-cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: #f26522;
+}
+.custom-cursor-ring {
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid rgba(242, 101, 34, 0.55);
+}
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .custom-cursor-dot,
+  .custom-cursor-ring {
+    display: none;
+  }
+}
+
+/* Scroll progress bar pinned above the sticky navbar. */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: 3px;
+  pointer-events: none;
+}
+.scroll-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #f26522, #ffb347);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+/* Page-transition curtain (PageTransition.tsx). Never captures clicks. */
+.page-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #16100b;
+  pointer-events: none;
+  transform: scaleY(0);
+}
+.page-transition-label {
+  font-family: var(--font-editorial);
+  font-weight: 700;
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+  color: #faf7f2;
+  opacity: 0;
+}
+.page-transition-label span {
+  color: #f26522;
+}

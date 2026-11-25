@@ -7,7 +7,9 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowRight, ArrowUpRight, Clock, Flame, MessageCircle, Star } from 'lucide-react';
 import Logo from '@/components/Logo';
+import Magnetic from '@/components/Magnetic';
 import SwahiliTrivia from '@/components/SwahiliTrivia';
+import { countUp, isFinePointer, splitWords } from '@/lib/motion';
 import { contact, contactLinks } from '@/lib/contact';
 import { appRelease, appReleaseUrl, repoUrl } from '@/lib/appRelease';
 import styles from './home.module.css';
@@ -189,6 +191,104 @@ export default function Home() {
           scrollTrigger: { trigger: marquee, start: 'top bottom', end: 'bottom top', scrub: 1 },
         });
       }
+
+      /* ── Split-text: section headings rise word by word ── */
+      gsap.utils.toArray<HTMLElement>('[data-split]').forEach((heading) => {
+        const words = splitWords(heading);
+        if (!words.length) return;
+        gsap.from(words, {
+          yPercent: 115,
+          duration: 0.85,
+          stagger: 0.06,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: heading, start: 'top 88%', once: true },
+        });
+      });
+
+      /* ── Proof stats count up when the hero settles ── */
+      gsap.utils.toArray<HTMLElement>('[data-count]').forEach((el) => {
+        const end = Number(el.dataset.count);
+        if (!Number.isFinite(end)) return;
+        countUp(el, end, {
+          decimals: Number(el.dataset.decimals ?? 0),
+          prefix: el.dataset.prefix ?? '',
+          delay: 0.55,
+        });
+      });
+
+      /* ── Hero plate floats gently (inner stage, so it never fights the
+         scroll parallax on the wrapper) ── */
+      gsap.to(`.${styles.plateStage}`, {
+        y: -10,
+        duration: 3.2,
+        ease: 'sine.inOut',
+        yoyo: true,
+        repeat: -1,
+      });
+
+      /* ── Pointer parallax: plate leans toward the cursor, copy counter-moves ── */
+      if (isFinePointer() && heroRef.current) {
+        const plateX = gsap.quickTo(`.${styles.plateWrap}`, 'x', { duration: 0.6, ease: 'power3.out' });
+        const plateY = gsap.quickTo(`.${styles.plateWrap}`, 'y', { duration: 0.6, ease: 'power3.out' });
+        const copyX = gsap.quickTo(`.${styles.heroCopy}`, 'x', { duration: 0.8, ease: 'power3.out' });
+        const copyY = gsap.quickTo(`.${styles.heroCopy}`, 'y', { duration: 0.8, ease: 'power3.out' });
+
+        const onHeroMove = (event: MouseEvent) => {
+          const rect = heroRef.current?.getBoundingClientRect();
+          if (!rect) return;
+          const nx = (event.clientX - rect.left) / rect.width - 0.5;
+          const ny = (event.clientY - rect.top) / rect.height - 0.5;
+          plateX(nx * 18);
+          plateY(ny * 14);
+          copyX(nx * -8);
+          copyY(ny * -6);
+        };
+        const onHeroLeave = () => {
+          plateX(0);
+          plateY(0);
+          copyX(0);
+          copyY(0);
+        };
+
+        heroRef.current.addEventListener('mousemove', onHeroMove);
+        heroRef.current.addEventListener('mouseleave', onHeroLeave);
+        return () => {
+          heroRef.current?.removeEventListener('mousemove', onHeroMove);
+          heroRef.current?.removeEventListener('mouseleave', onHeroLeave);
+        };
+      }
+
+      /* ── Dish cards tilt toward the pointer (21st.dev tilt-effect pattern) ── */
+      if (isFinePointer()) {
+        gsap.utils.toArray<HTMLElement>(`.${styles.dishCard}`).forEach((card) => {
+          const onMove = (event: MouseEvent) => {
+            const rect = card.getBoundingClientRect();
+            const nx = (event.clientX - rect.left) / rect.width - 0.5;
+            const ny = (event.clientY - rect.top) / rect.height - 0.5;
+            gsap.to(card, {
+              rotationY: nx * 10,
+              rotationX: ny * -8,
+              transformPerspective: 900,
+              y: -4,
+              duration: 0.4,
+              ease: 'power2.out',
+              overwrite: 'auto',
+            });
+          };
+          const onLeave = () => {
+            gsap.to(card, {
+              rotationX: 0,
+              rotationY: 0,
+              y: 0,
+              duration: 0.7,
+              ease: 'elastic.out(1, 0.5)',
+              overwrite: 'auto',
+            });
+          };
+          card.addEventListener('mousemove', onMove);
+          card.addEventListener('mouseleave', onLeave);
+        });
+      }
     }, root);
 
     return () => ctx.revert();
@@ -222,31 +322,43 @@ export default function Home() {
           </p>
 
           <div className={`${styles.actions} ${styles.heroFade}`}>
-            <Link href="/search" className={styles.primary}>
-              Explore the menu
-              <ArrowRight size={18} aria-hidden="true" />
-            </Link>
-            <Link href="/chef-ai" className={styles.secondary}>
-              Ask Chef AI
-              <MessageCircle size={17} aria-hidden="true" />
-            </Link>
+            <Magnetic>
+              <Link href="/search" className={styles.primary}>
+                Explore the menu
+                <ArrowRight size={18} aria-hidden="true" />
+              </Link>
+            </Magnetic>
+            <Magnetic>
+              <Link href="/chef-ai" className={styles.secondary}>
+                Ask Chef AI
+                <MessageCircle size={17} aria-hidden="true" />
+              </Link>
+            </Magnetic>
           </div>
 
           <dl className={`${styles.proof} ${styles.heroFade}`}>
             <div>
               <dt>Signature dishes</dt>
-              <dd>11</dd>
+              <dd>
+                <span data-count="11">11</span>
+              </dd>
             </div>
             <div>
               <dt>Average rating</dt>
               <dd>
                 <Star size={15} className={styles.star} aria-hidden="true" />
-                4.8
+                <span data-count="4.8" data-decimals="1">
+                  4.8
+                </span>
               </dd>
             </div>
             <div>
               <dt>Delivery in Dar</dt>
-              <dd>TSh 2,000</dd>
+              <dd>
+                <span data-count="2000" data-prefix="TSh ">
+                  TSh 2,000
+                </span>
+              </dd>
             </div>
           </dl>
         </div>
@@ -316,9 +428,11 @@ export default function Home() {
 
       {/* ─────────────────────── HOW IT WORKS ─────────────────────── */}
       <section className={styles.how} aria-labelledby="how-title">
-        <div className={`${styles.sectionHead} ${styles.reveal}`}>
-          <p className={styles.eyebrow}>From order to doorstep</p>
-          <h2 id="how-title">Hatua tatu. Hakuna mshangao.</h2>
+        <div className={styles.sectionHead}>
+          <p className={`${styles.eyebrow} ${styles.reveal}`}>From order to doorstep</p>
+          <h2 id="how-title" data-split>
+            Hatua tatu. Hakuna mshangao.
+          </h2>
         </div>
         <div className={styles.stepLine} aria-hidden="true" />
         <ol className={styles.steps}>
@@ -334,10 +448,12 @@ export default function Home() {
 
       {/* ──────────────────────── DISH GRID ───────────────────────── */}
       <section id="coastal-table" className={styles.table} aria-labelledby="table-title">
-        <div className={`${styles.sectionHeading} ${styles.reveal}`}>
+        <div className={styles.sectionHeading}>
           <div>
-            <p className={styles.eyebrow}>The coastal table</p>
-            <h2 id="table-title">Made familiar. Made Swahili.</h2>
+            <p className={`${styles.eyebrow} ${styles.reveal}`}>The coastal table</p>
+            <h2 id="table-title" data-split>
+              Made familiar. Made Swahili.
+            </h2>
           </div>
           <Link href="/search" className={styles.textLink}>
             Browse the full menu
@@ -392,16 +508,20 @@ export default function Home() {
         </div>
         <div>
           <p className={styles.eyebrow}>Chef Atelier AI</p>
-          <h2 id="chef-title">Hujui kula nini leo?</h2>
+          <h2 id="chef-title" data-split>
+            Hujui kula nini leo?
+          </h2>
           <p>
             Ask about spice pairings, what is good today, or design a Swahili plate that
             does not exist yet — then order it.
           </p>
         </div>
-        <Link href="/chef-ai" className={styles.secondary}>
-          Open Chef AI
-          <ArrowUpRight size={17} aria-hidden="true" />
-        </Link>
+        <Magnetic>
+          <Link href="/chef-ai" className={styles.secondary}>
+            Open Chef AI
+            <ArrowUpRight size={17} aria-hidden="true" />
+          </Link>
+        </Magnetic>
       </section>
 
       <SwahiliTrivia />
@@ -411,22 +531,28 @@ export default function Home() {
         <Logo size={56} />
         <div>
           <p className={styles.eyebrow}>The Flutter app</p>
-          <h2 id="app-title">Take BongoFoodie with you.</h2>
+          <h2 id="app-title" data-split>
+            Take BongoFoodie with you.
+          </h2>
           <p>
             The full app — Chef AI, live order tracking, Kiswahili and English — as a{' '}
             {appRelease.size} Android download.
           </p>
         </div>
-        <a href={appReleaseUrl} className={styles.primary} download>
-          Download APK
-        </a>
+        <Magnetic>
+          <a href={appReleaseUrl} className={styles.primary} download>
+            Download APK
+          </a>
+        </Magnetic>
       </section>
 
       {/* ───────────────────────── CONTACT ────────────────────────── */}
       <section className={styles.contact} aria-labelledby="contact-title">
         <div>
           <p className={styles.eyebrow}>Talk to us</p>
-          <h2 id="contact-title">Something not right with an order?</h2>
+          <h2 id="contact-title" data-split>
+            Something not right with an order?
+          </h2>
           <p>Mail us and a person replies. Open {contact.hours.toLowerCase()}.</p>
         </div>
         <div className={styles.contactLinks}>

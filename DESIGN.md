@@ -36,6 +36,23 @@ Tokens live in `mobile/lib/core/theme/app_colors.dart`; the light theme is `buil
 
 Use consistent margins, at least 44px touch targets, scalable text and meaningful semantic labels. Prefer theme components and semantic tokens over inline color literals. Larger type and translated text must not be clipped. Remote promotion color fields still exist in the data model; the home UI selects one of the two branded gradients rather than rendering arbitrary remote hex values.
 
+## Web motion system (Awwwards master-prompt adaptation)
+
+The web storefront implements the master prompt's animation system on the existing GSAP + Lenis stack — no new animation packages. Barba.js and Three.js from the prompt are deliberately **not** used: Barba targets multi-page sites and fights the Next.js App Router, and the hero's Three.js plate was already removed for first-paint performance (the hand-written WebGL steam shader in `HeatShader.tsx` covers the WebGL moment at a fraction of the cost).
+
+| Piece | Where | Behaviour |
+| --- | --- | --- |
+| GSAP registry + presets | `web/src/lib/motion.ts` | Plugins registered once; `MOTION_PRESETS` (`fadeUp`, `scaleIn`, `magnetic`, …) shared by all sections |
+| Split-text headings | `splitWords()` in `lib/motion.ts`, `data-split` in `app/page.tsx` | Words rise out of overflow-hidden masks on scroll; original text kept via `aria-label` |
+| Magnetic CTAs | `web/src/components/Magnetic.tsx` | GSAP QuickTo lean toward the pointer, elastic return; fine-pointer only |
+| Custom cursor | `web/src/components/CustomCursor.tsx` | Orange dot + trailing ring that grows over interactive elements; native cursor stays visible |
+| Page transition | `web/src/components/PageTransition.tsx` | Ember curtain with wordmark on every App Router navigation (<1s, never captures clicks) |
+| Scroll progress | `web/src/components/ScrollProgress.tsx` | Warm gradient bar, scrubbed ScrollTrigger synced with Lenis |
+| Count-up stats | `countUp()` in `lib/motion.ts`, `data-count` in `app/page.tsx` | Hero proof numbers animate from 0; final value is in markup for no-JS/reduced-motion |
+| Card tilt + hero parallax | `app/page.tsx` | Dish cards tilt in 3D toward the pointer; hero plate/copy counter-move; float loop on the plate stage |
+
+Every effect checks `prefersReducedMotion()` and `isFinePointer()` first and no-ops on touch devices and for reduced-motion users, so the page falls back to plain native scrolling with all content visible. No effect delays a task: the curtain is visual-only and the cursor never replaces the native pointer.
+
 ## Accessible type and brand icons
 
 The web storefront uses self-hosted Fraunces for editorial display and DM Sans for UI/body copy; the Flutter app keeps Quicksand. Both surfaces now enforce a readable baseline: web starts at the visitor's browser base size with a 16px floor, applies a 14px minimum to tiny utility classes and CSS Modules, and exposes saved **Kawaida / Kubwa / Kubwa zaidi** choices. Flutter wraps light and dark themes with `AppType` (14dp minimum), applies `ReadableTextScaler` to combine OS accessibility scaling with the saved choice, and offers the same three choices in Profile. Flutter web no longer disables pinch zoom.
