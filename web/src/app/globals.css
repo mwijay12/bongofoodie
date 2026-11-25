@@ -211,35 +211,6 @@ textarea:focus-visible {
   color: transparent;
 }
 
-/* Custom cursor accent — dot tracks 1:1, ring eases behind it. The native
-   cursor stays visible; these are brand accents, not a replacement. */
-.custom-cursor-dot,
-.custom-cursor-ring {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0;
-  border-radius: 999px;
-}
-.custom-cursor-dot {
-  width: 8px;
-  height: 8px;
-  background: #f26522;
-}
-.custom-cursor-ring {
-  width: 36px;
-  height: 36px;
-  border: 1.5px solid rgba(242, 101, 34, 0.55);
-}
-@media (pointer: coarse), (prefers-reduced-motion: reduce) {
-  .custom-cursor-dot,
-  .custom-cursor-ring {
-    display: none;
-  }
-}
-
 /* Scroll progress bar pinned above the sticky navbar. */
 .scroll-progress {
   position: fixed;
