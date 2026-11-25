@@ -180,7 +180,13 @@
   will-change: transform;
 }
 .heroLineAccent > span {
+  /* Warm gradient on the accent word; amber stays as the fallback colour
+     for engines without background-clip: text. */
   color: var(--amber);
+  background: linear-gradient(100deg, #ffb347 0%, #f26522 55%, #f58220 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .intro {
@@ -548,6 +554,9 @@
   display: block;
   min-width: 0;
   padding-bottom: 4px;
+  /* Perspective for the GSAP pointer-tilt (see page.tsx). */
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 .cardImage {
   position: relative;
