@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BongoFoodie Lab — Ladha za Kitanzania</title>
+<meta name="description" content="BongoFoodie Lab: sahani tano za Kitanzania zinazozunguka kwenye meza ya mbao. Nyama Choma, Chipsi Mayai, Pilau, Mishkaki na Samaki wa Kupaka.">
+<meta name="theme-color" content="#16100B">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+/* ─────────────────────────────────────────────────────────────
+   BongoFoodie Lab — lazy-susan flavour carousel
+   Design unit --u is set from JS; every size below is calc(N * var(--u))
+   so the whole composition scales as one photograph.
+   ───────────────────────────────────────────────────────────── */
+
+@font-face{
+  font-family:"Fraunces";src:url("fonts/Fraunces-Variable.woff2") format("woff2");
+  font-weight:100 900;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:"DM Sans";src:url("fonts/DMSans-Variable.woff2") format("woff2");
+  font-weight:100 900;font-style:normal;font-display:swap;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+
+html,body{height:100%}
+body{
+  margin:0;
+  overflow:hidden;
+  color:#3E2115;
+  font-family:"DM Sans",system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  /* Both are re-written from JS every frame during a turn. */
+  --bg:#D2977F;
+  --ink:#3E2115;
+  background:var(--bg);
+}
+
+/* ── Stage shell ─────────────────────────────────────────────── */
+.hero{
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+  opacity:0;
+  transition:opacity .6s ease;
+  /* Transparent — body paints --bg, so the crossfade has one owner. */
+}
+.hero.ready{opacity:1}
+
+.waves{
+  position:absolute;inset:0;
+  opacity:.5;
+  pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='28' viewBox='0 0 120 28'%3E%3Cpath d='M0 14 C 15 4, 30 4, 45 14 S 75 24, 90 14 S 112 6, 120 14' fill='none' stroke='rgba(62,33,21,0.16)' stroke-width='1.1'/%3E%3C/svg%3E");
+  background-size:calc(120 * var(--u)) calc(28 * var(--u));
+}
+
+.vignette{
+  position:absolute;inset:0;
+  pointer-events:none;
+  background:radial-gradient(ellipse 75% 70% at 50% 45%,transparent 55%,rgba(40,20,10,.22) 100%);
+}
+
+.stage{
+  position:absolute;
+  left:50%;top:50%;
+  width:calc(1440 * var(--u));
+  height:calc(900 * var(--u));
+  transform:translate(-50%,-50%);
+}
+body.portrait .stage{
+  width:calc(390 * var(--u));
+  height:calc(var(--hs) * var(--u));
+}
+
+/* ── Wooden lazy-susan ring ──────────────────────────────────── */
+.ring,.ring-shadow{
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+}
+.ring{
+  z-index:1;
+  background-repeat:no-repeat;
+  will-change:transform;
+}
+.ring-shadow{
+  z-index:0;
+  background:radial-gradient(circle closest-side,
+    transparent calc(var(--ri) - 10px),
+    rgba(40,20,10,.16) calc(var(--ri) + 6px),
+    rgba(40,20,10,.16) calc(var(--ro) - 4px),
+    transparent calc(var(--ro) + 14px));
+}
+
+/* ── Bowls ───────────────────────────────────────────────────── */
+.coupe,.coupe-shadow{
+  position:absolute;
+  top:0;left:0;
+  transform-origin:50% 50%;
+  pointer-events:none;
+  will-change:transform,opacity;
+}
+.coupe{
+  display:block;
+  border-radius:50%;
+  filter:drop-shadow(0 calc(10 * var(--u)) calc(16 * var(--u)) rgba(40,20,10,.28));
+}
+.coupe-shadow{
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(40,20,10,.30) 0%,rgba(40,20,10,.14) 48%,transparent 70%);
+}
+
+/* ── Props (CSS background crops of one sheet) ───────────────── */
+.prop{
+  position:absolute;
+  z-index:32;
+  pointer-events:none;
+  background-repeat:no-repeat;
+  background-image:url("props-sheet.webp");
+  filter:drop-shadow(0 calc(6 * var(--u)) calc(8 * var(--u)) rgba(40,20,10,.22));
+  will-change:transform;
+}
+
+/* ── Copy ────────────────────────────────────────────────────── */
+.title{
+  position:absolute;
+  left:calc(190 * var(--u));
+  top:calc(632 * var(--u));
+  z-index:3;
+  margin:0;
+  font-family:"Fraunces",Georgia,serif;
+  font-weight:800;
+  line-height:1;
+  letter-spacing:-.025em;
+  white-space:nowrap;
+  color:var(--ink);
+  font-variation-settings:"SOFT" 0,"WONK" 1;
+  pointer-events:none;
+}
+.title .accent{color:inherit}
+
+.eyebrow{
+  position:absolute;
+  left:calc(158 * var(--u));
+  top:calc(455 * var(--u));
+  z-index:40;
+  display:flex;
+  align-items:center;
+  gap:calc(18 * var(--u));
+  margin:0;
+  font-weight:600;
+  font-size:max(9px,calc(15 * var(--u)));
+  letter-spacing:.42em;
+  text-transform:uppercase;
+  color:var(--ink);
+  white-space:nowrap;
+}
+.eyebrow::before,.eyebrow::after{
+  content:"";
+  display:block;
+  width:calc(64 * var(--u));
+  height:calc(1.5 * var(--u));
+  background:currentColor;
+  flex:none;
+}
+.eyebrow::after{margin-left:calc(-6 * var(--u))}
+
+.flavour{
+  position:absolute;
+  left:calc(190 * var(--u));
+  top:calc(497 * var(--u));
+  z-index:40;
+  margin:0;
+  max-width:calc(430 * var(--u));
+  font-weight:700;
+  font-size:max(11px,calc(21 * var(--u)));
+  line-height:1.28;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--ink);
+  white-space:pre-line;
+}
+
+.buy{
+  position:absolute;
+  left:calc(190 * var(--u));
+  top:calc(572 * var(--u));
+  z-index:40;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:calc(156 * var(--u));
+  height:calc(50 * var(--u));
+  min-height:44px;
+  padding:0;
+  border:calc(2 * var(--u)) solid var(--ink);
+  border-radius:calc(8 * var(--u));
+  background:transparent;
+  color:var(--ink);
+  font-family:inherit;
+  font-weight:600;
+  font-size:max(9px,calc(14 * var(--u)));
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  text-decoration:none;
+  cursor:pointer;
+  transition:background-color .25s ease,color .25s ease,transform .2s ease;
+}
+.buy:hover,.buy:focus-visible{
+  background:var(--ink);
+  color:var(--bg);
+}
+.buy:active{transform:scale(.97)}
+
+/* ── Nav buttons ─────────────────────────────────────────────── */
+.nav-btn{
+  position:absolute;
+  top:calc(26 * var(--u));
+  z-index:20;
+  display:grid;
+  place-items:center;
+  width:calc(60 * var(--u));
+  height:calc(60 * var(--u));
+  border:calc(1.5 * var(--u)) solid rgba(255,255,255,.55);
+  border-radius:calc(14 * var(--u));
+  background:transparent;
+  color:#fff;
+  cursor:pointer;
+  transition:background-color .25s ease,border-color .25s ease;
+}
+.nav-btn:hover,.nav-btn:focus-visible{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.85)}
+.nav-btn svg{width:calc(24 * var(--u));height:calc(24 * var(--u));display:block}
+.nav-menu{left:calc(40 * var(--u))}
+.nav-cart{right:calc(40 * var(--u))}
+
+/* ── Menu panel (opened by the hamburger) ────────────────────── */
+.sheet{
+  position:absolute;
+  inset:0;
+  z-index:30;
+  display:grid;
+  place-items:center;
+  padding:calc(24 * var(--u));
+  background:rgba(22,16,11,.72);
+  backdrop-filter:blur(10px);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .3s ease,visibility .3s;
+}
+.sheet.open{opacity:1;visibility:visible}
+.sheet-card{
+  width:min(520px,100%);
+  padding:28px;
+  border-radius:20px;
+  background:#FAF7F2;
+  color:#2B1B12;
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.5);
+}
+.sheet-card h2{margin:0 0 4px;font-family:"Fraunces",serif;font-weight:800;font-size:1.5rem;letter-spacing:-.02em}
+.sheet-card p{margin:0 0 18px;font-size:.8125rem;color:#6F645D}
+.sheet-list{display:grid;gap:8px;margin:0 0 18px;padding:0;list-style:none}
+.sheet-list a{
+  display:flex;justify-content:space-between;gap:12px;
+  padding:12px 14px;border:1px solid #EADFD2;border-radius:12px;
+  font-size:.8125rem;font-weight:600;color:#2B1B12;text-decoration:none;
+  transition:border-color .2s,background-color .2s;
+}
+.sheet-list a:hover,.sheet-list a:focus-visible{border-color:#F26522;background:#F26522/8%}
+.sheet-list span{color:#6F645D;font-weight:500}
+.sheet-close{
+  width:100%;min-height:48px;border:0;border-radius:12px;
+  background:#F26522;color:#2B1B12;font-weight:700;font-size:.875rem;cursor:pointer;
+}
+
+/* ── Portrait copy stack ─────────────────────────────────────── */
+body.portrait .eyebrow{
+  left:0;right:0;top:calc(var(--copy-top) * var(--u));
+  justify-content:center;
+  gap:calc(12 * var(--u));
+  font-size:max(9px,calc(12 * var(--u)));
+}
+body.portrait .eyebrow::before,
+body.portrait .eyebrow::after{width:calc(40 * var(--u))}
+body.portrait .flavour{
+  left:0;right:0;top:calc((var(--copy-top) + 30) * var(--u));
+  max-width:none;
+  text-align:center;
+  font-size:max(11px,calc(17 * var(--u)));
+}
+body.portrait .buy{
+  left:50%;top:calc((var(--copy-top) + 92) * var(--u));
+  transform:translateX(-50%);
+  width:calc(140 * var(--u));
+  height:calc(46 * var(--u));
+  font-size:max(9px,calc(13 * var(--u)));
+}
+body.portrait .buy:active{transform:translateX(-50%) scale(.97)}
+body.portrait .title{
+  left:50%;top:calc(var(--title-top) * var(--u));
+  transform:translateX(-50%);
+  text-align:center;
+}
+body.portrait .nav-btn{
+  top:calc(18 * var(--u));
+  width:calc(48 * var(--u));
+  height:calc(48 * var(--u));
+  border-radius:calc(12 * var(--u));
+}
+body.portrait .nav-btn svg{width:calc(21 * var(--u));height:calc(21 * var(--u))}
+body.portrait .nav-menu{left:calc(18 * var(--u))}
+body.portrait .nav-cart{right:calc(18 * var(--u))}
+
+/* Focus ring that survives on every flavour colour. */
+:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.buy:focus-visible{outline:3px solid var(--ink);outline-offset:4px}
+
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .hero{transition:none}
+  .buy,.nav-btn,.sheet,.sheet-list a{transition-duration:.01ms}
+}
+</style>
+</head>
+<body>
+
+<main class="hero" id="hero" aria-label="BongoFoodie Lab — sahani tano za Kitanzania">
+  <div class="waves" aria-hidden="true"></div>
+
+  <div class="stage" id="stage">
+    <div class="ring-shadow" id="ringShadow" aria-hidden="true"></div>
+    <div class="ring" id="ring" aria-hidden="true"></div>
+
+    <h1 class="title" id="title">BONGO FOODIE</h1>
+
+    <!-- Bowls and props are appended by the script. -->
+
+    <p class="eyebrow">KITANZANIA</p>
+    <p class="flavour" id="flavour">NYAMA CHOMA</p>
+    <a class="buy" href="/search">AGIZA SASA</a>
+  </div>
+
+  <div class="vignette" aria-hidden="true"></div>
+
+  <button class="nav-btn nav-menu" id="menuBtn" type="button" aria-label="Fungua menyu" aria-expanded="false" aria-controls="sheet">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16"/>
+    </svg>
+  </button>
+
+  <a class="nav-btn nav-cart" href="/cart" aria-label="Kikapu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 4h2.2l2.1 10.2a1.6 1.6 0 0 0 1.6 1.3h7.9a1.6 1.6 0 0 0 1.6-1.2L20 8H6.2"/>
+      <circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>
+    </svg>
+  </a>
+</main>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-card">
+    <h2 id="sheetTitle">BongoFoodie Lab</h2>
+    <p>Sahani tano za Kitanzania, moja kwa moja kutoka jikoni yetu Dar es Salaam.</p>
+    <ul class="sheet-list">
+      <li><a href="/search">Menyu yote <span>Vitafunio &amp; milo</span></a></li>
+      <li><a href="/chef-ai">Chef AI <span>Msaidizi wa jikoni</span></a></li>
+      <li><a href="/cart">Kikapu <span>Malipo</span></a></li>
+      <li><a href="/profile">Oda zangu <span>Akaunti</span></a></li>
+    </ul>
+    <button class="sheet-close" id="sheetClose" type="button">Funga</button>
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   1. Data
+   ───────────────────────────────────────────────────────────── */
+
+const FLAVOURS = [
+  { name: 'NYAMA\nCHOMA',  bg: '#D2977F', ink: '#3E2115', img: 'bowl-nyama-choma.webp',
+    note: 'Mkaa, chumvi na uvumilivu.' },
+  { name: 'CHIPSI\nMAYAI', bg: '#EFC55E', ink: '#3E2C06', img: 'bowl-chipsi-mayai.webp',
+    note: 'Viazi, mayai, kachumbari.' },
+  { name: 'PILAU\nYA KUKU', bg: '#B9C79D', ink: '#26301A', img: 'bowl-pilau.webp',
+    note: 'Iliki, karafuu, mdalasini.' },
+  { name: 'MISHKAKI',     bg: '#C6A2C0', ink: '#38203A', img: 'bowl-mishkaki.webp',
+    note: 'Tangawizi, limau, mkaa.' },
+  { name: 'SAMAKI\nWA KUPARWA', bg: '#A8C9C4', ink: '#123330', img: 'bowl-samaki.webp',
+    note: 'Tui la nazi na ukwaju.' },
+];
+
+/* ── Ring geometry, measured off ring.webp (1024 x 1024) ─────── */
+const RING = { cx: 510.5, cy: 511, outer: 501, inner: 291.5, size: 1024 };
+const BAND = (RING.outer + RING.inner) / 2 / RING.outer;   // ≈ 0.791
+
+/* ── Props: source-sheet boxes measured from the alpha channel ─
+   Each entry is a crop rectangle inside props-sheet.webp, so one sheet
+   serves every prop and nothing is sliced into separate files.        */
+const SHEET_W = 1024, SHEET_H = 683;
+const PROPS = {
+  leaf:      { x: 633, y: 196, w: 291, h: 234 },
+  sauce:     { x: 303, y: 230, w: 188, h: 191 },
+  limeTop:   { x: 606, y: 74,  w: 121, h: 100 },
+  limeLeft:  { x: 113, y: 443, w: 125, h: 121 },
+  spoons:    { x: 333, y: 424, w: 279, h: 204 },
+  salt:      { x: 718, y: 516, w: 92,  h: 80  },
+  chilliTop: { x: 133, y: 80,  w: 229, h: 101 },
+  chilliMid: { x: 431, y: 68,  w: 167, h: 192 },
+  chilliLft: { x: 135, y: 191, w: 163, h: 179 },
+};
+
+/* ── Per-flavour layout constants ────────────────────────────── */
+const L = { R: 430, big: 470, small: 292, bowlY: 418 };
+const LP = { R: 222, big: 262, small: 158 };
+const STEP_MS = 1900, HOLD_MS = 1400, TURN_MS = 500;
+
+/* ─────────────────────────────────────────────────────────────
+   2. Easing — cubic-bezier(.42,0,.58,1) solved numerically
+   ───────────────────────────────────────────────────────────── */
+const BEZ = [0.42, 0, 0.58, 1];
+function bezierX(t) {
+  const u = 1 - t;
+  return 3 * u * u * t * BEZ[0] + 3 * u * t * t * BEZ[2] + t * t * t;
+}
+function bezierY(t) {
+  const u = 1 - t;
+  return 3 * u * u * t * BEZ[1] + 3 * u * t * t * BEZ[3] + t * t * t;
+}
+function ease(x) {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  let t = x;
+  for (let i = 0; i < 6; i++) {
+    const err = bezierX(t) - x;
+    if (Math.abs(err) < 1e-5) break;
+    const d = 3 * (1 - t) * (1 - t) * BEZ[0]
+            + 6 * (1 - t) * t * (BEZ[2] - BEZ[0])
+            + 3 * t * t * (1 - BEZ[2]) || 1e-6;
+    t -= err / d;
+    t = Math.min(1, Math.max(0, t));
+  }
+  return bezierY(t);
+}
+
+/* Rounded to two decimals — keeps the per-frame style strings short. */
+const r2 = n => Math.round(n * 100) / 100;
+
+/* ─────────────────────────────────────────────────────────────
+   3. Colour interpolation in linear RGB
+   ───────────────────────────────────────────────────────────── */
+function srgbToLinear(c) {
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+function linearToSrgb(c) {
+  return c <= 0.0031308 ? c * 12.92 : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+}
+function hexToLinear(hex) {
+  return [1, 3, 5].map(i => srgbToLinear(parseInt(hex.substr(i, 2), 16) / 255));
+}
+function linearToHex(rgb) {
+  return '#' + rgb.map(v =>
+    Math.round(linearToSrgb(Math.min(1, Math.max(0, v))) * 255)
+      .toString(16).padStart(2, '0')).join('');
+}
+const LINEAR = FLAVOURS.map(f => ({ bg: hexToLinear(f.bg), ink: hexToLinear(f.ink) }));
+function mixColour(from, to, t) {
+  return linearToHex(from.map((v, i) => v + (to[i] - v) * t));
+}
+
+/* ─────────────────────────────────────────────────────────────
+   4. State + DOM
+   ───────────────────────────────────────────────────────────── */
+const root = document.documentElement;
+const hero = document.getElementById('hero');
+const stage = document.getElementById('stage');
+const ringEl = document.getElementById('ring');
+const ringShadow = document.getElementById('ringShadow');
+const titleEl = document.getElementById('title');
+const flavourEl = document.getElementById('flavour');
+const menuBtn = document.getElementById('menuBtn');
+const sheet = document.getElementById('sheet');
+const sheetClose = document.getElementById('sheetClose');
+
+let u = 1, isPortrait = false, stageW = 1440, stageH = 900;
+let cx = 720, cy = -12;
+let bowlEls = [], bowlShadows = [], propEls = [];
+let R = L.R, big = L.big, small = L.small;
+let step = 0, phaseStart = 0, p = 0, lastNow = 0, lastFlavourShown = 0;
+
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+let motionQuery = reduce.matches;
+
+/* ─────────────────────────────────────────────────────────────
+   5. Build the bowls and props once the images are decoded
+   ───────────────────────────────────────────────────────────── */
+function buildBowls() {
+  FLAVOURS.forEach((f, i) => {
+    const shadow = document.createElement('div');
+    shadow.className = 'coupe-shadow';
+    stage.appendChild(shadow);
+
+    const img = document.createElement('img');
+    img.className = 'coupe';
+    img.src = f.img;
+    img.alt = '';
+    img.decoding = 'async';
+    img.draggable = false;
+    stage.appendChild(img);
+
+    bowlShadows.push(shadow);
+    bowlEls.push(img);
+  });
+}
+
+function buildProps() {
+  const pos = isPortrait ? propLayoutPortrait() : propLayoutDesktop();
+  for (const item of pos) {
+    const box = PROPS[item.key];
+    if (!box) continue;
+    const el = document.createElement('div');
+    el.className = 'prop';
+    const s = item.w / box.w;
+    el.style.width = `calc(${item.w} * var(--u))`;
+    el.style.height = `calc(${box.h * s} * var(--u))`;
+    el.style.backgroundSize = `calc(${SHEET_W * s} * var(--u)) calc(${SHEET_H * s} * var(--u))`;
+    el.style.backgroundPosition = `calc(${-box.x * s} * var(--u)) calc(${-box.y * s} * var(--u))`;
+    el.style.left = `calc(${item.x} * var(--u))`;
+    el.style.top = `calc(${item.y} * var(--u))`;
+    el.style.transform = `rotate(${item.rot}deg)`;
+    el.style.opacity = item.opacity ?? 1;
+    stage.appendChild(el);
+    propEls.push(el);
+  }
+}
+
+/* Desktop: props hug the four corners of the stage so they read as a real
+   table around the lazy-susan, never on top of a bowl. */
+function propLayoutDesktop() {
+  return [
+    // left table edge
+    { key: 'leaf',      x: -58,  y: 318, w: 216, rot: -14 },
+    { key: 'chilliLft', x: 4,    y: 486, w: 150, rot: 34 },
+    { key: 'limeLeft',  x: -34,  y: 636, w: 108, rot: 0 },
+    // right table edge (kept clear of the side bowl at ~1129,121)
+    { key: 'limeTop',   x: 1248, y: 316, w: 112, rot: 0 },
+    { key: 'chilliMid', x: 1238, y: 452, w: 150, rot: -30 },
+    { key: 'salt',      x: 1252, y: 626, w: 84,  rot: 0 },
+    // bottom corners, overlapping the wordmark like objects on a print
+    { key: 'spoons',    x: 44,   y: 726, w: 236, rot: 0 },
+    { key: 'sauce',     x: 1120, y: 706, w: 190, rot: 0 },
+  ];
+}
+
+/* Portrait: same idea, but only the props that survive a 390-unit frame. */
+function propLayoutPortrait() {
+  const c = bowlYPortraitValue;                          // centre-bowl row
+  const t = Math.max(titleTopPortraitValue, stageH - 170);
+  return [
+    { key: 'leaf',      x: -54, y: c - 96,  w: 104, rot: -18 },
+    { key: 'chilliLft', x: -28, y: c + 26,  w: 92,  rot: 30 },
+    { key: 'chilliMid', x: 306, y: c - 66,  w: 100, rot: 24 },
+    { key: 'limeTop',   x: 330, y: c + 56,  w: 62,  rot: 0 },
+    { key: 'spoons',    x: -40, y: t + 46,  w: 152, rot: 0 },
+    { key: 'sauce',     x: 286, y: t + 42,  w: 112, rot: 0 },
+  ];
+}
+
+/* ─────────────────────────────────────────────────────────────
+   6. Layout — runs on load and on resize
+   ───────────────────────────────────────────────────────────── */
+let titleTopPortraitValue = 0;
+let bowlYPortraitValue = 0;
+function layout() {
+  const W = window.innerWidth, H = window.innerHeight;
+  isPortrait = W / H < 0.9;
+  document.body.classList.toggle('portrait', isPortrait);
+
+  if (!isPortrait) {
+    const short = H < 560;
+    u = short ? Math.min(W / 1440, H / 770) : Math.min(W / 1440, H / 900);
+    stageW = 1440; stageH = 900;
+    R = L.R; big = L.big; small = L.small;
+    cx = stageW / 2;
+    cy = L.bowlY - L.R;          // -12: the ring centre sits just above the frame
+  } else {
+    u = Math.min(W / 390, H / 760);
+    stageW = 390;
+    // Vertical stack, measured in design units so the phone crop is deliberate.
+    stageH = H / u;
+    const stackH = LP.big + 22 + 138 + 20 + 50;
+    const top = 82;
+    const avail = stageH - 70 - top;
+    bowlYPortraitValue = top + Math.max(0, (avail - stackH) * 0.45) + LP.big / 2;
+    titleTopPortraitValue = bowlYPortraitValue + LP.big / 2 + 22 + 158;
+    R = LP.R; big = LP.big; small = LP.small;
+    cx = stageW / 2;
+    cy = bowlYPortraitValue - LP.R;
+  }
+
+  root.style.setProperty('--u', u + 'px');
+  root.style.setProperty('--hs', stageH);
+  root.style.setProperty('--copy-top', isPortrait ? (bowlYPortraitValue + LP.big / 2 + 22) : 0);
+  root.style.setProperty('--title-top', isPortrait ? titleTopPortraitValue : 0);
+
+  // Ring background geometry (measured against the source image).
+  const D = 2 * R / BAND;
+  const k = D / (2 * RING.outer);
+  const ri = D / 2 * (RING.inner / RING.outer);
+  const ro = D / 2;
+  ringEl.style.width = ringEl.style.height = `calc(${D} * var(--u))`;
+  ringShadow.style.width = ringShadow.style.height = `calc(${D} * var(--u))`;
+  ringEl.style.backgroundImage = 'url("ring.webp")';
+  ringEl.style.backgroundSize = `calc(${RING.size * k} * var(--u)) calc(${RING.size * k} * var(--u))`;
+  ringEl.style.backgroundPosition =
+    `calc(${D / 2 - RING.cx * k} * var(--u)) calc(${D / 2 - RING.cy * k} * var(--u))`;
+
+  // ring.webp already carries a feathered annulus in its alpha channel, so
+  // the grey surround and the hole are gone at the asset level. A radial
+  // mask on top only adds aliasing, so none is applied.
+  const riPx = r2(ri * u), roPx = r2(ro * u);
+
+  ringShadow.style.left = `calc(${cx - D / 2} * var(--u))`;
+  ringShadow.style.top = `calc(${cy - D / 2 + 10} * var(--u))`;
+  // The mask ring is sized in px against the element box, so the inner and
+  // outer radii are bound directly (not multiplied by --u twice).
+  ringShadow.style.setProperty('--ri', `${r2(ri * u)}px`);
+  ringShadow.style.setProperty('--ro', `${r2(ro * u)}px`);
+
+  // The ring itself must also sit at the stage centre, not at 0,0.
+  ringEl.style.left = `calc(${cx - D / 2} * var(--u))`;
+  ringEl.style.top = `calc(${cy - D / 2} * var(--u))`;
+
+  // Bowl element box: big / 0.985 so the visible plate is exactly `big`.
+  // The shadow box is 1.12 x big. Both are static per breakpoint.
+  const bowlSize = big / 0.985;
+  const shadowSize = big * 1.12;
+  bowlEls.forEach(img => {
+    img.style.width = img.style.height = `calc(${bowlSize} * var(--u))`;
+  });
+  bowlShadows.forEach(sh => {
+    sh.style.width = sh.style.height = `calc(${shadowSize} * var(--u))`;
+  });
+
+  fitTitle();
+  rebuildProps();
+  draw();
+}
+
+function fitTitle() {
+  const targetWidth = isPortrait ? 350 : 1062;
+  const probe = 100;
+  titleEl.style.fontSize = probe + 'px';
+  const measured = titleEl.getBoundingClientRect().width;
+  if (!measured) return;
+  const size = probe * (targetWidth * u) / measured;
+  titleEl.style.fontSize = size + 'px';
+}
+
+function rebuildProps() {
+  propEls.forEach(el => el.remove());
+  propEls = [];
+  buildProps();
+}
+
+/* ─────────────────────────────────────────────────────────────
+   7. Draw one frame — pure function of p
+   ───────────────────────────────────────────────────────────── */
+function draw() {
+  const t = p - Math.floor(p);
+
+  // The ring turns with the bowls. Its box is positioned once in layout();
+  // only the rotation changes per frame.
+  ringEl.style.transform = `rotate(${p * 72}deg)`;
+
+  // Bowls
+  for (let i = 0; i < FLAVOURS.length; i++) {
+    let diff = ((i - p) % 5 + 5) % 5;
+    if (diff >= 2.5) diff -= 5;
+
+    const ad = Math.abs(diff);
+    const angle = (90 - diff * 72) * Math.PI / 180;
+    const x = cx + R * Math.cos(angle);
+    const y = cy + R * Math.sin(angle);
+
+    const scale = ad <= 1
+      ? 1 + (small / big - 1) * ad
+      : (small / big) - (ad - 1) * 0.08;
+
+    const rotation = (p - i) * 72;
+    // Front bowl on top of the ring, under the props (z 32) and copy (z 40).
+    const z = 7 + Math.round(20 - ad * 8);
+    const size = big / 0.985;
+
+    const img = bowlEls[i];
+    const sh = bowlShadows[i];
+    if (!img) continue;
+
+    img.style.zIndex = z;
+    sh.style.zIndex = z - 1;
+
+    const tx = (x - size / 2) * u;
+    const ty = (y - size / 2) * u;
+    img.style.transform =
+      `translate3d(${r2(tx)}px,${r2(ty)}px,0) scale(${r2(scale)}) rotate(${r2(rotation)}deg)`;
+
+    // Shadow: same scale, pushed down, never rotated. Its box is sized once
+    // in layout(); only the transform changes per frame.
+    const shSize = big * 1.12;
+    const shx = (x - shSize / 2) * u;
+    const shy = (y - shSize / 2 + big * 0.05) * u;
+    sh.style.transform =
+      `translate3d(${r2(shx)}px,${r2(shy)}px,0) scale(${r2(scale)})`;
+  }
+
+  // Colour + copy crossfade. `from` is the flavour we are leaving, `to` the
+  // one we arrive at; t drives both the colour mix and the name swap.
+  const from = ((step % 5) + 5) % 5;
+  const to = (from + 1) % 5;
+  root.style.setProperty('--bg', mixColour(LINEAR[from].bg, LINEAR[to].bg, t));
+  root.style.setProperty('--ink', mixColour(LINEAR[from].ink, LINEAR[to].ink, t));
+
+  // Name fades out on the first half, in on the second.
+  const currentIndex = t < 0.5 ? from : to;
+  if (currentIndex !== lastFlavourShown) {
+    flavourEl.textContent = FLAVOURS[currentIndex].name;
+    lastFlavourShown = currentIndex;
+  }
+  const shift = t < 0.5 ? t : 1 - t;
+  flavourEl.style.opacity = r2(1 - 2 * shift);
+  const liftU = (t < 0.5 ? -2 * t : 2 * (1 - t)) * 8;
+  flavourEl.style.transform = `translateY(${r2(liftU * u)}px)`;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   8. Timeline
+   ───────────────────────────────────────────────────────────── */
+function frame(now) {
+  if (!lastNow) { lastNow = now; phaseStart = now; }
+  const gap = now - lastNow;
+  lastNow = now;
+
+  // Background tab: resume from a hold instead of jumping.
+  if (gap > 250) phaseStart += gap;
+
+  const HOLD = motionQuery ? 3000 : HOLD_MS;
+  const TURN = motionQuery ? 1 : TURN_MS;
+
+  const e = now - phaseStart;
+  if (e < HOLD) {
+    p = step;
+  } else if (e < HOLD + TURN) {
+    p = step + ease((e - HOLD) / TURN);
+  } else {
+    step = (step + 1) % 5;
+    phaseStart += HOLD + TURN;
+    p = step;
+  }
+
+  draw();
+  requestAnimationFrame(frame);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   9. Interactions
+   ───────────────────────────────────────────────────────────── */
+function openSheet(open) {
+  sheet.classList.toggle('open', open);
+  menuBtn.setAttribute('aria-expanded', String(open));
+  if (open) { sheetClose.focus(); menuBtn.setAttribute('aria-expanded', 'true'); }
+  else menuBtn.focus();
+}
+menuBtn.addEventListener('click', () => openSheet(true));
+sheetClose.addEventListener('click', () => openSheet(false));
+sheet.addEventListener('click', e => { if (e.target === sheet) openSheet(false); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && sheet.classList.contains('open')) openSheet(false);
+});
+
+motionQuery = reduce.matches;
+reduce.addEventListener('change', e => {
+  motionQuery = e.matches;
+  phaseStart = performance.now();
+  step = 0; p = 0; lastFlavourShown = -1;
+});
+
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(layout, 120);
+});
+
+/* ─────────────────────────────────────────────────────────────
+   10. Boot — wait for fonts, bowls, ring and the props sheet
+   ───────────────────────────────────────────────────────────── */
+function preloadImage(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = img.onerror = () => resolve();
+    img.src = src;
+  });
+}
+
+async function boot() {
+  // Bowls must exist before the first layout pass sizes them.
+  buildBowls();
+  layout();
+
+  await Promise.race([
+    Promise.all([
+      document.fonts ? document.fonts.ready : Promise.resolve(),
+      ...FLAVOURS.map(f => preloadImage(f.img)),
+      preloadImage('ring.webp'),
+      preloadImage('props-sheet.webp'),
+    ]),
+    // One slow image must not leave the page blank forever.
+    new Promise(resolve => setTimeout(resolve, 6000)),
+  ]);
+
+  layout();                       // fonts are in: fit the title properly
+  hero.classList.add('ready');
+  phaseStart = performance.now();
+  lastNow = 0;
+  requestAnimationFrame(frame);
+}
+
+boot();
+</script>
+</body>
+</html>

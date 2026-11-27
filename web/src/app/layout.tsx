@@ -176,6 +176,12 @@ export default function RootLayout({
                   </Link>
                 </li>
                 <li>
+                  {/* Plain-HTML showpiece; opens full screen with its own nav. */}
+                  <a href="/lab/index.html" className="inline-flex min-h-9 items-center hover:text-primary transition-colors">
+                    Lab ya Ladha
+                  </a>
+                </li>
+                <li>
                   <Link href="/cart" className="inline-flex min-h-9 items-center hover:text-primary transition-colors">
                     Kikapu &amp; malipo
                   </Link>
